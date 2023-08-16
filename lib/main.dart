@@ -1,0 +1,56 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vdsadmin/home/splashscreen.dart';
+import 'firebase_options.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(MyApp());
+}
+
+class MyApp extends StatefulWidget {
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool user = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initCheck();
+    configOneSignel();
+  }
+
+  void configOneSignel() {
+    OneSignal.shared.setAppId('d43fa4f9-2fa5-48a3-a184-49636c9d96c5');
+  }
+
+  void _initCheck() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool('user') != null) {
+      setState(() {
+        user = prefs.getBool('user')!;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      theme: ThemeData(
+        backgroundColor: Color(0xffF5F6F8),
+        fontFamily: "Nunito",
+      ),
+      title: 'VDS: ADMIN PANEL',
+      debugShowCheckedModeBanner: false,
+      home: SplashScreen(user),
+    );
+  }
+}

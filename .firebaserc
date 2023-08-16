@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "default": "ecommerce-26b18",
+    "prod": "ecommerce-26b18"
+  },
+  "targets": {},
+  "etags": {}
+}
