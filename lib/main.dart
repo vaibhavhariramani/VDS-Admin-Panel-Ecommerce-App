@@ -59,7 +59,7 @@ class _MyAppState extends State<MyApp> {
         backgroundColor: Color(0xffF5F6F8),
         fontFamily: "Nunito",
       ),
-      title: 'Shared Preference',
+      title: 'Admin Panel',
       debugShowCheckedModeBanner: false,
       home: SplashScreen(user),
     );
