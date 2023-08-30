@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vdsadmin/home/dashboard.dart';
+import 'package:vdsadmin/models/product_data.dart';
 import 'data_assisten.dart';
 
 class Login extends StatefulWidget {
@@ -12,6 +13,7 @@ class _LoginState extends State<Login> {
   TextEditingController username = TextEditingController();
   TextEditingController pass = TextEditingController();
   bool isLoading = false;
+  List<ProductData> productList = [];
 
   @override
   void initState() {
@@ -186,7 +188,11 @@ class _LoginState extends State<Login> {
             prefs.setString('username', username!);
             prefs.setString('fullname', fullname!);
             Navigator.pushReplacement(
-                context, MaterialPageRoute(builder: (context) => Dashboard()));
+                context,
+                MaterialPageRoute(
+                    builder: (context) => Dashboard(
+                          MasterproductListForBilling: productList,
+                        )));
           }
         }
       });

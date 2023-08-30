@@ -23,7 +23,12 @@ class _SplashScreenState extends State<SplashScreen> {
     var duration = const Duration(seconds: 3);
     return Timer(duration, () {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (c) => widget.user ? Dashboard() : Login()),
+        MaterialPageRoute(
+            builder: (c) => widget.user
+                ? Dashboard(
+                    MasterproductListForBilling: [],
+                  )
+                : Login()),
       );
     });
   }

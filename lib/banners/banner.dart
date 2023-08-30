@@ -30,87 +30,93 @@ class _BannerDisplayState extends State<BannerDisplay> {
   String? iconUrl;
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.blueGrey,
-      height: MediaQuery.of(context).size.height,
-      child: Container(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              SizedBox(
-                height: 20,
-              ),
-              Container(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.only(
-                          top: 5, right: 8, left: 8, bottom: 5),
-                      child: const Text("Banner",
-                          style: TextStyle(
-                              fontSize: 32,
-                              fontWeight: FontWeight.w400,
-                              color: Colors.white)),
-                    ),
-                    Container(
-                      child: MaterialButton(
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20)),
-                          child: const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Text(
-                              'Add New Banner',
-                              style: TextStyle(color: Colors.white),
+    return Scaffold(
+      body: Container(
+        color: Colors.blueGrey,
+        height: MediaQuery.of(context).size.height,
+        child: Container(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 20,
+                ),
+                Container(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back, color: Colors.white),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.only(
+                            top: 5, right: 8, left: 8, bottom: 5),
+                        child: const Text("Banner",
+                            style: TextStyle(
+                                fontSize: 32,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.white)),
+                      ),
+                      Container(
+                        child: MaterialButton(
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20)),
+                            child: const Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text(
+                                'Add New Banner',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                            color: Colors.green,
+                            onPressed: () {
+                              addBanner();
+                            }),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 20),
+                StreamBuilder<QuerySnapshot>(
+                    stream: dataProvider.banners(''),
+                    builder: (BuildContext context,
+                        AsyncSnapshot<QuerySnapshot> snapshot) {
+                      if (snapshot.hasError) {
+                        return Text('Something went wrong');
+                      }
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator());
+                      }
+                      if (snapshot.hasData) {
+                        return Material(
+                          child: Container(
+                            height: MediaQuery.of(context).size.height * 10,
+                            child: GridView.count(
+                              physics: const NeverScrollableScrollPhysics(),
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 4.0,
+                              mainAxisSpacing: 8.0,
+                              shrinkWrap: true,
+                              children: snapshot.data!.docs
+                                  .map((DocumentSnapshot document) {
+                                Map<String, dynamic> data =
+                                    document.data()! as Map<String, dynamic>;
+                                String id = document.id;
+                                return BannerCard(
+                                  data: data,
+                                  id: id,
+                                );
+                              }).toList(),
                             ),
                           ),
-                          color: Colors.green,
-                          onPressed: () {
-                            addBanner();
-                          }),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 20),
-              StreamBuilder<QuerySnapshot>(
-                  stream: dataProvider.banners(''),
-                  builder: (BuildContext context,
-                      AsyncSnapshot<QuerySnapshot> snapshot) {
-                    if (snapshot.hasError) {
-                      return Text('Something went wrong');
-                    }
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
-                    }
-                    if (snapshot.hasData) {
-                      return Material(
-                        child: Container(
-                          height: MediaQuery.of(context).size.height * 10,
-                          child: GridView.count(
-                            physics: const NeverScrollableScrollPhysics(),
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 4.0,
-                            mainAxisSpacing: 8.0,
-                            shrinkWrap: true,
-                            children: snapshot.data!.docs
-                                .map((DocumentSnapshot document) {
-                              Map<String, dynamic> data =
-                                  document.data()! as Map<String, dynamic>;
-                              String id = document.id;
-                              return BannerCard(
-                                data: data,
-                                id: id,
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                      );
-                    }
-                    return const Center(child: CircularProgressIndicator());
-                  }),
-            ],
+                        );
+                      }
+                      return const Center(child: CircularProgressIndicator());
+                    }),
+              ],
+            ),
           ),
         ),
       ),

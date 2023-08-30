@@ -14,10 +14,16 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:vdsadmin/gridView/gviewer.dart';
 import 'package:vdsadmin/home/loginpage.dart';
 import 'package:vdsadmin/models/data_provider.dart';
+import 'package:vdsadmin/models/product_data.dart';
 import 'package:vdsadmin/search/search.dart';
 
 class GridScreen extends StatefulWidget {
-  @override
+  final bool dataViewer;
+  List<ProductData> listOfProductsInBill;
+  GridScreen(
+      {Key? key, required this.dataViewer, required this.listOfProductsInBill})
+      : super(key: key);
+
   _GridScreenState createState() => _GridScreenState();
 }
 
@@ -101,6 +107,9 @@ class _GridScreenState extends State<GridScreen> {
                                   crossAxisCount:
                                       MediaQuery.of(context).orientation ==
                                               Orientation.landscape
+                                          //     &&
+                                          // MediaQuery.of(context).size.width >
+                                          //     500
                                           ? 3
                                           : 2,
                                   crossAxisSpacing: 4,
@@ -114,6 +123,9 @@ class _GridScreenState extends State<GridScreen> {
                           itemBuilder: (BuildContext context, int index) {
                             return HomeGridProductList(
                               snapshot: snap.data!.docs[index],
+                              navigatorDecider: widget.dataViewer,
+                              listOfProductsInBilling:
+                                  widget.listOfProductsInBill,
                             );
                           },
                         )

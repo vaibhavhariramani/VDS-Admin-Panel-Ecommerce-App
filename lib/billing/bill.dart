@@ -20,6 +20,7 @@ import 'package:vdsadmin/models/customer.dart';
 import 'package:vdsadmin/models/data_provider.dart';
 import 'package:vdsadmin/models/firebase.service.dart';
 import 'package:vdsadmin/models/invoice.dart';
+import 'package:vdsadmin/models/product_data.dart';
 import 'package:vdsadmin/models/suppiler.dart';
 import 'package:vdsadmin/whatsappApi/wa.dart';
 import 'package:vdsadmin/widgets/raised_gradient_button.dart';
@@ -28,27 +29,21 @@ import 'package:visibility_detector/visibility_detector.dart';
 import 'package:flutter_barcode_listener/flutter_barcode_listener.dart';
 
 class Bill extends StatefulWidget {
-  const Bill({Key? key}) : super(key: key);
+  List<ProductData> products;
+  Bill({Key? key, required this.products}) : super(key: key);
 
   @override
-  _BillState createState() => _BillState();
+  BillState createState() => BillState();
 }
 
-class _BillState extends State<Bill> {
+class BillState extends State<Bill> {
   String? Dataseturl;
   var url;
   late StateSetter sete;
   var category1;
   late String tags2;
   late String category2;
-  List<String> images = [];
-  List<String> productnames = [];
-  List<String> barcodes = [];
-  List<String> desc = [];
-  List<String> cat = [];
-  List<dynamic> prices = [];
-  List<dynamic> mrp = [];
-  List<int> count = [];
+
   List<InvoiceItem> saman = [
     InvoiceItem(
       description: 'Thanks for shopping',
@@ -74,6 +69,23 @@ class _BillState extends State<Bill> {
   String? scanBarcode;
   ScrollController controller = ScrollController();
   Map? data;
+  @override
+  void initState() {
+    super.initState();
+    // mrptotal = widget.products != null
+    //     ? widget.products
+    //         .map((product) => product.mrp)
+    //         .toList()
+    //         .reduce((value, element) => value + element)
+    //     : 0;
+    // total = widget.products != null
+    //     ? widget.products
+    //         .map((product) => product.price)
+    //         .toList()
+    //         .reduce((value, element) => value + element)
+    //     : 0;
+  }
+
   Future<void> scanBarcodeNormal() async {
     String barcodeScanRes;
     // Platform messages may fail, so we use a try/catch PlatformException.
@@ -142,9 +154,9 @@ class _BillState extends State<Bill> {
         color: Colors.white,
         padding: const EdgeInsets.only(bottom: 2),
         child: Row(children: <Widget>[
-          images[index] != null
+          widget.products[index].image != null
               ? Image.network(
-                  images[index],
+                  widget.products[index].image,
                   height: 80,
                   width: 80,
                 )
@@ -155,7 +167,7 @@ class _BillState extends State<Bill> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  productnames[index],
+                  widget.products[index].name, //product name
                   style: GoogleFonts.poppins(
                       fontSize: 18.0,
                       color: Colors.black,
@@ -166,7 +178,8 @@ class _BillState extends State<Bill> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(left: 8),
-                      child: Text('₹${prices[index]}',
+                      child: Text(
+                          '₹${widget.products[index].price}', //price of product
                           style: GoogleFonts.poppins(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -174,7 +187,7 @@ class _BillState extends State<Bill> {
                     ),
                     Padding(
                       padding: const EdgeInsets.only(left: 8),
-                      child: Text('₹${mrp[index]}',
+                      child: Text('₹${widget.products[index].mrp}',
                           style: GoogleFonts.poppins(
                               fontSize: 14,
                               color: Colors.grey,
@@ -190,28 +203,30 @@ class _BillState extends State<Bill> {
                           color: Colors.redAccent, size: 35),
                       onPressed: () async {
                         try {
-                          if (count[index] >= 1) {
-                            count[index] = count[index] - 1;
+                          if (widget.products[index].count >= 1) {
+                            widget.products[index].count =
+                                widget.products[index].count - 1;
 
-                            mrptotal = mrptotal - mrp[index];
-                            total = total - prices[index];
+                            mrptotal = mrptotal - widget.products[index].mrp;
+                            total = total - widget.products[index].price;
                             setState(() {});
                           }
-                          if (count[index] == 0) {
-                            count.removeAt(index);
-                            images.removeAt(index);
-                            productnames.removeAt(index);
-                            barcodes.removeAt(index);
-                            prices.removeAt(index);
-                            mrp.removeAt(index);
-                            desc.removeAt(index);
-                            cat.removeAt(index);
+                          if (widget.products[index].count == 0) {
+                            // count.removeAt(index);
+                            // images.removeAt(index);
+                            // productnames.removeAt(index);
+                            // barcodes.removeAt(index);
+                            // prices.removeAt(index);
+                            // mrp.removeAt(index);
+                            // desc.removeAt(index);
+                            // cat.removeAt(index);
+                            widget.products.removeAt(index);
                           }
                         } catch (e) {}
                       },
                     ),
                     Text(
-                      '${count[index]}',
+                      '${widget.products[index].count}',
                       style: GoogleFonts.poppins(
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
@@ -224,10 +239,11 @@ class _BillState extends State<Bill> {
                           color: Colors.redAccent, size: 35),
                       onPressed: () async {
                         try {
-                          if (count[index] < 5) {
-                            count[index] = count[index] + 1;
-                            mrptotal = mrptotal + mrp[index];
-                            total = total + prices[index];
+                          if (widget.products[index].count < 5) {
+                            widget.products[index].count =
+                                widget.products[index].count + 1;
+                            mrptotal = mrptotal + widget.products[index].mrp;
+                            total = total + widget.products[index].price;
                             setState(() {});
                           }
                         } catch (e) {}
@@ -255,13 +271,16 @@ class _BillState extends State<Bill> {
 
                                       TextEditingController FBProductName =
                                           TextEditingController(
-                                              text: productnames[index]);
+                                              text:
+                                                  widget.products[index].name);
                                       TextEditingController FBMRP =
                                           TextEditingController(
-                                              text: mrp[index].toString());
+                                              text: widget.products[index].mrp
+                                                  .toString());
                                       TextEditingController FBSP =
                                           TextEditingController(
-                                              text: prices[index].toString());
+                                              text: widget.products[index].price
+                                                  .toString());
                                       return Container(
                                         height:
                                             MediaQuery.of(context).size.height *
@@ -289,7 +308,7 @@ class _BillState extends State<Bill> {
                                               const SizedBox(height: 8),
                                               form(
                                                 'Product name',
-                                                productnames[index],
+                                                widget.products[index].name,
                                                 FBProductName,
                                                 const Icon(
                                                   Icons.description,
@@ -299,7 +318,8 @@ class _BillState extends State<Bill> {
                                               const SizedBox(height: 8),
                                               form(
                                                 'Enter MRP',
-                                                mrp[index].toString(),
+                                                widget.products[index].mrp
+                                                    .toString(),
                                                 FBMRP,
                                                 const Icon(
                                                   Icons.description,
@@ -308,7 +328,8 @@ class _BillState extends State<Bill> {
                                               ),
                                               form(
                                                 'Enter Selling price',
-                                                prices[index].toString(),
+                                                widget.products[index].price
+                                                    .toString(),
                                                 FBSP,
                                                 const Icon(
                                                   Icons.description,
@@ -329,20 +350,25 @@ class _BillState extends State<Bill> {
                                                 ),
                                                 onPressed: () {
                                                   InsertDatainFirebase().upload(
-                                                      barcodes[index],
+                                                      widget.products[index]
+                                                          .barcode,
                                                       FBProductName.text,
-                                                      desc[index],
+                                                      widget.products[index]
+                                                          .description,
                                                       FBMRP.text,
                                                       FBSP.text,
-                                                      count[index],
+                                                      widget.products[index]
+                                                          .count,
                                                       FBSP.text,
-                                                      images[index],
-                                                      cat[index]);
-                                                  productnames[index] =
+                                                      widget.products[index]
+                                                          .image,
+                                                      widget.products[index]
+                                                          .category);
+                                                  widget.products[index].name =
                                                       FBProductName.text;
-                                                  mrp[index] =
+                                                  widget.products[index].mrp =
                                                       double.parse(FBMRP.text);
-                                                  prices[index] =
+                                                  widget.products[index].price =
                                                       double.parse(FBSP.text);
                                                   setState(() {});
                                                   FBProductName.clear();
@@ -367,16 +393,21 @@ class _BillState extends State<Bill> {
                       flex: 1,
                       child: MaterialButton(
                         onPressed: () {
-                          mrptotal = mrptotal - (count[index] * mrp[index]);
-                          total = total - (count[index] * prices[index]);
-                          count.removeAt(index);
-                          images.removeAt(index);
-                          productnames.removeAt(index);
-                          barcodes.removeAt(index);
-                          prices.removeAt(index);
-                          mrp.removeAt(index);
-                          desc.removeAt(index);
-                          cat.removeAt(index);
+                          mrptotal = mrptotal -
+                              (widget.products[index].count *
+                                  widget.products[index].mrp);
+                          total = total -
+                              (widget.products[index].count *
+                                  widget.products[index].price);
+                          // count.removeAt(index);
+                          // images.removeAt(index);
+                          // productnames.removeAt(index);
+                          // barcodes.removeAt(index);
+                          // prices.removeAt(index);
+                          // mrp.removeAt(index);
+                          // desc.removeAt(index);
+                          // cat.removeAt(index);
+                          widget.products.removeAt(index);
                           setState(() {});
                         },
                         child: Icon(Icons.delete),
@@ -441,30 +472,41 @@ class _BillState extends State<Bill> {
                             documentSnapshot.data() as Map<String, dynamic>;
                         var index = -1;
                         var present = false;
-                        for (var i = 0; i < barcodes.length; i++) {
+                        for (var i = 0; i < widget.products.length; i++) {
                           // you may have to check the equality operator
-                          if (data1["barcode"] == barcodes[i]) {
+                          if (data1["barcode"] == widget.products[i].barcode) {
                             present = true;
                             index = i;
                             break;
                           }
                         }
                         if (index >= 0) {
-                          count[index] = count[index] + 1;
+                          widget.products[index].count =
+                              widget.products[index].count + 1;
                           saman[index + 1].quantity = saman[index].quantity + 1;
-                          mrptotal = mrptotal + mrp[index];
-                          total = total + prices[index];
+                          mrptotal = mrptotal + widget.products[index].mrp;
+                          total = total + widget.products[index].price;
                           setState(() {});
                         } else {
                           setState(() {
-                            images.add(data1["image"]);
-                            productnames.add(data1["name"]);
-                            barcodes.add(data1["barcode"]);
-                            prices.add(data1["selling"]);
-                            mrp.add(data1["mrp"]);
-                            desc.add(data1["description"]);
-                            cat.add(data1["category"][0]);
-                            count.add(1);
+                            // images.add(data1["image"]);
+                            // productnames.add(data1["name"]);
+                            // barcodes.add(data1["barcode"]);
+                            // prices.add(data1["selling"]);
+                            // mrp.add(data1["mrp"]);
+                            // desc.add(data1["description"]);
+                            // cat.add(data1["category"][0]);
+                            // count.add(1);
+                            widget.products.add(ProductData(
+                                barcode: data1["barcode"],
+                                image: data1["image"],
+                                name: data1["name"],
+                                mrp: data1["mrp"],
+                                price: data1["selling"],
+                                count: 1,
+                                quantity: "quantity",
+                                description: data1["description"],
+                                category: data1["category"][0]));
                             snapshots.add(data1);
                             saman.add(
                               InvoiceItem(
@@ -521,14 +563,21 @@ class _BillState extends State<Bill> {
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
-                    title: Text('My Pop-up Dialog'),
-                    content: GridScreen(),
-                    contentPadding: EdgeInsets.fromLTRB(
-                        24, 12, 24, 12), // Adjust content padding
-                    insetPadding:
-                        EdgeInsets.all(0), // Remove default inset padding
-                    // Set the width of the AlertDialog by limiting its constraints
-                    // constraints: const BoxConstraints(maxWidth: 400),
+                    content: Container(
+                      // Wrap your content in a Container
+                      width: MediaQuery.of(context).size.width *
+                          0.8, // Adjust the width as needed
+                      child: GridScreen(
+                        dataViewer: false,
+                        listOfProductsInBill: widget.products,
+                      ),
+                      // contentPadding: EdgeInsets.fromLTRB(
+                      //     24, 12, 24, 12), // Adjust content padding
+                      // insetPadding:
+                      //     EdgeInsets.all(0), // Remove default inset padding
+                      // Set the width of the AlertDialog by limiting its constraints
+                      // constraints: const BoxConstraints(maxWidth: 400),
+                    ),
                   );
                 },
               );
@@ -576,7 +625,7 @@ class _BillState extends State<Bill> {
         shrinkWrap: true,
         physics: BouncingScrollPhysics(),
         children: [
-          barcodes.isNotEmpty
+          widget.products.isNotEmpty
               ? Card(
                   elevation: 0,
                   child: Column(
@@ -654,7 +703,7 @@ class _BillState extends State<Bill> {
             scrollDirection: Axis.vertical,
             physics: const BouncingScrollPhysics(),
             itemBuilder: _buildProductItem,
-            itemCount: images.length,
+            itemCount: widget.products.length,
           ),
           Center(
             // Add visiblity detector to handle barcode
@@ -681,30 +730,41 @@ class _BillState extends State<Bill> {
 
                       var index = -1;
                       var present = false;
-                      for (var i = 0; i < barcodes.length; i++) {
+                      for (var i = 0; i < widget.products.length; i++) {
                         // you may have to check the equality operator
-                        if (data1["barcode"] == barcodes[i]) {
+                        if (data1["barcode"] == widget.products[i].barcode) {
                           present = true;
                           index = i;
                           break;
                         }
                       }
                       if (index >= 0) {
-                        count[index] = count[index] + 1;
+                        widget.products[index].count =
+                            widget.products[index].count + 1;
                         // saman[index].quantity = saman[index].quantity + 1;
-                        mrptotal = mrptotal + mrp[index];
-                        total = total + prices[index];
+                        mrptotal = mrptotal + widget.products[index].mrp;
+                        total = total + widget.products[index].price;
                         setState(() {});
                       } else {
                         setState(() {
-                          images.add(data1["image"]);
-                          productnames.add(data1["name"]);
-                          barcodes.add(data1["barcode"]);
-                          prices.add(data1["selling"]);
-                          mrp.add(data1["mrp"]);
-                          desc.add(data1["description"]);
-                          cat.add(data1["category"][0]);
-                          count.add(1);
+                          // images.add(data1["image"]);
+                          // productnames.add(data1["name"]);
+                          // barcodes.add(data1["barcode"]);
+                          // prices.add(data1["selling"]);
+                          // mrp.add(data1["mrp"]);
+                          // desc.add(data1["description"]);
+                          // cat.add(data1["category"][0]);
+                          // count.add(1);
+                          widget.products.add(ProductData(
+                              barcode: data1["barcode"],
+                              image: data1["image"],
+                              name: data1["name"],
+                              mrp: data1["mrp"],
+                              price: data1["selling"],
+                              quantity: "quantity",
+                              count: 1,
+                              description: data1["description"],
+                              category: data1["category"][0]));
                           snapshots.add(data1);
                           saman.add(
                             InvoiceItem(
@@ -748,7 +808,7 @@ class _BillState extends State<Bill> {
         ],
       ),
       // body: Fetcher(),
-      bottomNavigationBar: mrp.isNotEmpty
+      bottomNavigationBar: widget.products.isNotEmpty
           ? ListTile(
               tileColor: Colors.green,
               title: Text(
@@ -829,31 +889,41 @@ class _BillState extends State<Bill> {
             documentSnapshot.data() as Map<String, dynamic>;
         var index = -1;
         var present = false;
-        for (var i = 0; i < barcodes.length; i++) {
+        for (var i = 0; i < widget.products.length; i++) {
           // you may have to check the equality operator
-          if (data1["barcode"] == barcodes[i]) {
+          if (data1["barcode"] == widget.products[i].barcode) {
             present = true;
             index = i;
             break;
           }
         }
         if (index >= 0) {
-          count[index] = count[index] + 1;
+          widget.products[index].count = widget.products[index].count + 1;
           saman[index + 1].quantity = saman[index + 1].quantity + 1;
-          mrptotal = mrptotal + mrp[index];
-          total = total + prices[index];
+          mrptotal = mrptotal + widget.products[index].mrp;
+          total = total + widget.products[index].price;
           setState(() {});
         } else {
           setState(() {
-            images.add(data1["image"]);
-            productnames.add(data1["name"]);
-            barcodes.add(data1["barcode"]);
-            prices.add(data1["selling"]);
-            mrp.add(data1["mrp"]);
-            cat.add(data1["category"][0]);
-            desc.add(data1["description"]);
+            // images.add(data1["image"]);
+            // productnames.add(data1["name"]);
+            // barcodes.add(data1["barcode"]);
+            // prices.add(data1["selling"]);
+            // mrp.add(data1["mrp"]);
+            // cat.add(data1["category"][0]);
+            // desc.add(data1["description"]);
             snapshots.add(data1);
-            count.add(1);
+            // count.add(1);
+            widget.products.add(ProductData(
+                barcode: data1["barcode"],
+                image: data1["image"],
+                name: data1["name"],
+                mrp: data1["mrp"],
+                price: data1["selling"],
+                quantity: "quantity",
+                count: 1,
+                description: data1["description"],
+                category: data1["category"][0]));
             saman.add(
               InvoiceItem(
                 description: data1["name"],
@@ -893,15 +963,26 @@ class _BillState extends State<Bill> {
 
   Future<void> addToList(String PName, double m, double sp) async {
     setState(() {
-      images.add(
-          'https://thumbs.dreamstime.com/b/new-item-sticker-label-editable-vector-illustration-isolated-white-background-new-item-sticker-123424483.jpg');
-      productnames.add(PName);
-      barcodes.add('110 101 119 32 105 116 101 109 10');
-      prices.add(sp);
-      mrp.add(m);
-      cat.add("category");
-      desc.add("description");
-      count.add(1);
+      // images.add(
+      //     'https://thumbs.dreamstime.com/b/new-item-sticker-label-editable-vector-illustration-isolated-white-background-new-item-sticker-123424483.jpg');
+      // productnames.add(PName);
+      // barcodes.add('110 101 119 32 105 116 101 109 10');
+      // prices.add(sp);
+      // mrp.add(m);
+      // cat.add("category");
+      // desc.add("description");
+      // count.add(1);
+      widget.products.add(ProductData(
+          barcode: '110 101 119 32 105 116 101 109 10',
+          image:
+              'https://thumbs.dreamstime.com/b/new-item-sticker-label-editable-vector-illustration-isolated-white-background-new-item-sticker-123424483.jpg',
+          name: PName,
+          mrp: m,
+          price: sp,
+          quantity: "quantity",
+          count: 1,
+          description: "description",
+          category: "category"));
       saman.add(
         InvoiceItem(
           description: PName,
@@ -916,6 +997,45 @@ class _BillState extends State<Bill> {
     });
   }
 
+  Future<void> addProductToBill(
+      {required String PImg,
+      required String PName,
+      required String Barcode,
+      required double mrPrice,
+      required double sp}) async {
+    setState(() {
+      // images.add(PImg);
+      // productnames.add(PName);
+      // barcodes.add(Barcode);
+      // prices.add(sp);
+      // mrp.add(mrPrice);
+      // cat.add("category");
+      // desc.add("description");
+      // count.add(1);
+      widget.products.add(ProductData(
+          barcode: Barcode,
+          image: PImg,
+          name: PName,
+          mrp: mrPrice,
+          price: sp,
+          quantity: "quantity",
+          count: 1,
+          description: "description",
+          category: "category"));
+      saman.add(
+        InvoiceItem(
+          description: PName,
+          quantity: 1,
+          MRP: mrPrice,
+          OurPrice: sp,
+        ),
+      );
+
+      total = total + sp;
+      mrptotal = mrptotal + mrPrice;
+    });
+  }
+
   Future<void> addToDatabase(
     String barcode,
     String PName,
@@ -925,15 +1045,26 @@ class _BillState extends State<Bill> {
     String selling,
   ) async {
     setState(() {
-      images.add(
-          'https://thumbs.dreamstime.com/b/new-item-sticker-label-editable-vector-illustration-isolated-white-background-new-item-sticker-123424483.jpg');
-      productnames.add(PName);
-      barcodes.add(barcode);
-      prices.add(sp);
-      mrp.add(m);
-      cat.add("category");
-      desc.add("description");
-      count.add(1);
+      // images.add(
+      //     'https://thumbs.dreamstime.com/b/new-item-sticker-label-editable-vector-illustration-isolated-white-background-new-item-sticker-123424483.jpg');
+      // productnames.add(PName);
+      // barcodes.add(barcode);
+      // prices.add(sp);
+      // mrp.add(m);
+      // cat.add("category");
+      // desc.add("description");
+      // count.add(1);
+      widget.products.add(ProductData(
+          barcode: barcode,
+          image:
+              'https://thumbs.dreamstime.com/b/new-item-sticker-label-editable-vector-illustration-isolated-white-background-new-item-sticker-123424483.jpg',
+          name: PName,
+          mrp: m,
+          price: sp,
+          quantity: "quantity",
+          count: 1,
+          description: "description",
+          category: "category"));
       saman.add(
         InvoiceItem(
           description: PName,
@@ -962,15 +1093,17 @@ class _BillState extends State<Bill> {
   }
 
   void Clear() {
-    images.clear();
-    productnames.clear();
-    barcodes.clear();
-    prices.clear();
-    mrp.clear();
-    cat.clear();
-    desc.clear();
+    // images.clear();
+    // productnames.clear();
+    // barcodes.clear();
+    // prices.clear();
+    // mrp.clear();
+    // cat.clear();
+    // desc.clear();
+    // count.clear();
+    widget.products.clear();
     snapshots.clear();
-    count.clear();
+
     saman.clear();
     mrptotal = 0;
     total = 0;
@@ -1153,14 +1286,16 @@ class _BillState extends State<Bill> {
         {
           'orderID':
               '${DateTime.now().day + DateTime.now().month + DateTime.now().year + DateTime.now().hour + DateTime.now().minute}',
-          'images': images,
-          'product': productnames,
-          'barcodes': barcodes,
-          'desc': desc,
-          'cat': cat,
-          'prices': prices,
-          'mrp': mrp,
-          'count': count,
+          'images': widget.products.map((product) => product.image).toList(),
+          'product': widget.products.map((product) => product.name).toList(),
+          'barcodes':
+              widget.products.map((product) => product.barcode).toList(),
+          'desc':
+              widget.products.map((product) => product.description).toList(),
+          'cat': widget.products.map((product) => product.category).toList(),
+          'prices': widget.products.map((product) => product.price).toList(),
+          'mrp': widget.products.map((product) => product.mrp).toList(),
+          'count': widget.products.map((product) => product.count).toList(),
         },
       );
     } catch (e) {

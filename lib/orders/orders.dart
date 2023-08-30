@@ -27,13 +27,15 @@ class _OrderspageState extends State<Orderspage> {
                 height: 10,
               ),
               Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
+                children: [
+                  const SizedBox(
+                    width: 30.0,
+                  ),
                   MaterialButton(
                     child: Stack(
                       children: <Widget>[
                         Container(
-                          height: MediaQuery.of(context).size.height * 0.3,
+                          height: MediaQuery.of(context).size.height * 0.4,
                           width: MediaQuery.of(context).size.width * 0.4,
                           decoration: BoxDecoration(
                               shape: BoxShape.rectangle,
@@ -56,15 +58,21 @@ class _OrderspageState extends State<Orderspage> {
                         ),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: RichText(
-                            text: const TextSpan(
-                              text: 'Online Orders',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 22.0,
-                                fontWeight: FontWeight.w600,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: const <Widget>[
+                              Text(
+                                'Online Orders',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 24.0,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
-                            ),
+                              SizedBox(
+                                height: 10.0,
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -72,15 +80,18 @@ class _OrderspageState extends State<Orderspage> {
                     onPressed: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const Orders(),
+                        builder: (_) => const Orders2(),
                       ),
                     ),
+                  ),
+                  const SizedBox(
+                    width: 30.0,
                   ),
                   MaterialButton(
                     child: Stack(
                       children: <Widget>[
                         Container(
-                          height: MediaQuery.of(context).size.height * 0.3,
+                          height: MediaQuery.of(context).size.height * 0.4,
                           width: MediaQuery.of(context).size.width * 0.4,
                           decoration: BoxDecoration(
                               shape: BoxShape.rectangle,
@@ -119,117 +130,11 @@ class _OrderspageState extends State<Orderspage> {
                     onPressed: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => Example(),
+                        builder: (_) => OfflineOrders2(),
                       ),
                     ),
                   ),
                 ],
-              ),
-              const SizedBox(
-                height: 30.0,
-              ),
-              MaterialButton(
-                child: Stack(
-                  children: <Widget>[
-                    Container(
-                      height: MediaQuery.of(context).size.height * 0.3,
-                      width: MediaQuery.of(context).size.width * 0.7,
-                      decoration: BoxDecoration(
-                          shape: BoxShape.rectangle,
-                          color: const Color(0xFFE44E4F),
-                          borderRadius: BorderRadius.circular(20.0),
-                          boxShadow: const <BoxShadow>[
-                            BoxShadow(
-                                color: Colors.black45,
-                                offset: Offset(0.0, 10.0),
-                                blurRadius: 10.0)
-                          ]),
-                      child: Container(
-                        alignment: FractionalOffset.bottomCenter,
-                        child: Image.asset(
-                          'images/2.png',
-                          height: MediaQuery.of(context).size.height * 0.4,
-                          width: MediaQuery.of(context).size.width * 0.3,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const <Widget>[
-                          Text(
-                            'Online Orders 2',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 24.0,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          SizedBox(
-                            height: 10.0,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const Orders2(),
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 30.0,
-              ),
-              MaterialButton(
-                child: Stack(
-                  children: <Widget>[
-                    Container(
-                      height: MediaQuery.of(context).size.height * 0.3,
-                      width: MediaQuery.of(context).size.width * 0.7,
-                      decoration: BoxDecoration(
-                          shape: BoxShape.rectangle,
-                          color: const Color(0xFF6674F1),
-                          borderRadius: BorderRadius.circular(20.0),
-                          boxShadow: const <BoxShadow>[
-                            BoxShadow(
-                                color: Colors.black45,
-                                offset: Offset(0.0, 10.0),
-                                blurRadius: 10.0)
-                          ]),
-                      child: Container(
-                        alignment: FractionalOffset.bottomCenter,
-                        child: Image.asset(
-                          'images/3.png',
-                          height: MediaQuery.of(context).size.height * 0.4,
-                          width: MediaQuery.of(context).size.width * 0.3,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: RichText(
-                        text: const TextSpan(
-                          text: 'Offline Orders 2',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 22.0,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => OfflineOrders2(),
-                  ),
-                ),
               ),
             ],
           ),

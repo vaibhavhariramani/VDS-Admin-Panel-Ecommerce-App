@@ -10,6 +10,7 @@ import 'package:vdsadmin/database/add_item_to_db.dart';
 import 'package:vdsadmin/example.dart';
 import 'package:vdsadmin/gridView/grid_vw.dart';
 import 'package:vdsadmin/home/loginpage.dart';
+import 'package:vdsadmin/models/product_data.dart';
 import 'package:vdsadmin/notification/notifyhome.dart';
 import 'package:vdsadmin/orders/orders.dart';
 
@@ -20,6 +21,9 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 class Dashboard extends StatefulWidget {
+  List<ProductData> MasterproductListForBilling = [];
+  Dashboard({Key? key, required this.MasterproductListForBilling})
+      : super(key: key);
   @override
   _DashboardState createState() => _DashboardState();
 }
@@ -224,7 +228,9 @@ class _DashboardState extends State<Dashboard> {
                     onPressed: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => Bill(),
+                        builder: (_) => Bill(
+                          products: widget.MasterproductListForBilling,
+                        ),
                       ),
                     ),
                   ),
@@ -842,7 +848,11 @@ class _DashboardState extends State<Dashboard> {
                           onPressed: () => Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => GridScreen(),
+                              builder: (_) => GridScreen(
+                                dataViewer: true,
+                                listOfProductsInBill:
+                                    widget.MasterproductListForBilling,
+                              ),
                             ),
                           ),
                         ),

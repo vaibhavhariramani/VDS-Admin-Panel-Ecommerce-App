@@ -4,10 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:vdsadmin/gridView/gviewer.dart';
 import 'package:vdsadmin/models/data_provider.dart';
+import 'package:vdsadmin/models/product_data.dart';
 
 class HomeGridProducts extends StatelessWidget {
   final DocumentSnapshot snapshot;
-  const HomeGridProducts({Key? key, required this.snapshot}) : super(key: key);
+  List<ProductData> productsInBilling = [];
+  HomeGridProducts(
+      {Key? key, required this.snapshot, required this.productsInBilling})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +47,8 @@ class HomeGridProducts extends StatelessWidget {
                             itemBuilder: (BuildContext context, int index) {
                               return HomeGridProductList(
                                 snapshot: snap.data!.docs[index],
+                                navigatorDecider: true,
+                                listOfProductsInBilling: productsInBilling,
                               );
                             },
                           ),

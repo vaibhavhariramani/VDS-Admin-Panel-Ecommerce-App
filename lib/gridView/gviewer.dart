@@ -3,13 +3,26 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:vdsadmin/models/data_provider.dart';
+import 'package:vdsadmin/models/product_data.dart';
 import 'package:vdsadmin/search/product_details.dart';
 
-class HomeGridProductList extends StatelessWidget {
-  final DocumentSnapshot snapshot;
-  const HomeGridProductList({Key? key, required this.snapshot})
-      : super(key: key);
+import '../billing/bill.dart';
 
+class HomeGridProductList extends StatefulWidget {
+  final DocumentSnapshot snapshot;
+  final bool navigatorDecider;
+  List<ProductData> listOfProductsInBilling;
+  HomeGridProductList(
+      {Key? key,
+      required this.snapshot,
+      required this.navigatorDecider,
+      required this.listOfProductsInBilling})
+      : super(key: key);
+  @override
+  _HomeGridProductListState createState() => _HomeGridProductListState();
+}
+
+class _HomeGridProductListState extends State<HomeGridProductList> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -24,18 +37,18 @@ class HomeGridProductList extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                   color: Colors.white10.withOpacity(0.95)),
               child: CachedNetworkImage(
-                imageUrl: snapshot.get('image'),
+                imageUrl: widget.snapshot.get('image'),
               ),
             ),
             ListTile(
               title: Text(
-                '${snapshot.get('name')}',
+                '${widget.snapshot.get('name')}',
                 style: GoogleFonts.poppins(
                     fontSize: 18, fontWeight: FontWeight.w500),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              subtitle: Text('Price for ${snapshot.get('quantity')}',
+              subtitle: Text('Price for ${widget.snapshot.get('quantity')}',
                   style: GoogleFonts.poppins(
                       fontSize: 16, fontWeight: FontWeight.normal),
                   maxLines: 1,
@@ -50,7 +63,7 @@ class HomeGridProductList extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4)),
                 padding: EdgeInsets.all(6),
                 child: Text(
-                  '${snapshot.get('quantity')}',
+                  '${widget.snapshot.get('quantity')}',
                   style: GoogleFonts.poppins(),
                 ),
               ),
@@ -62,7 +75,7 @@ class HomeGridProductList extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(left: 8),
                     child: Text(
-                      '₹${snapshot.get('selling')}',
+                      '₹${widget.snapshot.get('selling')}',
                       style: GoogleFonts.poppins(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -72,7 +85,7 @@ class HomeGridProductList extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(left: 4),
                     child: Text(
-                      '₹${snapshot.get('mrp')}',
+                      '₹${widget.snapshot.get('mrp')}',
                       style: GoogleFonts.poppins(
                           fontSize: 14,
                           color: Colors.grey,
@@ -92,7 +105,7 @@ class HomeGridProductList extends StatelessWidget {
                     color: Colors.green.withOpacity(0.2)),
                 padding: EdgeInsets.all(2),
                 child: Text(
-                  'You save ₹${snapshot.get('mrp') - snapshot.get('selling')}',
+                  'You save ₹${widget.snapshot.get('mrp') - widget.snapshot.get('selling')}',
                   style: GoogleFonts.poppins(
                       fontWeight: FontWeight.bold, color: Colors.green),
                 ),
@@ -101,7 +114,7 @@ class HomeGridProductList extends StatelessWidget {
             Container(
               width: 120,
               child: StreamBuilder<DocumentSnapshot>(
-                  stream: dataProvider.cartCheck(snapshot.id),
+                  stream: dataProvider.cartCheck(widget.snapshot.id),
                   builder: (context, snapshotData) {
                     if (snapshotData.hasData) {
                       return ElevatedButton(
@@ -117,19 +130,57 @@ class HomeGridProductList extends StatelessWidget {
                         onPressed: () {},
                       );
                     }
-                    return ElevatedButton(
-                      child: Text('Add',
-                          style: GoogleFonts.poppins(
-                              color: Colors.white, fontSize: 16)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8)),
-                      ),
-                      onPressed: () {
-                        print(snapshot.data);
-                      },
+                    return Row(
+                      children: [
+                        // ElevatedButton(
+                        //   child: Text('Edit',
+                        //       style: GoogleFonts.poppins(
+                        //           color: Colors.white, fontSize: 16)),
+                        //   style: ElevatedButton.styleFrom(
+                        //     backgroundColor: Colors.green,
+                        //     elevation: 0,
+                        //     shape: RoundedRectangleBorder(
+                        //         borderRadius: BorderRadius.circular(8)),
+                        //   ),
+                        //   onPressed: () {},
+                        // ),
+                        ElevatedButton(
+                          child: Text('Add',
+                              style: GoogleFonts.poppins(
+                                  color: Colors.white, fontSize: 16)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8)),
+                          ),
+                          onPressed: () {
+                            widget.listOfProductsInBilling.add(ProductData(
+                                barcode: '${widget.snapshot.get('barcode')}',
+                                image: '${widget.snapshot.get('image')}',
+                                name: '${widget.snapshot.get('name')}',
+                                mrp: widget.snapshot.get('mrp'),
+                                price: widget.snapshot.get('selling'),
+                                quantity: "quantity",
+                                count: 1,
+                                description: "description",
+                                category: "category"));
+                            setState(() {});
+                            widget.navigatorDecider
+                                ? Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => Bill(
+                                        products:
+                                            widget.listOfProductsInBilling,
+                                      ),
+                                    ),
+                                  )
+                                : Navigator.of(context).pop();
+                            print(widget.snapshot.data);
+                          },
+                        ),
+                      ],
                     );
                   }),
             ),
@@ -141,7 +192,7 @@ class HomeGridProductList extends StatelessWidget {
             context,
             MaterialPageRoute(
                 builder: (BuildContext context) =>
-                    ProductDetails(snapshot: snapshot)));
+                    ProductDetails(snapshot: widget.snapshot)));
       },
     );
   }
