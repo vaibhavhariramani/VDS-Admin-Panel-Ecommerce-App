@@ -30,7 +30,9 @@ import 'package:flutter_barcode_listener/flutter_barcode_listener.dart';
 
 class Bill extends StatefulWidget {
   List<ProductData> products;
-  Bill({Key? key, required this.products}) : super(key: key);
+  bool addedfromDB;
+  Bill({Key? key, required this.products, required this.addedfromDB})
+      : super(key: key);
 
   @override
   BillState createState() => BillState();
@@ -72,18 +74,20 @@ class BillState extends State<Bill> {
   @override
   void initState() {
     super.initState();
-    // mrptotal = widget.products != null
-    //     ? widget.products
-    //         .map((product) => product.mrp)
-    //         .toList()
-    //         .reduce((value, element) => value + element)
-    //     : 0;
-    // total = widget.products != null
-    //     ? widget.products
-    //         .map((product) => product.price)
-    //         .toList()
-    //         .reduce((value, element) => value + element)
-    //     : 0;
+    if (widget.addedfromDB == true) {
+      mrptotal = widget.products != null
+          ? widget.products
+              .map((product) => product.mrp)
+              .toList()
+              .reduce((value, element) => value + element)
+          : 0;
+      total = widget.products != null
+          ? widget.products
+              .map((product) => product.price)
+              .toList()
+              .reduce((value, element) => value + element)
+          : 0;
+    }
   }
 
   Future<void> scanBarcodeNormal() async {
@@ -551,15 +555,16 @@ class BillState extends State<Bill> {
         actions: [
           MaterialButton(
             elevation: 0,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
             child: const Text(
               'Add Item From Database',
               style: TextStyle(color: Colors.white),
             ),
             color: const Color(0xffCB0338),
-            onPressed: () {
-              showDialog(
+            onPressed: () async {
+              final updatedListOfProducts = await showDialog<List<ProductData>>(
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
@@ -581,6 +586,25 @@ class BillState extends State<Bill> {
                   );
                 },
               );
+
+              // If the user made changes, update the list of products.
+              if (updatedListOfProducts != null) {
+                setState(() {
+                  widget.products = updatedListOfProducts;
+                  mrptotal = widget.products != null
+                      ? widget.products
+                          .map((product) => product.mrp)
+                          .toList()
+                          .reduce((value, element) => value + element)
+                      : 0;
+                  total = widget.products != null
+                      ? widget.products
+                          .map((product) => product.price)
+                          .toList()
+                          .reduce((value, element) => value + element)
+                      : 0;
+                });
+              }
             },
           ),
           SizedBox(
@@ -1223,7 +1247,10 @@ class BillState extends State<Bill> {
                             ),
                           ),
                           onPressed: () async {
+                            print("got customer number ${contact.text}");
+                            print("###############################");
                             final invoice1 = CreateInvoice();
+                            print("Datatype of Invoice generated ${invoice1}");
                             final pdfFile =
                                 await PdfInvoiceApi.generate(invoice1);
                             PdfInvoiceSyncFusion.generateInvoice();
@@ -1742,7 +1769,8 @@ class BillState extends State<Bill> {
       ),
       items: saman,
     );
-
+    print("invoice material created");
+    print("#######################################");
     return invoice;
   }
 

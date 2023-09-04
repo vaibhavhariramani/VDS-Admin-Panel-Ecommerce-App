@@ -173,10 +173,12 @@ class _HomeGridProductListState extends State<HomeGridProductList> {
                                       builder: (_) => Bill(
                                         products:
                                             widget.listOfProductsInBilling,
+                                        addedfromDB: true,
                                       ),
                                     ),
                                   )
-                                : Navigator.of(context).pop();
+                                : Navigator.of(context)
+                                    .pop(widget.listOfProductsInBilling);
                             print(widget.snapshot.data);
                           },
                         ),

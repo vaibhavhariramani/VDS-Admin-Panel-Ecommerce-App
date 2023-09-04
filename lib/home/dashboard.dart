@@ -230,6 +230,7 @@ class _DashboardState extends State<Dashboard> {
                       MaterialPageRoute(
                         builder: (_) => Bill(
                           products: widget.MasterproductListForBilling,
+                          addedfromDB: false,
                         ),
                       ),
                     ),
