@@ -1,6 +1,6 @@
 {
-    "name": "ecom_admin_panel",
-    "short_name": "ecom_admin_panel",
+    "name": "vdsadmin",
+    "short_name": "vdsadmin",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
