@@ -1,0 +1,8 @@
+enum UserType {
+  ADMIN,
+  MERCHANT,
+  CUSTOMER,
+  AFFILIATES,
+  COUNTRY_HEAD,
+  SHOP_ADMIN
+}
