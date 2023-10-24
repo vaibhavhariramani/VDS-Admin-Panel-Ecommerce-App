@@ -1253,7 +1253,7 @@ class BillState extends State<Bill> {
                             print("Datatype of Invoice generated ${invoice1}");
                             final pdfFile =
                                 await PdfInvoiceApi.generate(invoice1);
-                            PdfInvoiceSyncFusion.generateInvoice();
+                            // PdfInvoiceSyncFusion.generateInvoice();
                             Navigator.pop(context);
                             DocumentReference reference = FirebaseFirestore
                                 .instance
@@ -1283,7 +1283,7 @@ class BillState extends State<Bill> {
                             }
                             await Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (context) => Whatsap(
+                                builder: (context) => PdfViewerPg(
                                   number: contact.text,
                                   pth: pdfFile.path,
                                 ),

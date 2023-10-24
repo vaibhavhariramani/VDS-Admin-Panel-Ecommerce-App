@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -42,13 +43,17 @@ class PdfInvoiceApi {
         '₹ ${total.toStringAsFixed(2)}',
       ];
     }).toList();
-
+    print("starting creating pdf invoice part-1");
     pdf.addPage(MultiPage(
       build: (context) => [
+        // Building header of invoice
         buildHeader(invoice),
         SizedBox(height: 3 * PdfPageFormat.cm),
+        // Building title of invoice
         buildTitle(invoice),
-        // buildInvoice(invoice),
+        // COmpiling invoice
+        buildInvoice(invoice),
+
         Table.fromTextArray(
           headers: headers,
           data: data,
@@ -69,9 +74,9 @@ class PdfInvoiceApi {
             5: Alignment.centerLeft,
           },
         ),
-
         Divider(),
-        // buildTotal(invoice),
+
+        buildTotal(invoice),
         Container(
           alignment: Alignment.centerRight,
           child: Row(
@@ -162,7 +167,7 @@ class PdfInvoiceApi {
       ],
       footer: (context) => buildFooter(invoice),
     ));
-
+    print("pdf compiling stage is getting over here");
     return PdfApi.saveDocument(name: 'my_invoice.pdf', pdf: pdf);
   }
 
@@ -252,108 +257,109 @@ class PdfInvoiceApi {
         ],
       );
 
-  // static Future<Widget> buildInvoice(Invoice invoice) async {
-  //   final headers = ['Description', 'Quantity', 'MRP', 'Our Price', 'Total'];
-  //   final fontData = await rootBundle.load("assets/open-sans.ttf");
-  //   final ttf = pw.Font.ttf(fontData);
-  //   final data = invoice.items.map((item) {
-  //     final total = item.OurPrice * item.quantity;
+  static Widget buildInvoice(Invoice invoice) {
+    final headers = ['Description', 'Quantity', 'MRP', 'Our Price', 'Total'];
+    // final fontData = await rootBundle.load("assets/open-sans.ttf");
+    // final ttf = pw.Font.ttf(fontData);
+    final data = invoice.items.map((item) {
+      final total = item.OurPrice * item.quantity;
+      print("header is built \n title is built \n creating invoice");
+      return [
+        item.description,
+        '${item.quantity}',
+        '\$ ${item.MRP}',
+        '\$ ${item.OurPrice}',
+        '\$ ${total.toStringAsFixed(2)}',
+      ];
+    }).toList();
+    print("Invoice table created");
+    return Table.fromTextArray(
+      headers: headers,
+      data: data,
+      border: null,
+      headerStyle: TextStyle(fontWeight: FontWeight.bold),
+      cellStyle: TextStyle(
+        fontWeight: FontWeight.bold,
+      ),
+      headerDecoration: BoxDecoration(color: PdfColors.grey300),
+      cellHeight: 30,
+      cellAlignments: {
+        0: Alignment.centerLeft,
+        1: Alignment.centerRight,
+        2: Alignment.centerRight,
+        3: Alignment.centerRight,
+        4: Alignment.centerRight,
+        5: Alignment.centerRight,
+      },
+    );
+  }
 
-  //     return [
-  //       item.description,
-  //       '${item.quantity}',
-  //       '\$ ${item.MRP}',
-  //       '\$ ${item.OurPrice}',
-  //       '\$ ${total.toStringAsFixed(2)}',
-  //     ];
-  //   }).toList();
+  static Widget buildTotal(Invoice invoice) {
+    final netTotal = invoice.items
+        .map((item) => item.OurPrice * item.quantity)
+        .reduce((item1, item2) => item1 + item2);
+    final netTotalMRP = invoice.items
+        .map((item) => item.MRP * item.quantity)
+        .reduce((item1, item2) => item1 + item2);
+    // final MRPPercent = invoice.items.first.MRP;
+    // final MRP = netTotal * MRPPercent;
+    final total = netTotal;
+    final totalMRP = netTotalMRP;
+    final dicount = totalMRP - total;
 
-  //   return Table.fromTextArray(
-  //     headers: headers,
-  //     data: data,
-  //     border: null,
-  //     headerStyle: TextStyle(fontWeight: FontWeight.bold),
-  //     cellStyle: TextStyle(
-  //       fontWeight: FontWeight.bold,
-  //     ),
-  //     headerDecoration: BoxDecoration(color: PdfColors.grey300),
-  //     cellHeight: 30,
-  //     cellAlignments: {
-  //       0: Alignment.centerLeft,
-  //       1: Alignment.centerRight,
-  //       2: Alignment.centerRight,
-  //       3: Alignment.centerRight,
-  //       4: Alignment.centerRight,
-  //       5: Alignment.centerRight,
-  //     },
-  //   );
-  // }
-
-  // static Future<pw.Widget> buildTotal(Invoice invoice) async {
-  //   final netTotal = invoice.items
-  //       .map((item) => item.OurPrice * item.quantity)
-  //       .reduce((item1, item2) => item1 + item2);
-  //   final netTotalMRP = invoice.items
-  //       .map((item) => item.MRP * item.quantity)
-  //       .reduce((item1, item2) => item1 + item2);
-  //   // final MRPPercent = invoice.items.first.MRP;
-  //   // final MRP = netTotal * MRPPercent;
-  //   final total = netTotal;
-  //   final totalMRP = netTotalMRP;
-  //   final dicount = totalMRP - total;
-
-  //   final fontData = await rootBundle.load("fonts/Poppins-Regular.ttf");
-  //   final ttf = pw.Font.ttf(fontData);
-  //   return Container(
-  //     alignment: Alignment.centerRight,
-  //     child: Row(
-  //       children: [
-  //         Spacer(flex: 6),
-  //         Expanded(
-  //           flex: 4,
-  //           child: Column(
-  //             crossAxisAlignment: CrossAxisAlignment.start,
-  //             children: [
-  //               buildText(
-  //                 title: 'Net total',
-  //                 value: Utils.formatPrice(netTotalMRP),
-  //                 unite: true,
-  //                 titleStyle: TextStyle(
-  //                   fontWeight: FontWeight.bold,
-  //                   font: ttf,
-  //                 ),
-  //               ),
-  //               buildText(
-  //                 title: 'Discount off',
-  //                 value: Utils.formatPrice(dicount),
-  //                 unite: true,
-  //               ),
-  //               // buildText(
-  //               //   title: 'MRP ${MRPPercent * 100} %',
-  //               //   value: Utils.formatPrice(MRP),
-  //               //   unite: true,
-  //               // ),
-  //               Divider(),
-  //               buildText(
-  //                 title: 'Total amount ',
-  //                 titleStyle: TextStyle(
-  //                   fontSize: 14,
-  //                   fontWeight: FontWeight.bold,
-  //                 ),
-  //                 value: Utils.formatPrice(total),
-  //                 unite: true,
-  //               ),
-  //               SizedBox(height: 2 * PdfPageFormat.mm),
-  //               Container(height: 1, color: PdfColors.grey400),
-  //               SizedBox(height: 0.5 * PdfPageFormat.mm),
-  //               Container(height: 1, color: PdfColors.grey400),
-  //             ],
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
+    // final fontData = await rootBundle.load("fonts/Poppins-Regular.ttf");
+    // final ttf = pw.Font.ttf(fontData);
+    print("printing total on pdf");
+    return Container(
+      alignment: Alignment.centerRight,
+      child: Row(
+        children: [
+          Spacer(flex: 6),
+          Expanded(
+            flex: 4,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                buildText(
+                  title: 'Net total',
+                  value: Utils.formatPrice(netTotalMRP),
+                  unite: true,
+                  titleStyle: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    // font: ttf,
+                  ),
+                ),
+                buildText(
+                  title: 'Discount off',
+                  value: Utils.formatPrice(dicount),
+                  unite: true,
+                ),
+                // buildText(
+                //   title: 'MRP ${MRPPercent * 100} %',
+                //   value: Utils.formatPrice(MRP),
+                //   unite: true,
+                // ),
+                Divider(),
+                buildText(
+                  title: 'Total amount ',
+                  titleStyle: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  value: Utils.formatPrice(total),
+                  unite: true,
+                ),
+                SizedBox(height: 2 * PdfPageFormat.mm),
+                Container(height: 1, color: PdfColors.grey400),
+                SizedBox(height: 0.5 * PdfPageFormat.mm),
+                Container(height: 1, color: PdfColors.grey400),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   static Widget buildFooter(Invoice invoice) => Column(
         crossAxisAlignment: CrossAxisAlignment.center,

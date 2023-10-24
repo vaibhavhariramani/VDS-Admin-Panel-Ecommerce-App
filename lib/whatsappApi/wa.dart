@@ -10,17 +10,17 @@ import 'package:screenshot/screenshot.dart';
 
 import 'package:pdf_viewer_plugin/pdf_viewer_plugin.dart';
 
-class Whatsap extends StatefulWidget {
+class PdfViewerPg extends StatefulWidget {
   final String pth;
   final String number;
-  Whatsap({Key? key, required this.pth, required this.number})
+  PdfViewerPg({Key? key, required this.pth, required this.number})
       : super(key: key);
 
   @override
-  State<Whatsap> createState() => _WhatsapState();
+  State<PdfViewerPg> createState() => _PdfViewerPgState();
 }
 
-class _WhatsapState extends State<Whatsap> {
+class _PdfViewerPgState extends State<PdfViewerPg> {
   final _controller = ScreenshotController();
 
   TextEditingController description = TextEditingController();

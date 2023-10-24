@@ -55,6 +55,7 @@ dependencies:
   http:
   transparent_image: 2.0.1
   syncfusion_flutter_pdf: ^20.1.48-beta
+  native_pdf_view: ^6.0.0+1
 
 dev_dependencies:
   flutter_test:
