@@ -40,7 +40,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void configOneSignel() {
-    OneSignal.shared.setAppId('d43fa4f9-2fa5-48a3-a184-49636c9d96c5');
+    OneSignal.initialize('d43fa4f9-2fa5-48a3-a184-49636c9d96c5');
   }
 
   void _initCheck() async {

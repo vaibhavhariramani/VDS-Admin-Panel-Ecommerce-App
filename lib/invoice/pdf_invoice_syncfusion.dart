@@ -151,14 +151,14 @@ class PdfInvoiceSyncFusion {
     //Add invoice footer
     drawFooter(page, pageSize);
     //Save the PDF document
-    final List<int> bytes = document.save();
-    File('invoice2.pdf').writeAsBytes(document.save());
+    final Future<List<int>> bytes = document.save();
+    File('invoice2.pdf').writeAsBytes(document.save() as List<int>);
 
     print("Invoice created succesfully");
     //Dispose the document.
     document.dispose();
     //Save and launch the file.
-    await saveAndLaunchFile(bytes, 'Invoice.pdf');
+    await saveAndLaunchFile(bytes as List<int>, 'Invoice.pdf');
   }
 
   //Create PDF grid and return

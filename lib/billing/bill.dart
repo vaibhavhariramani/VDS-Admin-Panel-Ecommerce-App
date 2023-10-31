@@ -28,6 +28,8 @@ import 'package:vdsadmin/widgets/raised_gradient_button.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:flutter_barcode_listener/flutter_barcode_listener.dart';
 
+import '../invoice/pdf_invoice_api_web.dart';
+
 class Bill extends StatefulWidget {
   List<ProductData> products;
   bool addedfromDB;
@@ -871,7 +873,8 @@ class BillState extends State<Bill> {
                     ),
                     MaterialButton(
                       elevation: 0,
-                      onPressed: () => Checkout(),
+                      onPressed: () => Checkout(
+                          saman: saman, pdfFileAndroid: '', pdfFileWeb: ''),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(80.0)),
                       padding: EdgeInsets.all(0.0),
@@ -1134,7 +1137,9 @@ class BillState extends State<Bill> {
     setState(() {});
   }
 
-  void Checkout() {
+  void Checkout(
+      {required List<InvoiceItem> saman, pdfFileAndroid, pdfFileWeb}) {
+    bool isthisWeb = false;
     form(String title, String hint, TextEditingController controller, Icon ic) {
       return Padding(
         padding: const EdgeInsets.all(4.0),
@@ -1251,8 +1256,16 @@ class BillState extends State<Bill> {
                             print("###############################");
                             final invoice1 = CreateInvoice();
                             print("Datatype of Invoice generated ${invoice1}");
-                            final pdfFile =
-                                await PdfInvoiceApi.generate(invoice1);
+                            if (kIsWeb) {
+                              isthisWeb = true;
+                              print("ok going for web pdf invoice");
+                              pdfFileWeb =
+                                  await PdfInvoiceWebApi.generate(invoice1);
+                            } else {
+                              pdfFileAndroid =
+                                  await PdfInvoiceApi.generate(invoice1);
+                            }
+
                             // PdfInvoiceSyncFusion.generateInvoice();
                             Navigator.pop(context);
                             DocumentReference reference = FirebaseFirestore
@@ -1281,14 +1294,23 @@ class BillState extends State<Bill> {
                             } catch (e) {
                               Navigator.pop(context);
                             }
-                            await Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => PdfViewerPg(
-                                  number: contact.text,
-                                  pth: pdfFile.path,
-                                ),
-                              ),
-                            );
+                            isthisWeb
+                                ? await Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => PdfViewerweb(
+                                        number: contact.text,
+                                        data: pdfFileWeb,
+                                      ),
+                                    ),
+                                  )
+                                : await Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => PdfViewerPg(
+                                        number: contact.text,
+                                        pth: pdfFileAndroid.path,
+                                      ),
+                                    ),
+                                  );
                             setState(() {});
                             // PdfApi.openFile(pdfFile);
                           },
