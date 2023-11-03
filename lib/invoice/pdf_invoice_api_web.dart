@@ -12,7 +12,7 @@ import 'package:vdsadmin/models/suppiler.dart';
 import 'package:vdsadmin/models/utils.dart';
 
 class PdfInvoiceWebApi {
-  static Future<Future<Object>> generate(Invoice invoice) async {
+  static Future<Uint8List> generate(Invoice invoice) async {
     final pdf = Document();
     final fontData = await rootBundle.load("fonts/Poppins-Regular.ttf");
     final ttf = pw.Font.ttf(fontData);
@@ -21,10 +21,10 @@ class PdfInvoiceWebApi {
     final fontData3 = await rootBundle.load("fonts/Hind-Bold.ttf");
     final ttf3 = pw.Font.ttf(fontData);
     final netTotal = invoice.items
-        .map((item) => item.OurPrice * item.quantity)
+        .map((item) => item.price * item.count)
         .reduce((item1, item2) => item1 + item2);
     final netTotalMRP = invoice.items
-        .map((item) => item.MRP * item.quantity)
+        .map((item) => item.mrp * item.count)
         .reduce((item1, item2) => item1 + item2);
     // final MRPPercent = invoice.items.first.MRP;
     // final MRP = netTotal * MRPPercent;
@@ -33,13 +33,14 @@ class PdfInvoiceWebApi {
     final dicount = totalMRP - total;
     final headers = ['Description', 'Quantity', 'MRP', 'Our Price', 'Total'];
     final data = invoice.items.map((item) {
-      final total = item.OurPrice * item.quantity;
+      print(item.mrp);
+      final total = item.price * item.count;
 
       return [
         item.description,
         '${item.quantity}',
-        '₹ ${item.MRP}',
-        '₹ ${item.OurPrice}',
+        '₹ ${item.mrp}',
+        '₹ ${item.price}',
         '₹ ${total.toStringAsFixed(2)}',
       ];
     }).toList();
@@ -54,7 +55,7 @@ class PdfInvoiceWebApi {
         // COmpiling invoice
         buildInvoice(invoice),
 
-        Table.fromTextArray(
+        TableHelper.fromTextArray(
           headers: headers,
           data: data,
           border: null,
@@ -262,13 +263,13 @@ class PdfInvoiceWebApi {
     // final fontData = await rootBundle.load("assets/open-sans.ttf");
     // final ttf = pw.Font.ttf(fontData);
     final data = invoice.items.map((item) {
-      final total = item.OurPrice * item.quantity;
+      final total = item.price * item.count;
       print("header is built \n title is built \n creating invoice");
       return [
         item.description,
         '${item.quantity}',
-        '\$ ${item.MRP}',
-        '\$ ${item.OurPrice}',
+        '\$ ${item.mrp}',
+        '\$ ${item.price}',
         '\$ ${total.toStringAsFixed(2)}',
       ];
     }).toList();
@@ -296,10 +297,10 @@ class PdfInvoiceWebApi {
 
   static Widget buildTotal(Invoice invoice) {
     final netTotal = invoice.items
-        .map((item) => item.OurPrice * item.quantity)
+        .map((item) => item.price * item.count)
         .reduce((item1, item2) => item1 + item2);
     final netTotalMRP = invoice.items
-        .map((item) => item.MRP * item.quantity)
+        .map((item) => item.mrp * item.count)
         .reduce((item1, item2) => item1 + item2);
     // final MRPPercent = invoice.items.first.MRP;
     // final MRP = netTotal * MRPPercent;

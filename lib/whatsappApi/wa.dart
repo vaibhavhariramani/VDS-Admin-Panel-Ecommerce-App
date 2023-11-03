@@ -8,7 +8,7 @@ import 'package:whatsapp_share/whatsapp_share.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:screenshot/screenshot.dart';
-import 'package:native_pdf_view/native_pdf_view.dart' as nativepdf;
+import 'package:pdfx/pdfx.dart' as nativepdf;
 
 import 'package:pdf_viewer_plugin/pdf_viewer_plugin.dart';
 
@@ -143,6 +143,10 @@ class _PdfViewerPgState extends State<PdfViewerPg> {
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Invoice Bill'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
         ),
         body: Center(
           child: Column(
@@ -205,7 +209,7 @@ class PdfViewerweb extends StatefulWidget {
       : super(key: key);
 
   @override
-  State<PdfViewerPg> createState() => _PdfViewerPgState();
+  State<PdfViewerweb> createState() => _PdfViewerwebState();
 }
 
 class _PdfViewerwebState extends State<PdfViewerweb> {
@@ -324,6 +328,8 @@ class _PdfViewerwebState extends State<PdfViewerweb> {
 
   @override
   Widget build(BuildContext context) {
+    print("inside PdfViewerweb");
+    // print(widget.data);
     final pdfController = nativepdf.PdfController(
       document: nativepdf.PdfDocument.openData(widget.data),
     );
@@ -331,7 +337,45 @@ class _PdfViewerwebState extends State<PdfViewerweb> {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
+          backgroundColor: Colors.green,
           title: const Text('Invoice Bill'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                MaterialButton(
+                  elevation: 0,
+                  onPressed: shareFile,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(80.0)),
+                  padding: EdgeInsets.all(0.0),
+                  child: const Text(
+                    "Send Bill",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green,
+                    ),
+                  ),
+                  color: Colors.white,
+                ),
+                ElevatedButton(
+                  child: Text('Print Bill'),
+                  onPressed: () {
+                    // PdfApi.openFile(File(widget.data));
+                  },
+                ),
+                ElevatedButton(
+                  child: Text('is Installed'),
+                  onPressed: isInstalled,
+                ),
+              ],
+            ),
+          ],
         ),
         body: Center(
           child: Column(
@@ -348,20 +392,6 @@ class _PdfViewerwebState extends State<PdfViewerweb> {
                 )
               else
                 Text("Pdf is not Loaded"),
-              ElevatedButton(
-                child: Text('Send Bill'),
-                onPressed: shareFile,
-              ),
-              ElevatedButton(
-                child: Text('Print Bill'),
-                onPressed: () {
-                  // PdfApi.openFile(File(widget.data));
-                },
-              ),
-              ElevatedButton(
-                child: Text('is Installed'),
-                onPressed: isInstalled,
-              ),
             ],
           ),
         ),

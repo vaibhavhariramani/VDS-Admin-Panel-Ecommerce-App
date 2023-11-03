@@ -1,11 +1,12 @@
 import 'package:vdsadmin/models/customer.dart';
+import 'package:vdsadmin/models/product_data.dart';
 import 'package:vdsadmin/models/suppiler.dart';
 
 class Invoice {
   final InvoiceInfo info;
   final Supplier supplier;
   final Customer customer;
-  final List<InvoiceItem> items;
+  final List<ProductData> items;
 
   const Invoice({
     required this.info,

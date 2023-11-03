@@ -874,7 +874,9 @@ class BillState extends State<Bill> {
                     MaterialButton(
                       elevation: 0,
                       onPressed: () => Checkout(
-                          saman: saman, pdfFileAndroid: '', pdfFileWeb: ''),
+                          saman: widget.products,
+                          pdfFileAndroid: '',
+                          pdfFileWeb: ''),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(80.0)),
                       padding: EdgeInsets.all(0.0),
@@ -1138,7 +1140,7 @@ class BillState extends State<Bill> {
   }
 
   void Checkout(
-      {required List<InvoiceItem> saman, pdfFileAndroid, pdfFileWeb}) {
+      {required List<ProductData> saman, pdfFileAndroid, pdfFileWeb}) {
     bool isthisWeb = false;
     form(String title, String hint, TextEditingController controller, Icon ic) {
       return Padding(
@@ -1254,7 +1256,7 @@ class BillState extends State<Bill> {
                           onPressed: () async {
                             print("got customer number ${contact.text}");
                             print("###############################");
-                            final invoice1 = CreateInvoice();
+                            final invoice1 = CreateInvoice(saman);
                             print("Datatype of Invoice generated ${invoice1}");
                             if (kIsWeb) {
                               isthisWeb = true;
@@ -1768,7 +1770,7 @@ class BillState extends State<Bill> {
         });
   }
 
-  Invoice CreateInvoice() {
+  Invoice CreateInvoice(List<ProductData> samanList) {
     final date = DateTime.now();
     final dueDate = date.add(const Duration(days: 7));
 
@@ -1789,7 +1791,7 @@ class BillState extends State<Bill> {
         number:
             '${DateTime.now().year}${DateTime.now().month}${DateTime.now().day}-${DateTime.now().hour}${DateTime.now().minute}',
       ),
-      items: saman,
+      items: samanList,
     );
     print("invoice material created");
     print("#######################################");

@@ -33,13 +33,15 @@ class PdfApi {
 }
 
 class PdfApiWeb {
-  static Future<Object> saveDocument({
+  static Future<Uint8List> saveDocument({
     required String name,
     required Document pdf,
   }) async {
     print("Saving PDF now");
+    print(pdf.runtimeType);
     final bytes = await pdf.save();
     if (kIsWeb) {
+      print("platform is web");
       return bytes;
     } else {
       print("Getting path to store pdf in android");
@@ -48,7 +50,7 @@ class PdfApiWeb {
       final file = File('${dir.path}/$name');
       await file.writeAsBytes(bytes);
 
-      return file;
+      return bytes;
     }
   }
 
