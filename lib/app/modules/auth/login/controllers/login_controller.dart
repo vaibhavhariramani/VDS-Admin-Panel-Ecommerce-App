@@ -6,7 +6,11 @@ import '../../../../../services/auth_service.dart';
 
 class LoginController extends GetxController {
   final AuthService _authService = AuthService.to;
-
+  RxBool mobileloginbool = false.obs;
+  final RxBool isLoginPassVisible = true.obs,
+      isRegisterPassVisible = false.obs,
+      isRegisterConfirmPassVisible = false.obs,
+      isAuthProcessing = false.obs;
   final FormGroup emailLoginForm = FormGroup(
     {
       'email': FormControl<String>(
@@ -84,8 +88,11 @@ class LoginController extends GetxController {
           .login(emailLoginForm.value)
           .then((bool? _isLoginSuccess) {
         if (_isLoginSuccess != null) {
+          print("Was Login Success");
+          print(_isLoginSuccess);
           if (_isLoginSuccess) {
             if (_authService.user.value != null) {
+              print(_authService.user.value);
               // _checkUserTypeAndNavigate(_authService.user.value!);
               // _authService.getLogedInUserDetails();
               // _authService.enableOrDisableRoutes(_authService.user.value!);

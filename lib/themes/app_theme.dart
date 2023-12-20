@@ -3,7 +3,11 @@ import 'package:flutter_dashboard/flutter_dashboard.dart';
 
 part './colors.dart';
 
+part 'light_theme.dart';
+part 'dark_theme.dart';
+
 class AppTheme {
+  static TextStyle globalFontStyle = GoogleFonts.poppins();
   static ThemeData get _lightTheme => ThemeData.light();
 
   static ThemeData get _darkTheme => ThemeData.dark();
@@ -24,6 +28,49 @@ class AppTheme {
           borderRadius: BorderRadius.circular(30),
         ),
       );
+
+  static final TextTheme globalTextTheme =
+      GoogleFonts.poppinsTextTheme().copyWith(
+    headline1: globalFontStyle.copyWith(
+      fontSize: 30,
+    ),
+    headline2: globalFontStyle.copyWith(
+      fontSize: 28,
+    ),
+    headline3: globalFontStyle.copyWith(
+      fontSize: 26,
+    ),
+    headline4: globalFontStyle.copyWith(
+      fontSize: 24,
+    ),
+    headline5: globalFontStyle.copyWith(
+      fontSize: 22,
+    ),
+    headline6: globalFontStyle.copyWith(
+      fontSize: 20,
+    ),
+    subtitle1: globalFontStyle.copyWith(
+      fontSize: 14,
+    ),
+    subtitle2: globalFontStyle.copyWith(
+      fontSize: 12,
+    ),
+    bodyText1: globalFontStyle.copyWith(
+      fontSize: 16,
+    ),
+    bodyText2: globalFontStyle.copyWith(
+      fontSize: 14,
+    ),
+    caption: globalFontStyle.copyWith(
+      fontSize: 12,
+    ),
+    button: globalFontStyle.copyWith(
+      fontSize: 16,
+    ),
+    overline: globalFontStyle.copyWith(
+      fontSize: 12,
+    ),
+  );
 
   static ThemeData get lightTheme => _lightTheme.copyWith(
         indicatorColor: Colors.green,
@@ -110,5 +157,13 @@ class AppTheme {
         drawerTheme: drawerTheme.copyWith(
           backgroundColor: AppColors.black,
         ),
+      );
+
+  static ThemeData get globalThemeData => ThemeData(
+        appBarTheme: _appBarTheme,
+        fontFamily: globalFontStyle.fontFamily,
+        dividerColor: Colors.transparent,
+        textTheme: globalTextTheme,
+        platform: TargetPlatform.iOS,
       );
 }
