@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dashboard/flutter_dashboard.dart';
+import 'package:vdsadmin/app/modules/auth/widgets/components/social_media_auth_button.dart';
 import '../../../../../themes/app_theme.dart';
 import '../controllers/login_controller.dart';
 
@@ -477,6 +478,14 @@ class LoginView extends GetResponsiveView<LoginController> {
                 ),
               ),
             ),
+            const Divider(),
+            Flexible(
+              child: AuthSocialMediaButtons(
+                isProcessing: (bool _processing) {
+                  controller.isAuthProcessing(_processing);
+                },
+              ),
+            ),
           ],
         ),
       ),
@@ -557,10 +566,10 @@ class LoginView extends GetResponsiveView<LoginController> {
       () => Center(
         child: LoadingButton(
           onPressed: () async {
-            _isProcessing(true);
-            await controller
-                .handleLogin()
-                .whenComplete(() => _isProcessing(false));
+            _isProcessing.value = true;
+            await controller.handleLogin().whenComplete(() {
+              _isProcessing.value = false;
+            });
           },
           defaultWidget: Text(
             'Login to Continue',

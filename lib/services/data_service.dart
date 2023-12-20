@@ -2621,34 +2621,7 @@ query MyQuery {
     return false;
   }
 
-  Future<void> CreateLogs({String? action}) async {
-    var url = Uri.parse(
-        'https://xiz7sjryubbtzcvgimxy7tcuem.appsync-api.eu-west-1.amazonaws.com/graphql');
-    String? uid = AuthService.to.user.value?.id;
-    print("uid is $uid");
-    DateTime rightnow = DateTime(DateTime.now() as int);
-
-    String createMutation = """mutation MyMutation {
-  createActivityLog(input: {usersID: "$uid", datetime: "$rightnow", actio: "$action"}) {
-    id
-    _version
-    actio
-    brief_discription
-    datetime
-  }
-}
-""";
-
-    var response = await http.post(
-      url,
-      headers: {'x-api-key': 'da2-qah2nlfghjd6hlve2dn7r5pi3a'},
-      body: json.encode(
-        {'query': createMutation},
-      ),
-    );
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}');
-  }
+  Future<void> CreateLogs({String? action}) async {}
 
   Future<bool> updateProductStatus(String id, bool isPublished) async {
     var url = Uri.parse(
