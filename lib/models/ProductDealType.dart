@@ -1,0 +1,1 @@
+enum ProductDealType { GREENDEALS, REDDEALS, HOTDEALS }

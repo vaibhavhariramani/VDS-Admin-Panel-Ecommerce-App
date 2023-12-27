@@ -56,7 +56,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyC_YMZV4Zny306NUTmNNijeE7gCGs0eK4A',
-    appId: '1:135817720188:android:6ec49e2e41ba42b6a3b4f9',
+    appId: '1:135817720188:android:edd7bc0c2d93e0e1a3b4f9',
     messagingSenderId: '135817720188',
     projectId: 'vaibhav-s-ecommerce-app',
     databaseURL: 'https://vaibhav-s-ecommerce-app.firebaseio.com',
@@ -65,23 +65,23 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyAmyXoI36rVHsDRl4RE9j4JwWhedEX96pc',
-    appId: '1:135817720188:ios:22eaf41249eeabfca3b4f9',
+    appId: '1:135817720188:ios:807e8541bf7ddebba3b4f9',
     messagingSenderId: '135817720188',
     projectId: 'vaibhav-s-ecommerce-app',
     databaseURL: 'https://vaibhav-s-ecommerce-app.firebaseio.com',
     storageBucket: 'vaibhav-s-ecommerce-app.appspot.com',
-    iosClientId: '135817720188-v5fr78s7v0qpstimt83mmt9ro8qv2tbd.apps.googleusercontent.com',
-    iosBundleId: 'com.example.emart',
+    iosClientId: '135817720188-23rkokc1k7r2kjob1kvu542c9ep7jff2.apps.googleusercontent.com',
+    iosBundleId: 'com.example.vdsadmin.vdsadmin',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyAmyXoI36rVHsDRl4RE9j4JwWhedEX96pc',
-    appId: '1:135817720188:ios:e9c85e4800f6d341a3b4f9',
+    appId: '1:135817720188:ios:b5ffe1850fb1fb33a3b4f9',
     messagingSenderId: '135817720188',
     projectId: 'vaibhav-s-ecommerce-app',
     databaseURL: 'https://vaibhav-s-ecommerce-app.firebaseio.com',
     storageBucket: 'vaibhav-s-ecommerce-app.appspot.com',
-    iosClientId: '135817720188-pucosiho09np8cvvc602ki5pcth7258o.apps.googleusercontent.com',
-    iosBundleId: 'com.example.emart.RunnerTests',
+    iosClientId: '135817720188-95hbke1vm8m2re1akb55pfsb62ac4t58.apps.googleusercontent.com',
+    iosBundleId: 'com.example.vdsadmin.vdsadmin.RunnerTests',
   );
 }

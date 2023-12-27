@@ -10,6 +10,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:mime_type/mime_type.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:vdsadmin/models/ProductDealType.dart';
+import 'package:vdsadmin/models/UserStatus.dart';
 import '../models/AcitivityLog.dart';
 import '../models/Magazines.dart';
 import '../models/Product.dart';
@@ -776,6 +778,7 @@ class DataService extends GetxService {
   //Fetching List of Products according to product type
   Future<List<Product>> fetchAllProductsaccordingProductType({
     String? shopId,
+    required ProductDealType deal_type,
     // required ProductDealType deal_type,
   }) async {
     Get.log("Fetching Products Data according to Product Type");
@@ -1932,6 +1935,7 @@ class DataService extends GetxService {
     required var offer_starts_on,
     required var offer_available_from,
     required String sku,
+    required ProductDealType deal_type,
   }) async {
     if (AuthService.to.isAuthenticated) {
       print('creating new Hot Deal product');
@@ -1985,6 +1989,7 @@ class DataService extends GetxService {
   Future<int> GetUserCount({
     // required UserStatus status,
     required UserType userType,
+    required UserStatus status,
   }) async {
     int userCount = 0;
     if (AuthService.to.isAuthenticated) {
@@ -2734,4 +2739,6 @@ query MyQuery {
     }
     return false;
   }
+
+  FetchInvitedUserData({String? id}) {}
 }

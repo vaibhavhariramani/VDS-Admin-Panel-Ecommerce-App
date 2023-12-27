@@ -1,0 +1,1 @@
+enum InvitedUserStatus { PENDING, ACCEPTED, CANCELED, REJECTED }

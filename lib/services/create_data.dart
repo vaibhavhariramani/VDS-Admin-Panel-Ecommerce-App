@@ -19,6 +19,7 @@ class CreateService extends GetxService {
     required double offer_price,
     required var offer_ends_on,
     required var offer_available_from,
+    required deal_type,
   }) async {
     if (AuthService.to.isAuthenticated) {
       print('creating new Green Deal product');

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:flutter_dashboard/flutter_dashboard.dart';
 import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
@@ -6,8 +7,17 @@ import 'package:iconly/iconly.dart';
 import '../../middlewares/auth_middleware.dart';
 import '../modules/auth/login/bindings/login_binding.dart';
 import '../modules/auth/login/views/login_view.dart';
+import '../modules/deletion_status/bindings/deletion_status_binding.dart';
+import '../modules/deletion_status/controllers/deletion_status_controller.dart';
+import '../modules/deletion_status/views/deletion_status_view.dart';
 import '../modules/home/bindings/home_binding.dart';
 import '../modules/home/views/home_view.dart';
+import '../modules/merchants/bindings/merchants_binding.dart';
+import '../modules/merchants/views/merchants_view.dart';
+import '../modules/products/master_list/bindings/master_list_binding.dart';
+import '../modules/products/master_list/views/master_list_view.dart';
+import '../modules/products/products_listing/bindings/products_listing_binding.dart';
+import '../modules/products/products_listing/views/products_listing_view.dart';
 
 part 'app_routes.dart';
 
@@ -18,9 +28,29 @@ class AppPages {
 
   static final routes = [
     GetPage(
+      name: _Paths.HOME,
+      page: () => HomeView(),
+      binding: HomeBinding(),
+    ),
+    GetPage(
       name: _Paths.LOGIN,
       page: () => LoginView(),
       binding: LoginBinding(),
+    ),
+    GetPage(
+      name: _Paths.DELETION_STATUS,
+      page: () => DeletionStatusView(),
+      binding: DeletionStatusBinding(),
+    ),
+    GetPage(
+      name: _Paths.PRODUCTS_LISTING,
+      page: () => ProductsListingView(),
+      binding: ProductsListingBinding(),
+    ),
+    GetPage(
+      name: _Paths.MATSER_LIST,
+      page: () => MasterListView(),
+      binding: MasterListBinding(),
     ),
   ];
 
@@ -36,8 +66,8 @@ class AppPages {
   ];
 
   static List<FlutterDashboardItem> footerPages(BuildContext context) {
-    // DeletionStatusController deletionStatusController =
-    //     Get.put(DeletionStatusController());
+    DeletionStatusController deletionStatusController =
+        Get.put(DeletionStatusController());
     return [
       // FlutterDashboardItem(
       //   title: 'Account',
@@ -254,45 +284,45 @@ class AppPages {
       //   ),
       // ),
 
-      // FlutterDashboardItem(
-      //   title: 'Merchants',
-      //   page: GetPage(
-      //     name: _Paths.MERCHANTS,
-      //     page: () {
-      //       deletionStatusController.isVisible.value = false;
-      //       return MerchantsView();
-      //     },
-      //     binding: MerchantsBinding(),
-      //     middlewares: [
-      //       EnsureAuthenticated(),
-      //     ],
-      //   ),
-      //   icon: const Icon(
-      //     IconlyLight.profile,
-      //   ),
-      //   selectedIcon: Icon(
-      //     IconlyBold.profile,
-      //     color: Theme.of(context).scaffoldBackgroundColor,
-      //   ),
-      // ),
-      // FlutterDashboardItem(
-      //   title: 'Master List',
-      //   page: GetPage(
-      //     name: _Paths.MATSER_LIST,
-      //     page: () => MatserListView(),
-      //     binding: MatserListBinding(),
-      //     middlewares: [
-      //       EnsureAuthenticated(),
-      //     ],
-      //   ),
-      //   icon: const Icon(
-      //     IconlyLight.chart,
-      //   ),
-      //   selectedIcon: Icon(
-      //     IconlyBold.chart,
-      //     color: Theme.of(context).scaffoldBackgroundColor,
-      //   ),
-      // ),
+      FlutterDashboardItem(
+        title: 'Merchants',
+        page: GetPage(
+          name: _Paths.MERCHANTS,
+          page: () {
+            deletionStatusController2.isVisible.value = false;
+            return MerchantsView();
+          },
+          binding: MerchantsBinding(),
+          middlewares: [
+            EnsureAuthenticated(),
+          ],
+        ),
+        icon: const Icon(
+          IconlyLight.profile,
+        ),
+        selectedIcon: Icon(
+          IconlyBold.profile,
+          color: Theme.of(context).scaffoldBackgroundColor,
+        ),
+      ),
+      FlutterDashboardItem(
+        title: 'Master List',
+        page: GetPage(
+          name: _Paths.MATSER_LIST,
+          page: () => MasterListView(),
+          binding: MasterListBinding(),
+          middlewares: [
+            EnsureAuthenticated(),
+          ],
+        ),
+        icon: const Icon(
+          IconlyLight.chart,
+        ),
+        selectedIcon: Icon(
+          IconlyBold.chart,
+          color: Theme.of(context).scaffoldBackgroundColor,
+        ),
+      ),
       // FlutterDashboardItem(
       //   title: 'Scheduled Products',
       //   page: GetPage(
@@ -366,15 +396,13 @@ class AppPages {
       //   ),
       // ),
 
-      // FlutterDashboardItem.items(
-      //   title: 'Products',
-      //   icon: const Icon(
-      //     IconlyLight.folder,
-      //   ),
-      //   // subItems: [
-
-      //   // ],
-      // ),
+      FlutterDashboardItem.items(
+        title: 'Products',
+        icon: const Icon(
+          IconlyLight.folder,
+        ),
+        subItems: [],
+      ),
 
       // FlutterDashboardItem(
       //   title: 'Action Log',

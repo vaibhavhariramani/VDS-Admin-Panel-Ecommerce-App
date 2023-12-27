@@ -18,8 +18,17 @@ class Users {
   String? _saved_location;
   double? _current_lon;
   String? _managed_by;
+  String? _country;
 
   get current_lon => null;
+
+  get shops_subscription_left => null;
+
+  String? get country {
+    return _country;
+  }
+
+  get status => null;
 
   @override
   String? getId() {
@@ -83,7 +92,8 @@ class Users {
       radiusPreference,
       saved_location,
       current_lon,
-      managed_by})
+      managed_by,
+      country})
       : _fullname = fullname,
         _img_token = img_token,
         _phn_number = phn_number,
@@ -99,7 +109,8 @@ class Users {
         _radiusPreference = radiusPreference,
         _saved_location = saved_location,
         _current_lon = current_lon,
-        _managed_by = managed_by;
+        _managed_by = managed_by,
+        _country = country;
   factory Users(
       {String? id,
       String? fullname,
@@ -117,7 +128,8 @@ class Users {
       double? radiusPreference,
       String? saved_location,
       double? current_lon,
-      String? managed_by}) {
+      String? managed_by,
+      String? country}) {
     return Users._internal(
       id: id,
       fullname: fullname,
@@ -135,6 +147,7 @@ class Users {
       saved_location: saved_location,
       current_lon: current_lon,
       managed_by: managed_by,
+      country: country,
     );
   }
 
