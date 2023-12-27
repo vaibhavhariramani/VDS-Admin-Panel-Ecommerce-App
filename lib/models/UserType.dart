@@ -4,5 +4,5 @@ enum UserType {
   CUSTOMER,
   AFFILIATES,
   COUNTRY_HEAD,
-  SHOP_ADMIN
+  SHOP_ADMIN,
 }

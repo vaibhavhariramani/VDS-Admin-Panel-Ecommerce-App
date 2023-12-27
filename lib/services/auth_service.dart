@@ -1,10 +1,12 @@
 import 'dart:js';
+import 'dart:js_interop';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vdsadmin/models/UserType.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_dashboard/flutter_dashboard.dart';
 import 'package:bot_toast/bot_toast.dart';
@@ -27,6 +29,7 @@ class AuthService extends GetxService {
   final Rx<User?> firebaseUser = Rx<User?>(null);
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore Collection = FirebaseFirestore.instance;
   final FacebookAuth _facebookAuth = FacebookAuth.instance;
   Rx<Users?> appUser = Rx<Users?>(null);
   // GraphQLClient? client;
@@ -106,8 +109,8 @@ class AuthService extends GetxService {
     }
     if ((user.user_type ?? UserType.COUNTRY_HEAD) == UserType.COUNTRY_HEAD) {
       FlutterDashboardNavService.to.enabledRoutes.addAll(const [
-        "Dashboard",
-        "Merchants", //Firstpage alsways need to be enabled
+        "Dashboard", //Firstpage alsways need to be enabled
+        "Merchants",
         "Subscriptions",
         "Action Log",
         "Banner Ads",
@@ -247,28 +250,76 @@ class AuthService extends GetxService {
       print("got user creds");
       print("${userData.value?.email}");
       print("${userData.value}");
-      Users? temp = Users(
-          id: "123",
-          fullname: "",
-          img_token: "",
-          phn_number: "",
-          gmail_id: "",
-          fb_id: "",
-          applie_id: "",
-          email: "",
-          phonepinID: "",
-          user_type: UserType.ADMIN,
-          current_language: "",
-          current_lat: 0.0,
-          isUserSecure: true,
-          radiusPreference: 0.0,
-          saved_location: "",
-          current_lon: 0.0,
-          managed_by: "");
-      user(temp).obs;
-      _storage.write('token', temp.id);
-      print("User Details Updated");
-      return true;
+      print("User ID:${userData.value?.uid}");
+      CollectionReference UsersDB = Collection.collection('Users');
+      print("*****************************");
+      try {
+        DocumentSnapshot<Object?> querySnapshot =
+            await UsersDB.doc(userData.value?.uid).get();
+        print(querySnapshot);
+        if (querySnapshot.data().isDefinedAndNotNull) {
+          // Assuming 'email' is a unique field, so there should be at most one document
+          var userDataMap = querySnapshot.data() as Map<String, dynamic>;
+          print(userDataMap);
+          print("*****************************");
+          String type_of_user = userDataMap['userType'];
+          // Create your Users object with the fetched data
+          Users temp = Users(
+            id: userDataMap['id'],
+            fullname: userDataMap['fullname'],
+            img_token: userDataMap['imgToken'],
+            phn_number: "",
+            gmail_id: "",
+            fb_id: "",
+            applie_id: "",
+            email: "",
+            phonepinID: "",
+            user_type: getUserTypeFromString(userDataMap['userType'] ?? ''),
+            current_language: "",
+            current_lat: 0.0,
+            isUserSecure: true,
+            radiusPreference: 0.0,
+            saved_location: "",
+            current_lon: 0.0,
+            managed_by: "",
+            country: userDataMap['Country'],
+          );
+          print("----------------------------------------------");
+          print("User Type: ${temp.user_type}");
+          print(temp.fullname);
+          user(temp).obs;
+          _storage.write('token', temp.id);
+          return true;
+        } else {
+          BotToast.showText(text: 'No User Found'.tr);
+          return false;
+        }
+      } catch (e) {
+        print("Error fetching user details: $e");
+
+        Users? temp = Users(
+            id: "123",
+            fullname: "",
+            img_token: "",
+            phn_number: "",
+            gmail_id: "",
+            fb_id: "",
+            applie_id: "",
+            email: "",
+            phonepinID: "",
+            user_type: UserType.ADMIN,
+            current_language: "",
+            current_lat: 0.0,
+            isUserSecure: true,
+            radiusPreference: 0.0,
+            saved_location: "",
+            current_lon: 0.0,
+            managed_by: "");
+        user(temp).obs;
+        _storage.write('token', temp.id);
+        print("User Details Updated");
+        return true;
+      }
     } else {
       BotToast.showText(text: 'No User Found'.tr);
       return false;
@@ -619,4 +670,23 @@ class AuthService extends GetxService {
   // Future<bool> _createUserInDatabase(Map<String, dynamic> credential) async {
   //   return false;
   // }
+}
+
+UserType getUserTypeFromString(String userTypeString) {
+  switch (userTypeString) {
+    case 'ADMIN':
+      return UserType.ADMIN;
+    case 'MERCHANT':
+      return UserType.MERCHANT;
+    case 'CUSTOMER':
+      return UserType.CUSTOMER;
+    case 'AFFILIATES':
+      return UserType.AFFILIATES;
+    case 'COUNTRY_HEAD':
+      return UserType.COUNTRY_HEAD;
+    case 'SHOP_ADMIN':
+      return UserType.SHOP_ADMIN;
+    default:
+      throw Exception('Unsupported UserType: $userTypeString');
+  }
 }

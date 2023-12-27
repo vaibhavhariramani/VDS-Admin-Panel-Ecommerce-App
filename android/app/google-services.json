@@ -1,0 +1,155 @@
+{
+  "project_info": {
+    "project_number": "135817720188",
+    "firebase_url": "https://vaibhav-s-ecommerce-app.firebaseio.com",
+    "project_id": "vaibhav-s-ecommerce-app",
+    "storage_bucket": "vaibhav-s-ecommerce-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:135817720188:android:6ec49e2e41ba42b6a3b4f9",
+        "android_client_info": {
+          "package_name": "com.example.emart"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "135817720188-9iipt0p8efd9p1e5s3hrvoc3khff45sv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_YMZV4Zny306NUTmNNijeE7gCGs0eK4A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "135817720188-9iipt0p8efd9p1e5s3hrvoc3khff45sv.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "135817720188-0t2hpieo0eufrlcftm971mc87g9j7sl1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.vaibhav.vdsecom.vdsEcom"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:135817720188:android:edd7bc0c2d93e0e1a3b4f9",
+        "android_client_info": {
+          "package_name": "com.example.vdsadmin.vdsadmin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "135817720188-9iipt0p8efd9p1e5s3hrvoc3khff45sv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_YMZV4Zny306NUTmNNijeE7gCGs0eK4A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "135817720188-9iipt0p8efd9p1e5s3hrvoc3khff45sv.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "135817720188-0t2hpieo0eufrlcftm971mc87g9j7sl1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.vaibhav.vdsecom.vdsEcom"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:135817720188:android:a0d7d109abbb2755a3b4f9",
+        "android_client_info": {
+          "package_name": "com.vaibhav.development"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "135817720188-9iipt0p8efd9p1e5s3hrvoc3khff45sv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_YMZV4Zny306NUTmNNijeE7gCGs0eK4A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "135817720188-9iipt0p8efd9p1e5s3hrvoc3khff45sv.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "135817720188-0t2hpieo0eufrlcftm971mc87g9j7sl1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.vaibhav.vdsecom.vdsEcom"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:135817720188:android:a500fa5f4df0ae26a3b4f9",
+        "android_client_info": {
+          "package_name": "com.vaibhav.vdsecom.vds_ecom"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "135817720188-9iipt0p8efd9p1e5s3hrvoc3khff45sv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_YMZV4Zny306NUTmNNijeE7gCGs0eK4A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "135817720188-9iipt0p8efd9p1e5s3hrvoc3khff45sv.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "135817720188-0t2hpieo0eufrlcftm971mc87g9j7sl1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.vaibhav.vdsecom.vdsEcom"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

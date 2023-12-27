@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:js_interop';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get/get.dart';
 
@@ -16,6 +18,8 @@ class FetchService extends GetxService {
   static FetchService get to => Get.find<FetchService>();
   final storageref = FirebaseStorage.instance;
   final Rx<Users?> amplifyUser = Rx<Users?>(null);
+  final FirebaseFirestore Collection = FirebaseFirestore.instance;
+
   // GraphQLClient? client;
   int invitedUserCount = 0;
   @override
@@ -387,63 +391,25 @@ class FetchService extends GetxService {
     print("Fetching Merchants");
     if (AuthService.to.isAuthenticated) {
       try {
-        var url = Uri.parse(
-            'https://xiz7sjryubbtzcvgimxy7tcuem.appsync-api.eu-west-1.amazonaws.com/graphql');
-        String alllist = '''query MyQuery {
-  syncUsers(filter: {user_type: {eq: MERCHANT}}) {
-    items {
-      _deleted
-      _lastChangedAt
-      _version
-      applie_id
-      city
-      country
-      createdAt
-      currency_type
-      current_language
-      current_lat
-      current_lon
-      deleted_parent
-      email
-      fb_id
-      fullname
-      gmail_id
-      id
-      img_token
-      isUserSecure
-      mag_subscription_left
-      managed_by
-      phn_number
-      phonepinID
-      radiusPreference
-      saved_location
-      shops_subscription_left
-      status
-      updatedAt
-      user_type
-    }
-  }
-}
-''';
-        var response = await http.post(
-          url,
-          headers: {'x-api-key': 'da2-qah2nlfghjd6hlve2dn7r5pi3a'},
-          body: json.encode(
-            {
-              'query': alllist,
-            },
-          ),
-        );
-        print('Response status: ${response.statusCode}');
-        print('Response body: ${response.body}');
-        Map versionResopnseMap = jsonDecode(response.body);
-
-        var versionResopnseList =
-            versionResopnseMap["data"]["syncUsers"]["items"];
-        print(versionResopnseMap.toString() + 'is working');
-        for (var i in versionResopnseList) {
-          _merchants.add(Users.fromJson(i));
+        CollectionReference CountriesDB = Collection.collection('Countries');
+        print("Users country is : ${AuthService.to.user.value!.country}");
+        var UserCountry = AuthService.to.user.value!.country;
+        DocumentSnapshot<Object?> querySnapshot =
+            await CountriesDB.doc(UserCountry).get();
+        print(querySnapshot.data());
+        if (querySnapshot.data()!.isDefinedAndNotNull) {
+          // Assuming 'email' is a unique field, so there should be at most one document
+          var MerchantsDataMap = querySnapshot.data() as Map<String, dynamic>;
+          print(MerchantsDataMap);
+          print("*****************************");
+          var MerchantsList = MerchantsDataMap['RegionMerchant'];
+          var MerchantsData = MerchantsList.data() as Map<String, dynamic>;
+          print(MerchantsData.toString() + 'is working');
+          for (var i in MerchantsData.values) {
+            _merchants.add(Users.fromJson(i));
+          }
         }
+
         Get.log(_merchants.toString() + 'response');
         print("checking Refreshed Value:  ");
         for (var item in _merchants) {
