@@ -1,11 +1,11 @@
-import 'package:emart/app/modules/shop_listing/controllers/shop_listing_controller.dart';
-import 'package:emart/app/widgets/components/animated_submit_button.dart';
-import 'package:emart/app/widgets/components/form_input_field.dart';
-import 'package:emart/app/widgets/components/labled_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dashboard/flutter_dashboard.dart';
 
 import '../../../../../models/Product.dart';
+import '../../../../widgets/components/animated_submit_button.dart';
+import '../../../../widgets/components/form_input_field.dart';
+import '../../../../widgets/components/labled_textfield.dart';
+import '../../controllers/shop_listing_controller.dart';
 
 class ProductEditingBox extends GetResponsiveView<ShopListingController> {
   Product ProductDetails;

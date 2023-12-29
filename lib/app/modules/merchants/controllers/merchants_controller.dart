@@ -11,20 +11,20 @@ import '../../../../models/Users.dart';
 import '../../../../services/fetch_data.dart';
 
 class MerchantsController extends GetxController {
-  final RxList<Users> userData = RxList<Users>();
-  final RxList<Users> merchantsData = RxList<Users>();
+  RxList<Users> userData = RxList<Users>();
+  RxList<Users?> merchantsData = RxList<Users>();
   // final RxList<InviteMechantData> allInvitedMerchants =
   //     DemoData.DemoInvitedMerchants;
   // final RxList<String> addedMerchants = DemoData.DemoalreadyaddedMerchants.map(
   //     (element) => element.merchantEmail ?? "").toList().obs;
 
-  final RxList<InvitedUser> allInvitedMerchants = <InvitedUser>[].obs;
-  final RxList<String> addedMerchants = <String>[].obs;
+  RxList<InvitedUser> allInvitedMerchants = <InvitedUser>[].obs;
+  RxList<String> addedMerchants = <String>[].obs;
   // final RxList<InviteMechantData> allUninvitedMerchants =
   //     DemoData.DemoNotaddedMerchants;
-  final RxBool isInviting = false.obs;
-  final isLoading = false.obs;
-  final RxBool shopGridView = false.obs;
+  RxBool isInviting = false.obs;
+  RxBool isLoading = false.obs;
+  RxBool shopGridView = false.obs;
   final DataService _dataService = DataService.to;
   final FetchService _fetchData = FetchService.to;
   final AuthService userService = AuthService.to;
@@ -107,14 +107,17 @@ class MerchantsController extends GetxController {
     print("\n");
     print("Fetching All merchants ");
     merchantsData.clear();
-    isLoading(true);
+    isLoading(true).obs;
     await Future.delayed(1000.milliseconds, () async {
-      await _fetchData.fetchAllMERCANTS().then((List<Users> _response) {
-            merchantsData.addAll(_response);
-          } as FutureOr Function(List<Users?> value));
+      await _fetchData.fetchAllMERCANTS().then((RxList<Users?> response) {
+        merchantsData = response;
+      });
 
       isLoading(false);
     });
+    print("Merchant Data is Fetched -----------");
+    print(merchantsData.first);
+    isLoading(false).obs;
   }
 
   @override

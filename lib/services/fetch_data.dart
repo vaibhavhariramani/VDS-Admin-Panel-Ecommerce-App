@@ -4,6 +4,7 @@ import 'dart:js_interop';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 
 import 'package:http/http.dart' as http;
 
@@ -385,35 +386,62 @@ class FetchService extends GetxService {
     return _countr_partners;
   }
 
-  Future<List<Users?>> fetchAllMERCANTS() async {
-    List<Users?> _merchants = [];
-    // String? shopId = await fetchShopId();
-    print("Fetching Merchants");
+  Future<RxList<Users?>> fetchAllMERCANTS() async {
+    RxList<Users?> _merchants = RxList<Users?>();
+
     if (AuthService.to.isAuthenticated) {
       try {
         CollectionReference CountriesDB = Collection.collection('Countries');
-        print("Users country is : ${AuthService.to.user.value!.country}");
+        CollectionReference UsersDB = Collection.collection('Users');
         var UserCountry = AuthService.to.user.value!.country;
-        DocumentSnapshot<Object?> querySnapshot =
-            await CountriesDB.doc(UserCountry).get();
-        print(querySnapshot.data());
-        if (querySnapshot.data()!.isDefinedAndNotNull) {
-          // Assuming 'email' is a unique field, so there should be at most one document
-          var MerchantsDataMap = querySnapshot.data() as Map<String, dynamic>;
-          print(MerchantsDataMap);
-          print("*****************************");
-          var MerchantsList = MerchantsDataMap['RegionMerchant'];
-          var MerchantsData = MerchantsList.data() as Map<String, dynamic>;
-          print(MerchantsData.toString() + 'is working');
-          for (var i in MerchantsData.values) {
-            _merchants.add(Users.fromJson(i));
-          }
-        }
+        QuerySnapshot<Object?> querySnapshot =
+            await CountriesDB.where("Country", isEqualTo: UserCountry).get();
 
-        Get.log(_merchants.toString() + 'response');
-        print("checking Refreshed Value:  ");
-        for (var item in _merchants) {
-          print('$item \n\n');
+        print("Fetching Merchants");
+        print("Users country is : ${AuthService.to.user.value!.country}");
+        print("priting data from Country: ${UserCountry}----->");
+
+        for (var document in querySnapshot.docs) {
+          var merchantData = document.data() as Map<String, dynamic>;
+
+          // Access MerchantUserID and ShopsUnderMerchant
+          var merchantUserID = merchantData['RegionMerchantUserID'];
+          var shopsUnderMerchant = merchantData['ShopsUnderMerchant'];
+
+          print('MerchantUserID: $merchantUserID');
+          print('ShopsUnderMerchant: $shopsUnderMerchant');
+          DocumentSnapshot<Object?> querySnapshot =
+              await UsersDB.doc(merchantUserID).get();
+          if (querySnapshot.data().isDefinedAndNotNull) {
+            // Assuming 'email' is a unique field, so there should be at most one document
+            var userDataMap = querySnapshot.data() as Map<String, dynamic>;
+            print(userDataMap);
+            print("*****************************");
+            String type_of_user = userDataMap['userType'];
+            // Create your Users object with the fetched data
+            Users temp = Users(
+              id: userDataMap['id'],
+              fullname: userDataMap['fullname'],
+              img_token: userDataMap['imgToken'],
+              phn_number: userDataMap['phone'],
+              gmail_id: "",
+              fb_id: "",
+              applie_id: "",
+              email: userDataMap['email'],
+              phonepinID: "",
+              user_type: getUserTypeFromString(userDataMap['userType'] ?? ''),
+              current_language: "",
+              current_lat: 0.0,
+              isUserSecure: true,
+              radiusPreference: 0.0,
+              saved_location: "",
+              current_lon: 0.0,
+              managed_by: "",
+              country: userDataMap['Country'],
+            );
+            // Assuming you have a Users.fromJson constructor to create Users objects
+            _merchants.add(temp);
+          }
         }
       } on Exception catch (e) {
         print('Query failed: $e');
@@ -421,6 +449,8 @@ class FetchService extends GetxService {
         print(e);
       }
     }
+    print("Length of list fetched from google firebase for merchants");
+    print(_merchants.length);
     return _merchants;
   }
 }

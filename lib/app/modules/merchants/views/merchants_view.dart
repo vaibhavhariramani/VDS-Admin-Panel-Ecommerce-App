@@ -92,7 +92,7 @@ class MerchantsView extends GetResponsiveView<MerchantsController> {
                           ],
                           columnSpacing: 20,
                           source: DataSourceMerchants(
-                              context, controller.merchantsData),
+                              context, controller.merchantsData!),
                         ),
                       ),
                     )
