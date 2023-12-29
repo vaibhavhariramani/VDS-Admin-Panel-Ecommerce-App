@@ -1,13 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:emart/app/modules/shop_listing/controllers/shop_listing_controller.dart';
-import 'package:emart/app/widgets/components/animated_submit_button.dart';
-import 'package:emart/app/widgets/components/form_input_field.dart';
-import 'package:emart/app/widgets/components/labled_textfield.dart';
-import 'package:emart/app/widgets/components/reactive_datetime_picker.dart';
-import 'package:emart/themes/app_theme.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_dashboard/flutter_dashboard.dart';
 import 'package:get/get.dart';
+
+import '../../../../widgets/components/animated_submit_button.dart';
+import '../../../../widgets/components/form_input_field.dart';
+import '../../../../widgets/components/labled_textfield.dart';
+import '../../controllers/shop_listing_controller.dart';
 
 class EditBox extends GetResponsiveView<ShopListingController> {
   BuildContext context;

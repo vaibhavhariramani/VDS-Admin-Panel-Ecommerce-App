@@ -9,7 +9,7 @@ class DataSourceMerchants extends DataTableSource {
   DataSourceMerchants(this.context, this.rows); //snapshot.data
   MerchantsController controller = Get.put(MerchantsController());
   final BuildContext context;
-  List<Users> rows;
+  RxList<Users?> rows;
   final int _selectedCount = 0;
 
   @override
@@ -29,7 +29,7 @@ class DataSourceMerchants extends DataTableSource {
               CircleAvatar(
                 radius: 20,
                 backgroundImage: Image.network(
-                  row.img_token.toString() == 'null'
+                  row!.img_token.toString() == 'null'
                       ? 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50?s=200'
                       : row.img_token.toString(),
                   fit: BoxFit.cover,

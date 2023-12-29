@@ -18,6 +18,8 @@ import '../modules/products/master_list/bindings/master_list_binding.dart';
 import '../modules/products/master_list/views/master_list_view.dart';
 import '../modules/products/products_listing/bindings/products_listing_binding.dart';
 import '../modules/products/products_listing/views/products_listing_view.dart';
+import '../modules/shop_listing/bindings/shop_listing_binding.dart';
+import '../modules/shop_listing/views/shop_listing_view.dart';
 
 part 'app_routes.dart';
 
@@ -241,27 +243,27 @@ class AppPages {
       //     color: Theme.of(context).scaffoldBackgroundColor,
       //   ),
       // ),
-      // FlutterDashboardItem(
-      //   title: 'Shop Listing',
-      //   page: GetPage(
-      //     name: _Paths.SHOP_LISTING,
-      //     page: () {
-      //       deletionStatusController.isVisible.value = false;
-      //       return ShopListingView();
-      //     },
-      //     binding: ShopListingBinding(),
-      //     middlewares: [
-      //       EnsureAuthenticated(),
-      //     ],
-      //   ),
-      //   icon: const Icon(
-      //     Icons.person_outline,
-      //   ),
-      //   selectedIcon: Icon(
-      //     Icons.person_outline,
-      //     color: Theme.of(context).scaffoldBackgroundColor,
-      //   ),
-      // ),
+      FlutterDashboardItem(
+        title: 'Shop Listing',
+        page: GetPage(
+          name: _Paths.SHOP_LISTING,
+          page: () {
+            deletionStatusController.isVisible.value = false;
+            return ShopListingView();
+          },
+          binding: ShopListingBinding(),
+          middlewares: [
+            EnsureAuthenticated(),
+          ],
+        ),
+        icon: const Icon(
+          Icons.person_outline,
+        ),
+        selectedIcon: Icon(
+          Icons.person_outline,
+          color: Theme.of(context).scaffoldBackgroundColor,
+        ),
+      ),
       // FlutterDashboardItem(
       //   title: 'Magazine',
       //   page: GetPage(
