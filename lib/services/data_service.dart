@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,6 +13,7 @@ import 'package:mime_type/mime_type.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:vdsadmin/models/ProductDealType.dart';
 import 'package:vdsadmin/models/UserStatus.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/AcitivityLog.dart';
 import '../models/Magazines.dart';
 import '../models/Product.dart';
@@ -25,6 +27,7 @@ class DataService extends GetxService {
   static DataService get to => Get.find<DataService>();
   final storageref = FirebaseStorage.instance;
   final Rx<Users?> amplifyUser = Rx<Users?>(null);
+  final FirebaseFirestore Collection = FirebaseFirestore.instance;
   // GraphQLClient? client;
   int invitedUserCount = 0;
   @override
@@ -865,33 +868,83 @@ class DataService extends GetxService {
   }) async {
     String? Id = AuthService.to.user.value?.id;
     List<Map<Shop, Users?>> _Supershops = [];
-    var url = Uri.parse(
-        'https://xiz7sjryubbtzcvgimxy7tcuem.appsync-api.eu-west-1.amazonaws.com/graphql');
+    if (AuthService.to.isAuthenticated) {
+      try {
+        CollectionReference RegionDB = Collection.collection('Regions');
+        CollectionReference ShopsDB = Collection.collection('Shops');
+        UserType? userType = AuthService.to.user.value!.user_type;
+        var UserID = AuthService.to.user.value!.id;
+        List<String?> shopIDs = [];
+        List<String?> ShopsUnderMerchant =
+            (AuthService.to.user.value!.shops as List<dynamic>)
+                .map((e) => e as String?)
+                .toList();
+        // Access MerchantUserID and ShopsUnderMerchant
+        shopIDs.addAll(ShopsUnderMerchant);
+        if (userType == UserType.MERCHANT) {
+          QuerySnapshot<Object?> querySnapshot =
+              await RegionDB.where("RegionHeadID", isEqualTo: UserID).get();
 
-    String getUsers = """query MyQuery {
-  listUsersHierarchies(filter: {managed_by: {eq: "$Id"}}) {
-    items {
-      user_id
-    }
-  }
-}
-""";
+          print("if user type is MERCHANT Fetching Region Details");
+          print("Users Region is : ${querySnapshot.docs}");
+          print("priting list of shops under him: ${querySnapshot.docs}----->");
 
-    var response = await http.post(url,
-        headers: {'x-api-key': 'da2-qah2nlfghjd6hlve2dn7r5pi3a'},
-        body: json.encode({'query': getUsers}));
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}');
-    var res =
-        json.decode(response.body)['data']["listUsersHierarchies"]['items'];
-    for (var item in res) {
-      print(item["user_id"]);
-      var uuid = item["user_id"];
-      await fetchAllShops(uuid).then((List<Map<Shop, Users?>> _shopresponse) {
-        _Supershops.addAll(_shopresponse);
-      });
+          for (var document in querySnapshot.docs) {
+            var RegionalData = document.data() as Map<String, dynamic>;
+            List<String?> ShopsUnderMerchant =
+                (RegionalData['ShopsList']) as List<String?>;
+            // Access MerchantUserID and ShopsUnderMerchant
+            shopIDs.add(ShopsUnderMerchant as String?);
+          }
+        }
+        for (var shopId in shopIDs) {
+          DocumentSnapshot<Object?> querySnapshot =
+              await ShopsDB.doc(shopId).get();
+          if (querySnapshot.data()!.isDefinedAndNotNull) {
+            // Assuming 'email' is a unique field, so there should be at most one document
+            var ShopsDataMap = querySnapshot.data() as Map<String, dynamic>;
+            print(ShopsDataMap);
+            print("*****************************");
+            // Create your Users object with the fetched data
+            Shop tempShop = Shop(
+                id: ShopsDataMap['id'],
+                name: ShopsDataMap['name'],
+                img_token: ShopsDataMap['imgToken'],
+                phn_number: ShopsDataMap['phone_number'],
+                opening_time: ShopsDataMap['opening_time'],
+                closing_time: ShopsDataMap['closing_time'],
+                phonepinID: ShopsDataMap['phonepinID'],
+                usersID: ShopsDataMap['shopAdmin'],
+                shopcategoryID: ShopsDataMap['ShopCategory'],
+                // Products: Products,
+                current_lon: ShopsDataMap['longitude'],
+                current_lat: ShopsDataMap['latitude'],
+                address: ShopsDataMap['address'],
+                radiusPreference: ShopsDataMap['radiusPreference'],
+                url: ShopsDataMap['url'],
+                saved_location: "saved_location",
+                rating: ShopsDataMap['rating'],
+                managed_by: ShopsDataMap['shopAdmin'],
+                renewed_on: ShopsDataMap['subscription']
+                    ['subcription_subcribed_date'],
+                expiry_date: ShopsDataMap['subscription']
+                    ['subcription_expiry_date'],
+                currency_type: ShopsDataMap['currencyType'],
+                is_active: ShopsDataMap['is_active']);
+            // Assuming you have a Users.fromJson constructor to create Users objects
+            Users? tempUser =
+                AuthService.to.fetchUserDetails(tempShop.manager) as Users;
+            _Supershops.add({tempShop: tempUser});
+          }
+        }
+      } on Exception catch (e) {
+        print('Query failed: $e');
+      } catch (e) {
+        print(e);
+      }
     }
-    Get.log("All Fetched Shops Are: $_Supershops");
+    print("Length of list fetched from google firebase for Shops Details");
+    print(_Supershops.length);
     return _Supershops;
   }
 

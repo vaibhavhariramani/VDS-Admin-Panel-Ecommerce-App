@@ -19,6 +19,7 @@ class Users {
   double? _current_lon;
   String? _managed_by;
   String? _country;
+  List<String?> _shops;
 
   get current_lon => null;
 
@@ -29,6 +30,10 @@ class Users {
   }
 
   get status => null;
+
+  List<String?> shops() {
+    return _shops;
+  }
 
   @override
   String? getId() {
@@ -93,7 +98,8 @@ class Users {
       saved_location,
       current_lon,
       managed_by,
-      country})
+      country,
+      shops})
       : _fullname = fullname,
         _img_token = img_token,
         _phn_number = phn_number,
@@ -110,7 +116,8 @@ class Users {
         _saved_location = saved_location,
         _current_lon = current_lon,
         _managed_by = managed_by,
-        _country = country;
+        _country = country,
+        _shops = shops;
   factory Users(
       {String? id,
       String? fullname,
@@ -129,26 +136,27 @@ class Users {
       String? saved_location,
       double? current_lon,
       String? managed_by,
-      String? country}) {
+      String? country,
+      List<String?>? shops}) {
     return Users._internal(
-      id: id,
-      fullname: fullname,
-      img_token: img_token,
-      phn_number: phn_number,
-      gmail_id: gmail_id,
-      fb_id: fb_id,
-      applie_id: applie_id,
-      email: email,
-      user_type: user_type,
-      current_language: current_language,
-      current_lat: current_lat,
-      isUserSecure: isUserSecure,
-      radiusPreference: radiusPreference,
-      saved_location: saved_location,
-      current_lon: current_lon,
-      managed_by: managed_by,
-      country: country,
-    );
+        id: id,
+        fullname: fullname,
+        img_token: img_token,
+        phn_number: phn_number,
+        gmail_id: gmail_id,
+        fb_id: fb_id,
+        applie_id: applie_id,
+        email: email,
+        user_type: user_type,
+        current_language: current_language,
+        current_lat: current_lat,
+        isUserSecure: isUserSecure,
+        radiusPreference: radiusPreference,
+        saved_location: saved_location,
+        current_lon: current_lon,
+        managed_by: managed_by,
+        country: country,
+        shops: shops);
   }
 
   static Users? fromJson(versionResopnseMap) {}
