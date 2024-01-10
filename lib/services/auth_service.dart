@@ -251,75 +251,16 @@ class AuthService extends GetxService {
       print("${userData.value?.email}");
       print("${userData.value}");
       print("User ID:${userData.value?.uid}");
-      CollectionReference UsersDB = Collection.collection('Users');
-      print("*****************************");
-      try {
-        DocumentSnapshot<Object?> querySnapshot =
-            await UsersDB.doc(userData.value?.uid).get();
-        print(querySnapshot);
-        if (querySnapshot.data().isDefinedAndNotNull) {
-          // Assuming 'email' is a unique field, so there should be at most one document
-          var userDataMap = querySnapshot.data() as Map<String, dynamic>;
-          print(userDataMap);
-          print("*****************************");
-          String type_of_user = userDataMap['userType'];
-          // Create your Users object with the fetched data
-          Users temp = Users(
-            id: userDataMap['id'],
-            fullname: userDataMap['fullname'],
-            img_token: userDataMap['imgToken'],
-            phn_number: "",
-            gmail_id: "",
-            fb_id: "",
-            applie_id: "",
-            email: "",
-            phonepinID: "",
-            user_type: getUserTypeFromString(userDataMap['userType'] ?? ''),
-            current_language: "",
-            current_lat: 0.0,
-            isUserSecure: true,
-            radiusPreference: 0.0,
-            saved_location: "",
-            current_lon: 0.0,
-            managed_by: "",
-            country: userDataMap['Country'],
-          );
-          print("----------------------------------------------");
-          print("User Type: ${temp.user_type}");
-          print(temp.fullname);
-          user(temp).obs;
-          _storage.write('token', temp.id);
-          return true;
-        } else {
-          BotToast.showText(text: 'No User Found'.tr);
-          return false;
-        }
-      } catch (e) {
-        print("Error fetching user details: $e");
+      await Future.delayed(100.milliseconds, () async {
+        await fetchUserDetails(userData.value?.uid).then((Users? responseUser) {
+          user(responseUser).obs;
+          print("Got User Authenticated: $responseUser");
 
-        Users? temp = Users(
-            id: "123",
-            fullname: "",
-            img_token: "",
-            phn_number: "",
-            gmail_id: "",
-            fb_id: "",
-            applie_id: "",
-            email: "",
-            phonepinID: "",
-            user_type: UserType.ADMIN,
-            current_language: "",
-            current_lat: 0.0,
-            isUserSecure: true,
-            radiusPreference: 0.0,
-            saved_location: "",
-            current_lon: 0.0,
-            managed_by: "");
-        user(temp).obs;
-        _storage.write('token', temp.id);
-        print("User Details Updated");
-        return true;
-      }
+          _storage.write('token', responseUser?.id);
+        });
+      });
+
+      return true;
     } else {
       BotToast.showText(text: 'No User Found'.tr);
       return false;
@@ -667,10 +608,78 @@ class AuthService extends GetxService {
     return false;
   }
 
-  // Future<bool> _createUserInDatabase(Map<String, dynamic> credential) async {
-  //   return false;
-  // }
+  Future<Users> fetchUserDetails(String? uid) async {
+    Users temp;
+    CollectionReference UsersDB = Collection.collection('Users');
+    print("*****************************");
+
+    DocumentSnapshot<Object?> querySnapshot = await UsersDB.doc(uid).get();
+    print(querySnapshot);
+    if (querySnapshot.data().isDefinedAndNotNull) {
+      // Assuming 'email' is a unique field, so there should be at most one document
+      var userDataMap = querySnapshot.data() as Map<String, dynamic>;
+      print(userDataMap);
+      print("*****************************");
+      String type_of_user = userDataMap['userType'];
+      print("Are we here ?");
+      // Create your Users object with the fetched data
+      temp = Users(
+          id: userDataMap['id'],
+          fullname: userDataMap['fullname'],
+          img_token: userDataMap['imgToken'],
+          phn_number: "",
+          gmail_id: "",
+          fb_id: "",
+          applie_id: "",
+          email: "",
+          phonepinID: "",
+          user_type:
+              getUserTypeFromString(userDataMap['userType'].toString() ?? ''),
+          current_language: "",
+          current_lat: 0.0,
+          isUserSecure: true,
+          radiusPreference: 0.0,
+          saved_location: "",
+          current_lon: 0.0,
+          managed_by: "",
+          country: userDataMap['Country'],
+          shops: []);
+      print("----------------------------------------------");
+      print("User Type: ${temp.user_type}");
+      print(temp.fullname);
+    } else {
+      print("Error fetching user details:");
+
+      temp = Users(
+          id: "123",
+          fullname: "",
+          img_token: "",
+          phn_number: "",
+          gmail_id: "",
+          fb_id: "",
+          applie_id: "",
+          email: "",
+          phonepinID: "",
+          user_type: UserType.ADMIN,
+          current_language: "",
+          current_lat: 0.0,
+          isUserSecure: true,
+          radiusPreference: 0.0,
+          saved_location: "",
+          current_lon: 0.0,
+          managed_by: "");
+      user(temp).obs;
+      _storage.write('token', temp.id);
+      print("User Details Updated");
+    }
+    BotToast.showText(text: 'No User Found'.tr);
+    return temp;
+  }
 }
+
+// Future<bool> _createUserInDatabase(Map<String, dynamic> credential) async {
+//   return false;
+// }
 
 UserType getUserTypeFromString(String userTypeString) {
   switch (userTypeString) {
