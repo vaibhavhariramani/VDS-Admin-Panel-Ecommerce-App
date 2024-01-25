@@ -139,7 +139,7 @@ class MasterCard extends GetResponsiveView<MasterListController> {
                             ),
                       ),
                       TextSpan(
-                        text: '${productItem.sku}',
+                        text: '${productItem.barcode}',
                         style: DefaultTextStyle.of(context).style.copyWith(
                               fontSize: 14,
                             ),
@@ -160,7 +160,7 @@ class MasterCard extends GetResponsiveView<MasterListController> {
                             ),
                       ),
                       TextSpan(
-                        text: productItem.is_published?.toString() == "true"
+                        text: productItem.is_published.toString() == "true"
                             ? 'Published'
                             : 'Unpublished',
                         style: DefaultTextStyle.of(context).style.copyWith(
@@ -170,30 +170,30 @@ class MasterCard extends GetResponsiveView<MasterListController> {
                     ],
                   ),
                 ),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: RichText(
-                    textScaleFactor: Get.textScaleFactor,
-                    textAlign: TextAlign.left,
-                    text: TextSpan(
-                      children: [
-                        TextSpan(
-                          text: EnumToString.convertToString(
-                              productItem.deal_type),
-                          style: productItem.deal_type?.name == "GREENDEALS"
-                              ? DefaultTextStyle.of(context).style.copyWith(
-                                  fontSize: 12,
-                                  color: Colors.green,
-                                  fontWeight: FontWeight.bold)
-                              : DefaultTextStyle.of(context).style.copyWith(
-                                  fontSize: 12,
-                                  color: Colors.red[300],
-                                  fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                // Align(
+                //   alignment: Alignment.centerRight,
+                //   child: RichText(
+                //     textScaleFactor: Get.textScaleFactor,
+                //     textAlign: TextAlign.left,
+                //     text: TextSpan(
+                //       children: [
+                //         TextSpan(
+                //           text: EnumToString.convertToString(
+                //               productItem.deal_type),
+                //           style: productItem.deal_type?.name == "GREENDEALS"
+                //               ? DefaultTextStyle.of(context).style.copyWith(
+                //                   fontSize: 12,
+                //                   color: Colors.green,
+                //                   fontWeight: FontWeight.bold)
+                //               : DefaultTextStyle.of(context).style.copyWith(
+                //                   fontSize: 12,
+                //                   color: Colors.red[300],
+                //                   fontWeight: FontWeight.bold),
+                //         ),
+                //       ],
+                //     ),
+                //   ),
+                // ),
               ],
             ),
           ),
@@ -284,7 +284,7 @@ class MasterCard extends GetResponsiveView<MasterListController> {
                                       Get.back();
                                       controller.isEditing(true);
                                       await controller
-                                          .deleteproduct(productItem.id);
+                                          .deleteproduct(productItem.id!);
                                       Get.back();
                                     }),
                               ],
@@ -583,7 +583,7 @@ class MasterCard extends GetResponsiveView<MasterListController> {
                               ],
                             ),
                             onPressed: () async {
-                              await controller.publishNow(productItem.id);
+                              await controller.publishNow(productItem.id!);
                               Get.back();
                             },
                           ),

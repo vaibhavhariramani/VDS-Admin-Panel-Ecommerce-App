@@ -28,6 +28,7 @@ class DataService extends GetxService {
   final storageref = FirebaseStorage.instance;
   final Rx<Users?> amplifyUser = Rx<Users?>(null);
   final FirebaseFirestore Collection = FirebaseFirestore.instance;
+
   // GraphQLClient? client;
   int invitedUserCount = 0;
   @override
@@ -233,35 +234,25 @@ class DataService extends GetxService {
   //Fetching Shop Id from User Id
   Future<String?> fetchShopId() async {
     print("runni fetch");
-    String? id = AuthService.to.user.value?.id;
-    var url = Uri.parse(
-        'https://xiz7sjryubbtzcvgimxy7tcuem.appsync-api.eu-west-1.amazonaws.com/graphql');
-    String Query = """query MyQuery {
-  searchShops(filter: {usersID: {eq: "$id"}}) {
-    items {
-      id
-      name
-      phy_address
-    }
-  }
-}""";
-
-    var response = await http.post(
-      url,
-      headers: {'x-api-key': 'da2-qah2nlfghjd6hlve2dn7r5pi3a'},
-      body: json.encode(
-        {
-          'query': Query,
-        },
-      ),
-    );
+    String? userId = AuthService.to.user.value?.id;
+    print("user id: $userId uuuuuuuuuusssssssss");
     print("Fetching Id for Shop from User Id: \n");
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}');
-    String shopId =
-        json.decode(response.body)['data']["searchShops"]['items'][0]["id"];
-    Get.log("Fetched ShopId : $shopId ");
-    return shopId;
+    try {
+      CollectionReference ShopsDB = Collection.collection('Shops');
+      QuerySnapshot<Object?> querySnapshot =
+          await ShopsDB.where("shopAdmin", isEqualTo: userId).get();
+      if (querySnapshot.docs.isEmpty) {
+        print("No shop found for the user.");
+        return null;
+      }
+      // Extract the shopId from the query result
+      String shopId = querySnapshot.docs.first.id;
+      print("Fetched ShopId: $shopId");
+      return shopId;
+    } catch (e) {
+      print('Error fetching shopId: $e');
+      return null;
+    }
   }
 
   //Fetching List of Scheduled Magazines
@@ -787,78 +778,15 @@ class DataService extends GetxService {
     Get.log("Fetching Products Data according to Product Type");
     List<Product> _DataList = [];
 
-    String? id = AuthService.to.user.value?.id;
-    DateTime now = DateTime.now();
-    print("SHOP ID ::: ${shopId}");
-    print("DEAL TYPE ::: ");
-    // DateTime date = DateTime(now.year, now.month, now.day);
-    DateTime? awsdate = DateTime.now();
-    print('dateTime right now according to AWSDATETIME FORMAT : $awsdate ');
     if (AuthService.to.isAuthenticated) {
-      print(AuthService.to.user.value?.id);
-      try {
-        var url = Uri.parse(
-            'https://xiz7sjryubbtzcvgimxy7tcuem.appsync-api.eu-west-1.amazonaws.com/graphql');
-        String Query = """query MyQuery {
-  searchProducts(filter: {shopID: {eq: "$shopId"}, deal_type: {eq: ""}, is_published: {eq: true}}, sort: {direction: desc, field: created_on}) {
-    items {
-      price
-      id
-      name
-      img_token
-      is_available
-      offer_description
-      offer_title
-      product_category
-      product_description
-      shopID
-      updatedAt
-      has_offer
-      expires_on
-      discount
-      deal_type
-      currency_type
-      created_on
-      createdAt
-      available_from
-      _version
-      _lastChangedAt
-      _deleted
-      is_published
-      sku
-      start_date
-    }
-  }
-}
+      print("Fetching details for Products: \n");
 
-
-""";
-
-        var response = await http.post(
-          url,
-          headers: {'x-api-key': 'da2-qah2nlfghjd6hlve2dn7r5pi3a'},
-          body: json.encode(
-            {
-              'query': Query,
-            },
-          ),
-        );
-        print("Fetching details for Products: \n");
-        print('Response status: ${response.statusCode}');
-        print('Response body: ${response.body}');
-        Map versionResopnseMap = jsonDecode(response.body);
-        var versionResopnseList =
-            versionResopnseMap["data"]["searchProducts"]["items"];
-        for (var i in versionResopnseList) {
-          _DataList.add(Product.fromJson(i));
-        }
-
-        print("checking Refreshed Value $_DataList");
-      } on Exception catch (e) {
-        print('Query failed: $e');
-      } catch (e) {
-        print(e);
-      }
+      print("checking Refreshed Value $_DataList");
+      // } on Exception catch (e) {
+      //   print('Query failed: $e');
+      // } catch (e) {
+      //   print(e);
+      // }
     }
     return _DataList;
   }
@@ -1021,76 +949,6 @@ class DataService extends GetxService {
     // }
     // print(_shops);
     return _shops;
-  }
-
-  Future<List<Product>> fetchAllProductsByShop(String? shopId) async {
-    List<Product> _products = [];
-    // String? shopId = await fetchShopId();
-    print("Fetching Products Data according to Shop Id: $shopId");
-    if (AuthService.to.isAuthenticated) {
-      try {
-        var url = Uri.parse(
-            'https://xiz7sjryubbtzcvgimxy7tcuem.appsync-api.eu-west-1.amazonaws.com/graphql');
-        String alllistShop = '''query MyQuery {
-  searchProducts(filter: {shopID: {eq: "$shopId"}, _deleted: {ne: true}} sort: {direction: desc, field: created_on}) {
-    items {
-      price
-      id
-      name
-      img_token
-      is_available
-      offer_description
-      offer_title
-      product_category
-      product_description
-      shopID
-      updatedAt
-      has_offer
-      expires_on
-      discount
-      deal_type
-      currency_type
-      created_on
-      createdAt
-      available_from
-      _version
-      _lastChangedAt
-      _deleted
-    }
-  }
-}
-''';
-        var response = await http.post(
-          url,
-          headers: {'x-api-key': 'da2-qah2nlfghjd6hlve2dn7r5pi3a'},
-          body: json.encode(
-            {
-              'query': alllistShop,
-            },
-          ),
-        );
-        print('Response status: ${response.statusCode}');
-        print('Response body: ${response.body}');
-        Map versionResopnseMap = jsonDecode(response.body);
-
-        var versionResopnseList =
-            versionResopnseMap["data"]["searchProducts"]["items"];
-        print(versionResopnseMap.toString() + 'is working');
-        for (var i in versionResopnseList) {
-          _products.add(Product.fromJson(i));
-        }
-        Get.log(_products.toString() + 'response');
-        print("checking Refreshed Value:  ");
-        for (var item in _products) {
-          print('$item \n\n');
-        }
-      } on Exception catch (e) {
-        print('Query failed: $e');
-      } catch (e) {
-        print(e);
-      }
-    }
-    return _products;
   }
 
   Future<String?> addUserImage(String id, String image) async {

@@ -163,7 +163,7 @@ class HotDeadProductEditor extends GetResponsiveView<HotDealsController> {
                         textfield: ReactiveDatePickerField<DateTime>(
                           controlName: "start_date",
                           hintText:
-                              " ${ProductDetails.start_date.toString().substring(0, 10)} ",
+                              " ${ProductDetails.available_from.toString().substring(0, 10)} ",
                           onEditingComplete: () =>
                               _form.focus("visibility_date"),
                           validationMessage: (error) =>

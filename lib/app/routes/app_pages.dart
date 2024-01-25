@@ -14,10 +14,20 @@ import '../modules/home/bindings/home_binding.dart';
 import '../modules/home/views/home_view.dart';
 import '../modules/merchants/bindings/merchants_binding.dart';
 import '../modules/merchants/views/merchants_view.dart';
+import '../modules/orders/bindings/orders_binding.dart';
+import '../modules/orders/bindings/orders_binding.dart';
+import '../modules/orders/views/orders_view.dart';
+import '../modules/orders/views/orders_view.dart';
+import '../modules/products/hot_deals/bindings/hot_deals_binding.dart';
+import '../modules/products/hot_deals/views/hot_deals_view.dart';
 import '../modules/products/master_list/bindings/master_list_binding.dart';
 import '../modules/products/master_list/views/master_list_view.dart';
 import '../modules/products/products_listing/bindings/products_listing_binding.dart';
 import '../modules/products/products_listing/views/products_listing_view.dart';
+import '../modules/products/published_products/bindings/published_products_binding.dart';
+import '../modules/products/published_products/views/published_products_view.dart';
+import '../modules/products/scheduled_products/bindings/scheduled_products_binding.dart';
+import '../modules/products/scheduled_products/views/scheduled_products_view.dart';
 import '../modules/shop_listing/bindings/shop_listing_binding.dart';
 import '../modules/shop_listing/views/shop_listing_view.dart';
 
@@ -53,6 +63,18 @@ class AppPages {
       name: _Paths.MATSER_LIST,
       page: () => MasterListView(),
       binding: MasterListBinding(),
+    ),
+    GetPage(
+      name: _Paths.ORDERS,
+      page: () => OrdersView(),
+      binding: OrdersBinding(),
+      children: [
+        GetPage(
+          name: _Paths.ORDERS,
+          page: () => OrdersView(),
+          binding: OrdersBinding(),
+        ),
+      ],
     ),
   ];
 
@@ -325,78 +347,78 @@ class AppPages {
           color: Theme.of(context).scaffoldBackgroundColor,
         ),
       ),
-      // FlutterDashboardItem(
-      //   title: 'Scheduled Products',
-      //   page: GetPage(
-      //     name: _Paths.SCHEDULED_PRODUCTS,
-      //     page: () => ScheduledProductsView(),
-      //     binding: ScheduledProductsBinding(),
-      //     middlewares: [
-      //       EnsureAuthenticated(),
-      //     ],
-      //   ),
-      //   icon: const Icon(
-      //     IconlyLight.calendar,
-      //   ),
-      //   selectedIcon: Icon(
-      //     IconlyBold.calendar,
-      //     color: Theme.of(context).scaffoldBackgroundColor,
-      //   ),
-      // ),
-      // FlutterDashboardItem(
-      //   title: 'Hot Deals',
-      //   page: GetPage(
-      //     name: _Paths.HOT_DEALS,
-      //     page: () => HotDealsView(),
-      //     binding: HotDealsBinding(),
-      //     middlewares: [
-      //       EnsureAuthenticated(),
-      //     ],
-      //   ),
-      //   icon: const Icon(
-      //     IconlyLight.discount,
-      //   ),
-      //   selectedIcon: Icon(
-      //     IconlyBold.discount,
-      //     color: Theme.of(context).scaffoldBackgroundColor,
-      //   ),
-      // ),
-      // FlutterDashboardItem(
-      //   title: 'Published Products',
-      //   page: GetPage(
-      //     name: _Paths.PUBLISHED_PRODUCTS,
-      //     page: () => PublishedProductsView(),
-      //     binding: PublishedProductsBinding(),
-      //     middlewares: [
-      //       EnsureAuthenticated(),
-      //     ],
-      //   ),
-      //   icon: const Icon(
-      //     IconlyLight.bag,
-      //   ),
-      //   selectedIcon: Icon(
-      //     IconlyBold.bag,
-      //     color: Theme.of(context).scaffoldBackgroundColor,
-      //   ),
-      // ),
-      // FlutterDashboardItem(
-      //   title: 'Product Listing',
-      //   page: GetPage(
-      //     name: _Paths.PRODUCTS_LISTING,
-      //     page: () => ProductsListingView(),
-      //     binding: ProductsListingBinding(),
-      //     middlewares: [
-      //       EnsureAuthenticated(),
-      //     ],
-      //   ),
-      //   icon: const Icon(
-      //     Icons.flag_outlined,
-      //   ),
-      //   selectedIcon: Icon(
-      //     Icons.flag,
-      //     color: Theme.of(context).scaffoldBackgroundColor,
-      //   ),
-      // ),
+      FlutterDashboardItem(
+        title: 'Scheduled Products',
+        page: GetPage(
+          name: _Paths.SCHEDULED_PRODUCTS,
+          page: () => ScheduledProductsView(),
+          binding: ScheduledProductsBinding(),
+          middlewares: [
+            EnsureAuthenticated(),
+          ],
+        ),
+        icon: const Icon(
+          IconlyLight.calendar,
+        ),
+        selectedIcon: Icon(
+          IconlyBold.calendar,
+          color: Theme.of(context).scaffoldBackgroundColor,
+        ),
+      ),
+      FlutterDashboardItem(
+        title: 'Hot Deals',
+        page: GetPage(
+          name: _Paths.HOT_DEALS,
+          page: () => HotDealsView(),
+          binding: HotDealsBinding(),
+          middlewares: [
+            EnsureAuthenticated(),
+          ],
+        ),
+        icon: const Icon(
+          IconlyLight.discount,
+        ),
+        selectedIcon: Icon(
+          IconlyBold.discount,
+          color: Theme.of(context).scaffoldBackgroundColor,
+        ),
+      ),
+      FlutterDashboardItem(
+        title: 'Published Products',
+        page: GetPage(
+          name: _Paths.PUBLISHED_PRODUCTS,
+          page: () => PublishedProductsView(),
+          binding: PublishedProductsBinding(),
+          middlewares: [
+            EnsureAuthenticated(),
+          ],
+        ),
+        icon: const Icon(
+          IconlyLight.bag,
+        ),
+        selectedIcon: Icon(
+          IconlyBold.bag,
+          color: Theme.of(context).scaffoldBackgroundColor,
+        ),
+      ),
+      FlutterDashboardItem(
+        title: 'Product Listing',
+        page: GetPage(
+          name: _Paths.PRODUCTS_LISTING,
+          page: () => ProductsListingView(),
+          binding: ProductsListingBinding(),
+          middlewares: [
+            EnsureAuthenticated(),
+          ],
+        ),
+        icon: const Icon(
+          Icons.flag_outlined,
+        ),
+        selectedIcon: Icon(
+          Icons.flag,
+          color: Theme.of(context).scaffoldBackgroundColor,
+        ),
+      ),
 
       FlutterDashboardItem.items(
         title: 'Products',
@@ -404,6 +426,24 @@ class AppPages {
           IconlyLight.folder,
         ),
         subItems: [],
+      ),
+      FlutterDashboardItem(
+        title: 'Orders',
+        page: GetPage(
+          name: _Paths.ORDERS,
+          page: () => OrdersView(),
+          binding: OrdersBinding(),
+          middlewares: [
+            EnsureAuthenticated(),
+          ],
+        ),
+        icon: const Icon(
+          IconlyLight.bag,
+        ),
+        selectedIcon: Icon(
+          IconlyBold.bag,
+          color: Theme.of(context).scaffoldBackgroundColor,
+        ),
       ),
 
       // FlutterDashboardItem(

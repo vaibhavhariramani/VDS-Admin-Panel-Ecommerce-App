@@ -220,7 +220,7 @@ class ProductsListingController extends GetxController {
       discount: discount!,
       available_from: available_from!,
       expires_on: expires_on!,
-      count: 0,
+      count: '0',
       description: '',
       image: '',
       mrp: 0.0,
@@ -228,8 +228,7 @@ class ProductsListingController extends GetxController {
       currency_type: '',
       deal_type: ProductDealType.HOTDEALS,
       img_token: null,
-      shopID: '',
-      sku: null,
+      shop_id: '',
     );
     // products?.removeAt(index!);
     // products?.insert(index!, temp);
@@ -327,17 +326,17 @@ class ProductsListingController extends GetxController {
           id: '',
           img_token: item[0],
           barcode: '',
-          sku: item[1],
+          // sku: item[1],
           name: item[2],
           price: item[3],
           discount: item[4],
           available_from: DateTime(createdon as int),
           expires_on: DateTime(expireon as int),
           deal_type: ProductDealType.GREENDEALS,
-          shopID: shopId.value,
+          shop_id: shopId.value,
           currency_type: shopCurrency.value,
           category: '',
-          count: 0,
+          count: '0',
           description: '',
           image: '',
           mrp: 0,
@@ -383,7 +382,7 @@ class ProductsListingController extends GetxController {
           offer_available_from: item.available_from,
           currency_type:
               item.currency_type == null ? "DKK" : item.currency_type!,
-          sku: item.sku!,
+          sku: item.id!,
         )
     ], cleanUp: (val) {
       print("CLEAN THE PRODUCT LIST ");
@@ -633,11 +632,11 @@ class ProductsListingController extends GetxController {
       discount: offerPrice,
       price: double.parse(productAddForm.value["actual_price"].toString()),
       currency_type: shopCurrency.value,
-      sku: productAddForm.value["sku"].toString(),
-      shopID: shopId.value,
+      // sku: productAddForm.value["sku"].toString(),
+      shop_id: shopId.value,
       barcode: '',
       category: '',
-      count: 0,
+      count: '0',
       description: '',
       image: '',
       mrp: 0,

@@ -56,7 +56,7 @@ class DSforBundle extends DataTableSource {
             ],
           ),
         ),
-        DataCell(Text(' ${row.sku.toString()}')),
+        DataCell(Text(' ${row.barcode.toString()}')),
         DataCell(
           RichText(
             textScaleFactor: Get.textScaleFactor,

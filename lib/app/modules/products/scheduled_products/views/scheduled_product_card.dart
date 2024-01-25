@@ -269,7 +269,7 @@ class ScheduledProductCard
                           onPressed: () async {
                             Get.back();
                             await controller.publishNow(
-                              productItem.id,
+                              productItem.id!,
                             );
                           },
                         ),
@@ -411,7 +411,7 @@ class ScheduledProductCard
                                     buttonText: 'Unpublish',
                                     onPressed: () async {
                                       await controller
-                                          .unpublishProduct(productItem.id);
+                                          .unpublishProduct(productItem.id!);
 
                                       Get.back();
                                     }),
@@ -513,7 +513,7 @@ class ScheduledProductCard
                                     buttonText: 'Unpublish',
                                     onPressed: () async {
                                       await controller
-                                          .unpublishProduct(productItem.id);
+                                          .unpublishProduct(productItem.id!);
 
                                       Get.back();
                                     }),
