@@ -7,6 +7,8 @@ import 'package:iconly/iconly.dart';
 import '../../middlewares/auth_middleware.dart';
 import '../modules/auth/login/bindings/login_binding.dart';
 import '../modules/auth/login/views/login_view.dart';
+import '../modules/billing/bindings/billing_binding.dart';
+import '../modules/billing/views/billing_view.dart';
 import '../modules/deletion_status/bindings/deletion_status_binding.dart';
 import '../modules/deletion_status/controllers/deletion_status_controller.dart';
 import '../modules/deletion_status/views/deletion_status_view.dart';
@@ -75,6 +77,11 @@ class AppPages {
           binding: OrdersBinding(),
         ),
       ],
+    ),
+    GetPage(
+      name: _Paths.BILLING,
+      page: () => BillingView(),
+      binding: BillingBinding(),
     ),
   ];
 
@@ -330,6 +337,24 @@ class AppPages {
         ),
       ),
       FlutterDashboardItem(
+        title: 'Billing',
+        page: GetPage(
+          name: _Paths.HOT_DEALS,
+          page: () => BillingView(),
+          binding: BillingBinding(),
+          middlewares: [
+            EnsureAuthenticated(),
+          ],
+        ),
+        icon: const Icon(
+          IconlyLight.discount,
+        ),
+        selectedIcon: Icon(
+          IconlyBold.discount,
+          color: Theme.of(context).scaffoldBackgroundColor,
+        ),
+      ),
+      FlutterDashboardItem(
         title: 'Master List',
         page: GetPage(
           name: _Paths.MATSER_LIST,
@@ -365,24 +390,7 @@ class AppPages {
           color: Theme.of(context).scaffoldBackgroundColor,
         ),
       ),
-      FlutterDashboardItem(
-        title: 'Hot Deals',
-        page: GetPage(
-          name: _Paths.HOT_DEALS,
-          page: () => HotDealsView(),
-          binding: HotDealsBinding(),
-          middlewares: [
-            EnsureAuthenticated(),
-          ],
-        ),
-        icon: const Icon(
-          IconlyLight.discount,
-        ),
-        selectedIcon: Icon(
-          IconlyBold.discount,
-          color: Theme.of(context).scaffoldBackgroundColor,
-        ),
-      ),
+
       FlutterDashboardItem(
         title: 'Published Products',
         page: GetPage(
