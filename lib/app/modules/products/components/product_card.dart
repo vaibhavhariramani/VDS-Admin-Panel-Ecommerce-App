@@ -237,7 +237,7 @@ class ProductCard extends GetResponsiveView<ScheduledProductsController> {
                           onPressed: () async {
                             Get.back();
                             await controller.publishNow(
-                              productItem.id,
+                              productItem.id!,
                             );
                           },
                         ),
@@ -390,7 +390,7 @@ class ProductCard extends GetResponsiveView<ScheduledProductsController> {
                                     buttonText: 'Unpublish',
                                     onPressed: () async {
                                       await controller
-                                          .unpublishProduct(productItem.id);
+                                          .unpublishProduct(productItem.id!);
 
                                       Get.back();
                                     }),

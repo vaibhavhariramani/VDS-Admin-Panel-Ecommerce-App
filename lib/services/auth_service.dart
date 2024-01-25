@@ -85,6 +85,7 @@ class AuthService extends GetxService {
         "Hot Deals",
         "Published Products",
         "Product Listing",
+        "Orders",
 
         // "Magazine",
         // "Registration"

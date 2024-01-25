@@ -78,7 +78,7 @@ class DSforBundleProduct extends DataTableSource {
             ],
           ),
         ),
-        DataCell(Text(' ${row.sku.toString()}')),
+        DataCell(Text(' ${row.barcode.toString()}')),
         DataCell(Text(' ${row.price}')),
         DataCell(Text(' ${row.discount}')),
         DataCell(Text(DataService.to.DateTimeToString(date: row.expires_on!))),

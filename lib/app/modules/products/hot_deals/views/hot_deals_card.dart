@@ -165,8 +165,8 @@ class HotDealProductCard extends GetResponsiveView<HotDealsController> {
                             ),
                       ),
                       TextSpan(
-                        text: DataService.to
-                            .DateTimeToString(date: productItem.start_date!),
+                        text: DataService.to.DateTimeToString(
+                            date: productItem.available_from!),
                         style: DefaultTextStyle.of(context).style.copyWith(
                               fontSize: 14,
                             ),
@@ -256,7 +256,7 @@ class HotDealProductCard extends GetResponsiveView<HotDealsController> {
                         confirm: ElevatedButton(
                           child: const Text('Publish Now'),
                           onPressed: () {
-                            controller.publishNow(productItem.id);
+                            controller.publishNow(productItem.id!);
                             Get.back();
                           },
                         ),
@@ -396,7 +396,7 @@ class HotDealProductCard extends GetResponsiveView<HotDealsController> {
                                     buttonText: 'Unpublish',
                                     onPressed: () async {
                                       await controller
-                                          .unpublishProduct(productItem.id);
+                                          .unpublishProduct(productItem.id!);
 
                                       Get.back();
                                     }),

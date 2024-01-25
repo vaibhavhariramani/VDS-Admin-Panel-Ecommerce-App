@@ -249,7 +249,7 @@ class PublishedProductCard
                           child: const Text('Publish Now'),
                           onPressed: () {
                             controller.publishNow(
-                              productItem.id,
+                              productItem.id!,
                             );
                             Get.back();
                           },
@@ -391,7 +391,7 @@ class PublishedProductCard
                                     buttonText: 'Unpublish',
                                     onPressed: () async {
                                       await controller
-                                          .unpublishProduct(productItem.id);
+                                          .unpublishProduct(productItem.id!);
 
                                       Get.back();
                                     }),

@@ -180,7 +180,7 @@ class HotDealsController extends GetxController {
             : DateTime(productEditForm.value["expiry_date"] as int);
     DateTime? startson =
         productEditForm.value["start_date"].toString() == "null"
-            ? ProductDetails?.start_date
+            ? ProductDetails?.available_from
             : DateTime(productEditForm.value["start_date"] as int);
 
     print("productId: $productId");

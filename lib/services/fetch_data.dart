@@ -9,6 +9,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/AcitivityLog.dart';
+import '../models/Orders.dart';
 import '../models/Product.dart';
 import '../models/Shop.dart';
 import '../models/Users.dart';
@@ -38,64 +39,25 @@ class FetchService extends GetxService {
     List<Product> _products = [];
     // String? shopId = await fetchShopId();
     print("Fetching Products Data according to Shop Id: $shopId");
+    print(AuthService.to.isAuthenticated);
     if (AuthService.to.isAuthenticated) {
       try {
-        var url = Uri.parse(
-            'https://xiz7sjryubbtzcvgimxy7tcuem.appsync-api.eu-west-1.amazonaws.com/graphql');
-        String alllistShop = '''query MyQuery {
-  searchProducts(filter: {shopID: {eq: "$shopId"}, _deleted: {ne: true}}, sort: {direction: desc, field: created_on}) {
-    items {
-      price
-      id
-      name
-      img_token
-      is_available
-      offer_description
-      offer_title
-      product_category
-      product_description
-      shopID
-      updatedAt
-      has_offer
-      expires_on
-      discount
-      deal_type
-      currency_type
-      created_on
-      createdAt
-      available_from
-      _version
-      _lastChangedAt
-      _deleted
-      sku
-      start_date
-      is_published
-    }
-  }
-}
-
-
-''';
-        var response = await http.post(
-          url,
-          headers: {'x-api-key': 'da2-qah2nlfghjd6hlve2dn7r5pi3a'},
-          body: json.encode(
-            {
-              'query': alllistShop,
-            },
-          ),
-        );
-        print('Response status: ${response.statusCode}');
-        print('Response body: ${response.body}');
-        Map versionResopnseMap = jsonDecode(response.body);
-
-        var versionResopnseList =
-            versionResopnseMap["data"]["searchProducts"]["items"];
-        print(versionResopnseMap.toString() + 'is working');
-        for (var i in versionResopnseList) {
-          _products.add(Product.fromJson(i));
+        CollectionReference productsCollection =
+            Collection.collection('Products');
+        print(productsCollection);
+        QuerySnapshot querySnapshot =
+            await productsCollection.where('shopId', isEqualTo: shopId).get();
+        List<DocumentSnapshot> products = querySnapshot.docs;
+        print(products.length);
+        for (var productDoc in products) {
+          print('Product ID: ${productDoc.id}');
+          print('Product Data: ${productDoc.data()}');
+          _products
+              .add(Product.fromJson(productDoc.data() as Map<String, dynamic>));
+          print("length of products: ${_products.length}");
+          print("printing products: ${_products}");
         }
-        Get.log(_products.toString() + 'response');
+        // Get.log(_products.toString() + 'response');
         print("checking Refreshed Value:  ");
         for (var item in _products) {
           print('$item \n\n');
@@ -112,36 +74,26 @@ class FetchService extends GetxService {
   //Fetching Shop Id from User Id
   Future<String?> fetchShopId() async {
     print("runni fetch");
-    String? id = AuthService.to.user.value?.id;
-    var url = Uri.parse(
-        'https://xiz7sjryubbtzcvgimxy7tcuem.appsync-api.eu-west-1.amazonaws.com/graphql');
-    String Query = """query MyQuery {
-  searchShops(filter: {usersID: {eq: "$id"}}) {
-    items {
-      id
-      name
-      phy_address
-    }
-  }
-}""";
+    String? userId = AuthService.to.user.value?.id;
+    print("Fetching Id for Shop from User Id: \n");
+    print("user id: $userId ");
 
-    var response = await http.post(
-      url,
-      headers: {'x-api-key': 'da2-qah2nlfghjd6hlve2dn7r5pi3a'},
-      body: json.encode(
-        {
-          'query': Query,
-        },
-      ),
-    );
-    print(
-        "Fetching Id for Shop from User Id: ${AuthService.to.user.value!.id} \n");
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}');
-    String shopId =
-        json.decode(response.body)['data']["searchShops"]['items'][0]["id"];
-    Get.log("Fetched ShopId : $shopId ");
-    return shopId;
+    try {
+      CollectionReference ShopsDB = Collection.collection('Shops');
+      QuerySnapshot<Object?> querySnapshot =
+          await ShopsDB.where("shopAdmin", isEqualTo: userId).get();
+      if (querySnapshot.docs.isEmpty) {
+        print("No shop found for the user.");
+        return null;
+      }
+      // Extract the shopId from the query result
+      String shopId = querySnapshot.docs.first.id;
+      print("Fetched ShopId: $shopId");
+      return shopId;
+    } catch (e) {
+      print('Error fetching shopId: $e');
+      return null;
+    }
   }
 
   //Fetching Shop Currency from User Id
@@ -452,5 +404,66 @@ class FetchService extends GetxService {
     print("Length of list fetched from google firebase for merchants");
     print(_merchants.length);
     return _merchants;
+  }
+
+  Stream<QuerySnapshot> OnlineOrders({String? search, String? filter}) {
+    return Collection.collection('OnlineOrders')
+        .orderBy('booking', descending: true)
+        .snapshots();
+  }
+
+  Stream<QuerySnapshot> regions(int? filter) {
+    if (filter != null) {
+      return Collection.collection('Regions')
+          .where('pincode', isEqualTo: filter)
+          .snapshots();
+    } else {
+      return Collection.collection('Regions').snapshots();
+    }
+  }
+
+  Stream<QuerySnapshot> orderItems(String id) {
+    return Collection.collection('Items')
+        .where('orderID', isEqualTo: id)
+        .snapshots();
+  }
+
+  Stream<QuerySnapshot> employee() {
+    return Collection.collection('Employee').snapshots();
+  }
+
+  Future<RxList<Orders?>> fetchOnlineOrdersUsingShopId() async {
+    RxList<Orders?> _onlineOrders = RxList<Orders?>();
+    if (AuthService.to.isAuthenticated) {
+      String? shopId = await fetchShopId();
+      try {
+        CollectionReference OnlineOrderDB =
+            Collection.collection('OnlineOrders');
+        QuerySnapshot<Object?> querySnapshot =
+            await OnlineOrderDB.where("shopId", isEqualTo: shopId).get();
+        for (var document in querySnapshot.docs) {
+          var OrderData = document.data() as Map<String, dynamic>;
+
+          // Access OrderUserID and ShopsUnderOrder
+          var OrderUserID = OrderData['RegionOrderUserID'];
+          var shopsUnderOrder = OrderData['ShopsUnderOrder'];
+
+          print('OrderUserID: $OrderUserID');
+          print('ShopsUnderOrder: $shopsUnderOrder');
+          print(OrderData);
+          print("*****************************");
+          // Create your Users object with the fetched data
+          Orders temp = Orders.fromJson(OrderData);
+          _onlineOrders.add(temp);
+        }
+      } on Exception catch (e) {
+        print('Query failed: $e');
+      } catch (e) {
+        print(e);
+      }
+    }
+    print("Length of list fetched from google firebase for _onlineOrders");
+    print(_onlineOrders.length);
+    return _onlineOrders;
   }
 }
