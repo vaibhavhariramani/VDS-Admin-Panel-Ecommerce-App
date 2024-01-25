@@ -117,16 +117,16 @@ class Orders {
     tempOrder._paymentStatus = data['paymentStatus'];
     tempOrder._deliveryMethod = data['deliveryMethod'];
     tempOrder._Address = data['address'];
-    tempOrder._deliveryDate = data['DateOfDelivery'];
-    tempOrder._deliveryTime = data['DateOfDelivery'];
+    tempOrder._deliveryDate = data['DateOfDelivery'].toString();
+    tempOrder._deliveryTime = data['DateOfDelivery'].toString();
     tempOrder._deliveryCharges = data['deliveryCharges'];
     tempOrder._deliveryPersonName = data['DeliveryBoy']['name'];
     tempOrder._deliveryPersonPhone = data['DeliveryBoy']['Dcontact'];
     tempOrder._deliveryPersonPhoto = data['DeliveryBoy']['Dimage'];
     tempOrder._deliveryPersonVehicle = 'deliveryPersonVehicle';
     tempOrder._deliveryPersonVehicleNumber = 'deliveryPersonVehicleNumber';
-    tempOrder._dateOfOrder = data['dateOfOrder'];
-    tempOrder._timeOfOrder = data['dateOfOrder'];
+    tempOrder._dateOfOrder = data['dateOfOrder'].toString();
+    tempOrder._timeOfOrder = data['dateOfOrder'].toString();
     tempOrder._pincode = data['pincode'];
     return tempOrder;
   }
