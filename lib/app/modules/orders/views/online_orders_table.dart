@@ -62,6 +62,7 @@ class OnlineOrderstableView extends GetResponsiveView<OrdersController> {
                             DataColumn(label: Text('Country')),
                             DataColumn(label: Text('contact')),
                             DataColumn(label: Text('Status')),
+                            DataColumn(label: Text('Delivery Boy')),
                             DataColumn(label: Text('ACTIONS')),
                           ],
                           columnSpacing: 20,

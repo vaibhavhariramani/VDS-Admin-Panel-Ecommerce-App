@@ -82,7 +82,7 @@ class AuthService extends GetxService {
         "Dashboard", //Firstpage alsways need to be enabled
         "Master List",
         "Scheduled Products",
-        "Hot Deals",
+        "Billing",
         "Published Products",
         "Product Listing",
         "Orders",

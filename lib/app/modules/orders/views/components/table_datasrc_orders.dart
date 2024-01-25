@@ -28,27 +28,15 @@ class DataSourceOrders extends DataTableSource {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CircleAvatar(
-                radius: 20,
-                backgroundImage: Image.network(
-                  row!.deliveryPersonPhoto.toString() == 'null'
-                      ? 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50?s=200'
-                      : row.deliveryPersonPhoto.toString(),
-                  fit: BoxFit.cover,
-                ).image,
-              ),
-              const SizedBox(
-                width: 20,
-              ),
               RichText(
                 textScaleFactor: Get.textScaleFactor,
                 maxLines: 2,
                 text: TextSpan(
                   children: [
                     TextSpan(
-                      text: row.customerName.toString() == 'null'
+                      text: row?.customerName.toString() == 'null'
                           ? ''
-                          : row.customerName.toString(),
+                          : row?.customerName.toString(),
                       style: DefaultTextStyle.of(context).style.copyWith(
                             fontSize: 14,
                           ),
@@ -57,9 +45,9 @@ class DataSourceOrders extends DataTableSource {
                       text: '\n',
                     ),
                     TextSpan(
-                      text: row.Address.toString() == 'null'
+                      text: row?.Address.toString() == 'null'
                           ? ''
-                          : row.Address.toString(),
+                          : row?.Address.toString(),
                       style: DefaultTextStyle.of(context).style.copyWith(
                             fontSize: 12,
                           ),
@@ -70,15 +58,15 @@ class DataSourceOrders extends DataTableSource {
             ],
           ),
         ),
-        DataCell(Text(row.deliveryDate.toString() == 'null'
+        DataCell(Text(row?.deliveryDate.toString() == 'null'
             ? ''
-            : row.deliveryDate.toString())),
-        DataCell(Text(row.customerNumber.toString() == 'null'
+            : row!.deliveryDate.toString())),
+        DataCell(Text(row?.customerNumber.toString() == 'null'
             ? ''
-            : row.customerNumber.toString())),
+            : row!.customerNumber!)),
         DataCell(
           Text(
-            row.status.toString() == 'null' ? '' : row.status!,
+            row!.status.toString() == 'null' ? '' : row.status!,
             // style: TextStyle(
             //     color: row.status == 'Active'
             //         ? Colors.green
@@ -86,6 +74,17 @@ class DataSourceOrders extends DataTableSource {
             //             ? const Color(0xFFFF9F43)
             //             : const Color(0xFF82868B),
             //     fontWeight: FontWeight.bold),
+          ),
+        ),
+        DataCell(
+          CircleAvatar(
+            radius: 20,
+            backgroundImage: Image.network(
+              row!.deliveryPersonPhoto.toString() == 'null'
+                  ? 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50?s=200'
+                  : row.deliveryPersonPhoto.toString(),
+              fit: BoxFit.cover,
+            ).image,
           ),
         ),
         DataCell(Row(
