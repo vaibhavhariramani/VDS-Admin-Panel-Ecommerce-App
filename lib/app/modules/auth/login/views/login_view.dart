@@ -480,10 +480,12 @@ class LoginView extends GetResponsiveView<LoginController> {
             ),
             const Divider(),
             Flexible(
-              child: AuthSocialMediaButtons(
-                isProcessing: (bool _processing) {
-                  controller.isAuthProcessing(_processing);
-                },
+              child: Center(
+                child: AuthSocialMediaButtons(
+                  isProcessing: (bool _processing) {
+                    controller.isAuthProcessing(_processing);
+                  },
+                ),
               ),
             ),
           ],

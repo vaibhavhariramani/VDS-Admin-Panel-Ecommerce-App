@@ -85,30 +85,7 @@ class DataService extends GetxService {
 
   Future<List<Product>> fetchAllProducts() async {
     List<Product> _products = [];
-    // final QueryResult _result = await client!
-    //     .query(QueryOptions(document: gql(GqlQueries.fetchAllProducts)));
 
-    // if (_result.hasException) {
-    //   print('Fetch List Products faild');
-    //   print(_result.exception.toString());
-    // } else {
-    // print((_result.data ?? {})['syncProducts']['items']);
-    // if ((_result.data?? {}).isNotEmpty) {
-
-    //   if ((_result.data ?? {})['syncProducts']['items'].isNotEmpty) {
-    //     for (var _item in (_result.data ?? {})['syncProducts']['items']) {
-    //       for (var _productsShop in _item['UserProductReviews']['items']) {
-    //         if (_productsShop['_deleted'] == null) {
-    //           _item['UserProductReviews'] = {"serializedData": _productsShop};
-    //         } else {
-    //           _item['UserProductReviews'] = [];
-    //         }
-    //       }
-
-    //       _products.add(Product.fromJson(_item));
-    //     }
-    //   }
-    // }
     return _products;
   }
 
