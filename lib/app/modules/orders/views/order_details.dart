@@ -2,12 +2,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../models/Orders.dart';
 import '../../../../services/fetch_data.dart';
 import 'items_details.dart';
 
 class OrderDetails extends StatefulWidget {
   // final DocumentSnapshot snapshot;
-  final Map<String, dynamic> mp;
+  final Orders? mp;
   const OrderDetails({Key? key, required this.mp}) : super(key: key);
 
   @override
@@ -23,8 +24,8 @@ class _OrderDetailsState extends State<OrderDetails> {
   @override
   void initState() {
     // TODO: implement initState
-    status = widget.mp['status'];
-    delivery = '${widget.mp['delivery']}';
+    status = widget.mp?.status;
+    delivery = '${widget.mp?.deliveryPersonPhoto}';
     super.initState();
   }
 
@@ -43,7 +44,7 @@ class _OrderDetailsState extends State<OrderDetails> {
           title: Row(
             children: [
               Text(
-                widget.mp['phone'],
+                widget.mp?.customerNumber,
                 style: TextStyle(fontSize: 16),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -102,11 +103,11 @@ class _OrderDetailsState extends State<OrderDetails> {
                             ListTile(
                               leading: CircleAvatar(
                                   child: Icon(Icons.person_outline)),
-                              title: Text('${widget.mp['name']}',
+                              title: Text('${widget.mp?.customerName}',
                                   style:
                                       TextStyle(fontWeight: FontWeight.w500)),
                               subtitle: Text(
-                                '${widget.mp['phone']}',
+                                '${widget.mp?.customerNumber}',
                               ),
                             ),
                             ListTile(
@@ -115,7 +116,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                                   style:
                                       TextStyle(fontWeight: FontWeight.w500)),
                               subtitle: Text(
-                                '${widget.mp['address']}',
+                                '${widget.mp?.Address}',
                               ),
                             ),
                             SizedBox(height: 10)
@@ -136,7 +137,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                             ),
                             CustomTile(
                                 title: 'Total Cost',
-                                tail: '₹${widget.mp['sub']}',
+                                tail: '₹${widget.mp?.totalAmount}',
                                 titlestyle: const TextStyle(
                                     fontWeight: FontWeight.w500,
                                     color: Colors.grey,
@@ -147,7 +148,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                                     fontSize: 16)),
                             CustomTile(
                                 title: 'Delivery Charge',
-                                tail: '₹${widget.mp['delivery']}',
+                                tail: '₹${widget.mp?.deliveryCharges}',
                                 titlestyle: const TextStyle(
                                     fontWeight: FontWeight.w500,
                                     color: Colors.grey,
@@ -159,7 +160,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                             CustomTile(
                                 title: 'Sub Total',
                                 tail:
-                                    '₹${widget.mp['sub'] + widget.mp['delivery']}',
+                                    '₹${widget.mp?.totalAmount + widget.mp?.deliveryCharges}',
                                 titlestyle: const TextStyle(
                                     fontWeight: FontWeight.w500,
                                     color: Colors.grey,
@@ -171,7 +172,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                             CustomTile(
                                 title: 'Discount',
                                 tail:
-                                    '${((widget.mp['saving'] / widget.mp['sub']) * 100).floor()}% OFF',
+                                    '${((widget.mp?.discount / widget.mp?.totalAmount) * 100).floor()}% OFF',
                                 titlestyle: const TextStyle(
                                     fontWeight: FontWeight.w500,
                                     color: Colors.grey,
@@ -182,7 +183,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                                     fontSize: 16)),
                             CustomTile(
                                 title: 'Total Saving',
-                                tail: '- ₹${widget.mp['saving']}',
+                                tail: '- ₹${widget.mp?.discount}',
                                 titlestyle: const TextStyle(
                                     fontWeight: FontWeight.w500,
                                     color: Colors.grey,
@@ -219,7 +220,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                                     ],
                                   ),
                                   Text(
-                                    "₹${widget.mp['total']}",
+                                    "₹${widget.mp?.discount}",
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 18),
@@ -251,17 +252,18 @@ class _OrderDetailsState extends State<OrderDetails> {
                                 ),
                               ),
                               ListTile(
-                                title: Text('${widget.mp['booking']}',
+                                title: Text('${widget.mp?.orderId}',
                                     style:
                                         TextStyle(fontWeight: FontWeight.w500)),
                                 subtitle: Text.rich(TextSpan(
                                     text:
-                                        '${format.format(DateTime.fromMicrosecondsSinceEpoch(widget.mp['booking']))}   ',
+                                        '${format.format(DateTime.fromMicrosecondsSinceEpoch(widget.mp?.deliveryDate))}   ',
                                     style: TextStyle(),
                                     children: [
                                       TextSpan(
-                                        text:
-                                            '${time.format(DateTime.fromMicrosecondsSinceEpoch(widget.mp['booking']))}',
+                                        text: time.format(
+                                            DateTime.fromMicrosecondsSinceEpoch(
+                                                widget.mp?.deliveryTime)),
                                       )
                                     ])),
                               ),
@@ -321,7 +323,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                   ),
                   //dataProvider.orderItems(widget.mp['id']),
                   StreamBuilder<QuerySnapshot>(
-                    stream: FetchService.to.orderItems(widget.mp['id']),
+                    stream: FetchService.to.orderItems(widget.mp?.CartItemsId),
                     builder: (context, snapshot) {
                       if (snapshot.hasError) {
                         return Text("Something went wrong");
@@ -422,7 +424,7 @@ class _OrderDetailsState extends State<OrderDetails> {
     CollectionReference referencer =
         FirebaseFirestore.instance.collection('Orders');
     try {
-      referencer.doc(widget.mp['id']).update({
+      referencer.doc(widget.mp?.orderId).update({
         'status': value,
       });
       setState(() {
@@ -435,7 +437,7 @@ class _OrderDetailsState extends State<OrderDetails> {
     CollectionReference referencer =
         FirebaseFirestore.instance.collection('Orders');
     try {
-      referencer.doc(widget.mp['id']).update({
+      referencer.doc(widget.mp?.orderId).update({
         'deliveryBoy': snapshot.id,
         'boyName': snapshot['name'],
         'boyPhone': snapshot['phone'],

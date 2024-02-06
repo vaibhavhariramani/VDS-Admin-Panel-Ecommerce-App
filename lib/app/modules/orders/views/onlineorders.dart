@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../models/Orders.dart';
 import '../../../../services/fetch_data.dart';
 import 'order_details.dart';
 
@@ -273,12 +274,13 @@ class _OnlineOrdersState extends State<OnlineOrders> {
                                 Map<String, dynamic> mp =
                                     snapshot.data!.docs[index].data()
                                         as Map<String, dynamic>;
+                                Orders orderDetails = Orders.fromJson(mp);
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                         builder: (BuildContext context) =>
                                             OrderDetails(
-                                              mp: mp,
+                                              mp: orderDetails,
                                             )));
                               },
                             );

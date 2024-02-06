@@ -5,6 +5,7 @@ import 'package:iconly/iconly.dart';
 import '../../../../../models/Orders.dart';
 import '../../../../../models/Users.dart';
 import '../../controllers/orders_controller.dart';
+import '../order_details.dart';
 // import '../../controllers/Orders_controller.dart';
 
 class DataSourceOrders extends DataTableSource {
@@ -22,7 +23,15 @@ class DataSourceOrders extends DataTableSource {
     return DataRow.byIndex(
       selected: false,
       index: index,
-      onSelectChanged: (value) {},
+      onSelectChanged: (value) {
+        // Map<String, dynamic> mp = row as Map<String, dynamic>;
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (BuildContext context) => OrderDetails(
+                      mp: row,
+                    )));
+      },
       cells: [
         DataCell(
           Row(

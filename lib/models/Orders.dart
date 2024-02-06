@@ -3,6 +3,7 @@ class Orders {
   String? _customerName;
   String? _customerNumber;
   double? _totalAmount;
+  double? _discount;
   String? _CartItemsId;
   String? _status;
   String? _paymentMethod;
@@ -94,6 +95,22 @@ class Orders {
 
   get deliveryDate {
     return _deliveryDate;
+  }
+
+  get totalAmount {
+    return _totalAmount;
+  }
+
+  get deliveryCharges {
+    return _deliveryCharges;
+  }
+
+  get discount {
+    return _discount;
+  }
+
+  get deliveryTime {
+    return _deliveryTime;
   }
 
   void printOrderDetails() {

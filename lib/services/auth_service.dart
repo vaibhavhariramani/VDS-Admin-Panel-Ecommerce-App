@@ -156,25 +156,7 @@ class AuthService extends GetxService {
     if (isAuthenticated) {
       readAuthToken();
       print(authToken);
-      if (authToken != null) {
-        // await client!
-        //     .query(QueryOptions(
-        //   document: gql(GqlQueries.getUserbyID),
-        //   variables: <String, String>{
-        //     'id': authToken!,
-        //   },
-        // ))
-        //     .then(
-        //   (QueryResult<dynamic> _response) {
-        //     // print(_response.data);
-        //     if ((_response.data ?? {})["getUsers"] != null) {
-        //       Users? _userData;
-        //       _userData = Users.fromJson((_response.data ?? {})["getUsers"]);
-        //       user(_userData);
-        //     }
-        //   },
-        // );
-      }
+      if (authToken != null) {}
     }
   }
 
