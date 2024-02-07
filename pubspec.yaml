@@ -64,6 +64,8 @@ dependencies:
   flutter_barcode_scanner: 
   fluttertoast: ^8.2.4
   permission_handler:
+  image_picker: ^0.8.4+4
+  image_picker_web:
 
 dev_dependencies:
   flutter_test:
