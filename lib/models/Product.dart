@@ -72,6 +72,10 @@ class Product {
     return true;
   }
 
+  get mrp {
+    return _mrp;
+  }
+
   @override
   String? getId() {
     return id;
