@@ -56,12 +56,20 @@ class Product {
     _shop_id = shop_id;
   }
 
-  double? get price {
-    return _price;
+  double get price {
+    return _price!;
   }
 
-  String? get name {
-    return _name;
+  set price(double value) {
+    _price = value;
+  }
+
+  String get name {
+    return _name!;
+  }
+
+  set name(String value) {
+    _name = value;
   }
 
   DateTime? get available_from {
@@ -72,12 +80,32 @@ class Product {
     return true;
   }
 
-  get mrp {
-    return _mrp;
+  double get mrp {
+    return _mrp!;
   }
 
-  get count {
-    return _count;
+  set mrp(double value) {
+    _mrp = value;
+  }
+
+  int get count {
+    return _count!;
+  }
+
+  get image {
+    return _image;
+  }
+
+  get description {
+    return _description;
+  }
+
+  get category {
+    return _category;
+  }
+
+  set count(int value) {
+    _count = value;
   }
 
   @override

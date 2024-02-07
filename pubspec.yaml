@@ -66,6 +66,7 @@ dependencies:
   permission_handler:
   image_picker: ^0.8.4+4
   image_picker_web:
+  visibility_detector: ^0.2.2
 
 dev_dependencies:
   flutter_test:

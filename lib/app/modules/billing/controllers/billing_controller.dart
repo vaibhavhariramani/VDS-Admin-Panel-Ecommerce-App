@@ -49,7 +49,7 @@ class BillingController extends GetxController {
   TextEditingController newProductName = TextEditingController();
   TextEditingController newMRP = TextEditingController();
   TextEditingController newSP = TextEditingController();
-  String? _barcode;
+  String? barcode;
   dynamic mrptotal = 0;
   dynamic total = 0;
   late bool visible;
@@ -103,7 +103,7 @@ class BillingController extends GetxController {
     // If the widget was removed from the tree while the asynchronous platform
     // message was in flight, we want to discard the reply rather than calling
     // setState to update our non-existent appearance.
-    if (!mounted) return;
+    // if (!mounted) return;
 
     scanBarcode = barcodeScanRes;
     Fetcher(barcodeScanRes);
@@ -179,7 +179,7 @@ class BillingController extends GetxController {
         builder: (
           context,
         ) {
-          addItemDialog(context, barcode: barcode);
+          return addItemDialog(context, barcode: barcode);
         });
   }
 
@@ -199,7 +199,7 @@ class BillingController extends GetxController {
         mrp: m,
         price: sp,
         quantity: "quantity",
-        count: '1',
+        count: 1,
         description: "description",
         category: "category"));
     saman.add(
@@ -318,5 +318,83 @@ class BillingController extends GetxController {
     } else {
       print('Permission not Provided');
     }
+  }
+
+  void removeItem(int index) {
+    total = total - products[index].price!;
+    mrptotal = mrptotal - products[index].mrp;
+    products.removeAt(index);
+    saman.removeAt(index + 1);
+  }
+
+  void updateItem(int index, int value) {
+    total = total - products[index].price!;
+    mrptotal = mrptotal - products[index].mrp;
+    products[index].count = value;
+    saman[index + 1].quantity = value;
+    total = total + products[index].price! * value;
+    mrptotal = mrptotal + products[index].mrp * value;
+  }
+
+  void productfetcher(String barcode1) {
+    if (visible) return;
+    print(barcode1);
+    FirebaseFirestore.instance
+        .collection("Products")
+        .doc(barcode1)
+        .get()
+        .then((DocumentSnapshot documentSnapshot) {
+      if (documentSnapshot.exists) {
+        print('Document data: ${documentSnapshot.data()}');
+        Map<String, dynamic> data1 =
+            documentSnapshot.data() as Map<String, dynamic>;
+
+        var index = -1;
+        var present = false;
+        for (var i = 0; i < products.length; i++) {
+          // you may have to check the equality operator
+          if (data1["barcode"] == products[i].barcode) {
+            present = true;
+            index = i;
+            break;
+          }
+        }
+        if (index >= 0) {
+          products[index].count = products[index].count + 1;
+          // saman[index].quantity = saman[index].quantity + 1;
+          mrptotal = mrptotal + products[index].mrp;
+          total = total + products[index].price;
+        } else {
+          products.add(Product(
+              barcode: data1["barcode"],
+              image: data1["image"],
+              name: data1["name"],
+              mrp: data1["mrp"],
+              price: data1["selling"],
+              quantity: "quantity",
+              count: 1,
+              description: data1["description"],
+              category: data1["category"][0]));
+          snapshots.add(data1);
+          saman.add(
+            InvoiceItem(
+              description: data1["name"],
+              quantity: 1,
+              MRP: data1["mrp"],
+              OurPrice: data1["selling"],
+            ),
+          );
+          barcode = barcode1;
+          mrptotal = mrptotal + data1["mrp"];
+          total = total + data1["selling"];
+          // barcode.text = barcode;
+          clearText();
+        }
+      } else {
+        print('Document does not exist on the database');
+        Fluttertoast.showToast(msg: 'Document does not exist on the database');
+        addNewItemToDatabase(barcode1, context as BuildContext);
+      }
+    });
   }
 }
