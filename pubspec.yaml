@@ -60,6 +60,10 @@ dependencies:
   syncfusion_flutter_signaturepad: ^22.2.12
   flutter_svg: 
   shimmer: ^3.0.0
+  flutter_barcode_listener: ^0.1.1
+  flutter_barcode_scanner: 
+  fluttertoast: ^8.2.4
+  permission_handler:
 
 dev_dependencies:
   flutter_test:
