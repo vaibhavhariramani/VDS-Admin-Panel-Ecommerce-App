@@ -1,4 +1,8 @@
+import 'dart:js';
+import 'dart:ui';
+import 'dart:io' as android;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,7 +11,7 @@ import 'package:get/get.dart';
 import '../../../../models/Product.dart';
 import '../../../../models/invoice.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
-import 'dart:io' as android;
+
 import 'package:permission_handler/permission_handler.dart';
 import '../../../../services/firebase.service.dart';
 import '../../../widgets/components/raised_gradient_button.dart';
@@ -164,7 +168,7 @@ class BillingController extends GetxController {
       } else {
         print('Document does not exist on the database');
         Fluttertoast.showToast(msg: 'Document does not exist on the database');
-        addNewItemToDatabase(text);
+        addNewItemToDatabase(text, context as BuildContext);
       }
     });
   }
@@ -245,7 +249,6 @@ class BillingController extends GetxController {
         url = file;
         Dataseturl = downloadurl;
         Fluttertoast.showToast(msg: 'Image Uploade Sucessfully');
-        setState(() {});
       } else {
         print('No image Selected');
       }
