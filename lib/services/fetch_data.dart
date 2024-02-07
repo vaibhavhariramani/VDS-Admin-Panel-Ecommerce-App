@@ -466,4 +466,9 @@ class FetchService extends GetxService {
     print(_onlineOrders.length);
     return _onlineOrders;
   }
+
+  category() {
+    return Collection.collection('Category')
+        .snapshots(includeMetadataChanges: true);
+  }
 }
