@@ -173,10 +173,10 @@ packages:
     dependency: transitive
     description:
       name: device_info_plus
-      sha256: c2386729379f04cd39ee0d5d4c48d8c8a0e70f7622dac626cbf5e396392602fd
+      sha256: "79439ccee1641b9cbb95dd0a6b3fb478eab63aab05700249d371626ec6c1810f"
       url: "https://pub.dev"
     source: hosted
-    version: "3.2.4"
+    version: "4.0.0"
   device_info_plus_linux:
     dependency: transitive
     description:
@@ -229,10 +229,10 @@ packages:
     dependency: transitive
     description:
       name: extension
-      sha256: "755224c11fcbfb81d622e38befd05581b52566529a08f2407e424219200ac7cf"
+      sha256: "7df1ee2de6ccd05fd3e4d63acb194ae97e6525a2e8da067161c0cccb6a0a5305"
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.0"
+    version: "0.5.0"
   fake_async:
     dependency: transitive
     description:
@@ -764,10 +764,10 @@ packages:
     dependency: "direct main"
     description:
       name: pdfx
-      sha256: "3c91a2a6ff55214d82d8644ce0ff55d1bf06dcebc93e6e065a552ca25ed5527a"
+      sha256: cad7eab6358a89922c8ea592b738891b3984edab43300558d25dc9b15a94a35e
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.1+1"
+    version: "2.3.0"
   pedantic:
     dependency: transitive
     description:
@@ -828,10 +828,10 @@ packages:
     dependency: transitive
     description:
       name: photo_view
-      sha256: "26cb153080a2673bebccaf72d3283e82f8f41a47fe5f9bc5ba8634d2e8a9fc8e"
+      sha256: "8036802a00bae2a78fc197af8a158e3e2f7b500561ed23b4c458107685e645bb"
       url: "https://pub.dev"
     source: hosted
-    version: "0.13.0"
+    version: "0.14.0"
   platform:
     dependency: transitive
     description:
