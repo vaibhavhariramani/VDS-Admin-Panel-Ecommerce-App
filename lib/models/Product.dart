@@ -9,7 +9,7 @@ class Product {
   double? _price;
   double? _discount;
   String? _quantity;
-  String? _count;
+  int? _count;
   String? _description;
   String? _category;
   String? _currency_type;
@@ -28,7 +28,7 @@ class Product {
     double? price,
     double? discount,
     String? quantity,
-    String? count,
+    int? count,
     String? description,
     String? category,
     String? currency_type,
@@ -116,7 +116,7 @@ class Product {
       id: i,
       barcode: '',
       category: '',
-      count: '0',
+      count: 0,
       description: '',
       image: '',
       mrp: 0,
@@ -151,7 +151,7 @@ class Product {
           description: data['description'],
           category: 'category',
           quantity: quantity1,
-          count: quantity1,
+          count: data['quantity'],
           image: data['image'],
           name: data['name'],
           id: data['barcode'].toString());
@@ -168,7 +168,7 @@ class Product {
     return Product(
         barcode: '',
         category: '',
-        count: '0',
+        count: 0,
         description: '',
         image: '',
         mrp: 0,
