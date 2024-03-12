@@ -12,6 +12,8 @@ import '../modules/billing/views/billing_view.dart';
 import '../modules/deletion_status/bindings/deletion_status_binding.dart';
 import '../modules/deletion_status/controllers/deletion_status_controller.dart';
 import '../modules/deletion_status/views/deletion_status_view.dart';
+import '../modules/help/bindings/help_binding.dart';
+import '../modules/help/views/help_view.dart';
 import '../modules/home/bindings/home_binding.dart';
 import '../modules/home/views/home_view.dart';
 import '../modules/merchants/bindings/merchants_binding.dart';
@@ -32,6 +34,8 @@ import '../modules/products/scheduled_products/bindings/scheduled_products_bindi
 import '../modules/products/scheduled_products/views/scheduled_products_view.dart';
 import '../modules/shop_listing/bindings/shop_listing_binding.dart';
 import '../modules/shop_listing/views/shop_listing_view.dart';
+import '../utilities/contact_us/bindings/contact_us_binding.dart';
+import '../utilities/contact_us/views/contact_us_view.dart';
 
 part 'app_routes.dart';
 
@@ -121,48 +125,48 @@ class AppPages {
       //     color: Theme.of(context).scaffoldBackgroundColor,
       //   ),
       // ),
-      // FlutterDashboardItem(
-      //   title: 'Contact us',
-      //   page: GetPage(
-      //     name: _Paths.CONTACT_US,
-      //     page: () {
-      //       deletionStatusController.isVisible.value = false;
-      //       return ContactUsView();
-      //     },
-      //     binding: ContactUsBinding(),
-      //     middlewares: [
-      //       EnsureAuthenticated(),
-      //     ],
-      //   ),
-      //   icon: const Icon(
-      //     IconlyLight.profile,
-      //   ),
-      //   selectedIcon: Icon(
-      //     IconlyBold.profile,
-      //     color: Theme.of(context).scaffoldBackgroundColor,
-      //   ),
-      // ),
-      // FlutterDashboardItem(
-      //   title: 'Help',
-      //   page: GetPage(
-      //     name: _Paths.HELP,
-      //     page: () {
-      //       deletionStatusController.isVisible.value = false;
-      //       return const HelpView();
-      //     },
-      //     binding: HelpBinding(),
-      //     middlewares: [
-      //       EnsureAuthenticated(),
-      //     ],
-      //   ),
-      //   icon: const Icon(
-      //     Icons.help_outline_sharp,
-      //   ),
-      //   selectedIcon: Icon(
-      //     Icons.help_outlined,
-      //     color: Theme.of(context).scaffoldBackgroundColor,
-      //   ),
-      // ),
+      FlutterDashboardItem(
+        title: 'Contact us',
+        page: GetPage(
+          name: _Paths.CONTACT_US,
+          page: () {
+            deletionStatusController.isVisible.value = false;
+            return ContactUsView();
+          },
+          binding: ContactUsBinding(),
+          middlewares: [
+            EnsureAuthenticated(),
+          ],
+        ),
+        icon: const Icon(
+          IconlyLight.profile,
+        ),
+        selectedIcon: Icon(
+          IconlyBold.profile,
+          color: Theme.of(context).scaffoldBackgroundColor,
+        ),
+      ),
+      FlutterDashboardItem(
+        title: 'Help',
+        page: GetPage(
+          name: _Paths.HELP,
+          page: () {
+            deletionStatusController.isVisible.value = false;
+            return const HelpView();
+          },
+          binding: HelpBinding(),
+          middlewares: [
+            EnsureAuthenticated(),
+          ],
+        ),
+        icon: const Icon(
+          Icons.help_outline_sharp,
+        ),
+        selectedIcon: Icon(
+          Icons.help_outlined,
+          color: Theme.of(context).scaffoldBackgroundColor,
+        ),
+      ),
     ];
   }
 
@@ -182,6 +186,13 @@ class AppPages {
           binding: HomeBinding(),
           middlewares: [
             EnsureAuthenticated(),
+          ],
+          children: [
+            GetPage(
+              name: _Paths.CONTACT_US,
+              page: () => ContactUsView(),
+              binding: ContactUsBinding(),
+            ),
           ],
         ),
         icon: const Icon(

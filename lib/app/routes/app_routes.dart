@@ -17,6 +17,8 @@ abstract class Routes {
   static const SHOP_LISTING = _Paths.SHOP_LISTING;
   static const ORDERS = _Paths.ORDERS;
   static const BILLING = _Paths.BILLING;
+  static const CONTACT_US = _Paths.CONTACT_US;
+  static const HELP = _Paths.HELP;
 }
 
 abstract class _Paths {
@@ -33,4 +35,6 @@ abstract class _Paths {
   static const SHOP_LISTING = '/shop-listing';
   static const ORDERS = '/orders';
   static const BILLING = '/billing';
+  static const CONTACT_US = '/contact-us';
+  static const HELP = '/help';
 }
