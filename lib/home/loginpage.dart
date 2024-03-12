@@ -77,91 +77,105 @@ class _LoginState extends State<Login> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
-                    "Please Login",
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w800,
+                  // const Text(
+                  //   "Please Login",
+                  //   style: TextStyle(
+                  //     fontSize: 24,
+                  //     fontWeight: FontWeight.w800,
+                  //   ),
+                  // ),
+                  Stack(children: [
+                    Center(
+                      child: Opacity(
+                        opacity: 0.5,
+                        child: Image.asset(
+                          'images/imageLogin.png',
+                          height: 500,
+                        ),
+                      ),
                     ),
-                  ),
-                  Image.asset('images/imageLogin.png'),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          margin: const EdgeInsets.only(bottom: 8.0),
-                          child: Text(
-                            "Login",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                        form(
-                          'Enter Username',
-                          'Username',
-                          username,
-                          const Icon(
-                            Icons.person_outline,
-                          ),
-                        ),
-                        form(
-                          'Enter Password',
-                          'Password',
-                          pass,
-                          const Icon(
-                            Icons.lock_outline,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.only(top: 8.0),
-                        child: Column(
-                          children: [
-                            Text(
-                              "Forget Password ?",
+                    Padding(
+                      padding: const EdgeInsets.only(top: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            margin: const EdgeInsets.only(bottom: 8.0),
+                            child: Text(
+                              "Login",
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                          form(
+                            'Enter Username',
+                            'Username',
+                            username,
+                            const Icon(
+                              Icons.person_outline,
+                            ),
+                          ),
+                          form(
+                            'Enter Password',
+                            'Password',
+                            pass,
+                            const Icon(
+                              Icons.lock_outline,
+                            ),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Container(
+                                margin: const EdgeInsets.only(top: 8.0),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      "Forget Password ?",
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 20),
+                            child: Center(
+                              child: TextButton(
+                                child: Text(
+                                  "Login".toUpperCase(),
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                                style: ButtonStyle(
+                                  padding:
+                                      MaterialStateProperty.all<EdgeInsets>(
+                                          EdgeInsets.all(10)),
+                                  backgroundColor:
+                                      MaterialStateProperty.all<Color>(
+                                          Color(0xffF3AB0D)),
+                                  shape: MaterialStateProperty.all<
+                                          RoundedRectangleBorder>(
+                                      RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20.0),
+                                  )),
+                                ),
+                                onPressed: _login,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 20),
-                    child: TextButton(
-                      child: Text(
-                        "Login".toUpperCase(),
-                        style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600),
-                      ),
-                      style: ButtonStyle(
-                        padding: MaterialStateProperty.all<EdgeInsets>(
-                            EdgeInsets.all(10)),
-                        backgroundColor:
-                            MaterialStateProperty.all<Color>(Color(0xffF3AB0D)),
-                        shape:
-                            MaterialStateProperty.all<RoundedRectangleBorder>(
-                                RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20.0),
-                        )),
-                      ),
-                      onPressed: _login,
                     ),
-                  ),
+                  ]),
                 ],
               ),
             ),

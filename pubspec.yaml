@@ -55,7 +55,8 @@ dependencies:
   http:
   transparent_image: 2.0.1
   syncfusion_flutter_pdf: ^20.1.48-beta
-  pdfx: 
+  pdfx:
+    path: plugins/pdfx
 
 dev_dependencies:
   flutter_test:
