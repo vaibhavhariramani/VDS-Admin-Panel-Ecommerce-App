@@ -3,17 +3,17 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+// import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:vdsadmin/billing/startbilling.dart';
-import 'package:vdsadmin/category/category.dart';
-import 'package:vdsadmin/category/category1.dart';
-import 'package:vdsadmin/example.dart';
-import 'package:auto_size_text/auto_size_text.dart';
+// import 'package:vdsadmin/billing/startbilling.dart';
+// import 'package:vdsadmin/category/category.dart';
+// import 'package:vdsadmin/category/category1.dart';
+// import 'package:vdsadmin/example.dart';
+// import 'package:auto_size_text/auto_size_text.dart';
 import 'package:vdsadmin/home/splashscreen.dart';
-import 'constant.dart';
-import 'database/add_item_to_db.dart';
+// import 'constant.dart';
+// import 'database/add_item_to_db.dart';
 import 'firebase_options.dart';
 
 void main() async {

@@ -20,7 +20,7 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
-  font_awesome_flutter:
+  # font_awesome_flutter:
  
   dotted_border: ^2.0.0+1
   image_picker: ^0.8.4+4
@@ -99,20 +99,20 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  fonts:
-     - family: Nunito
-       fonts:
-         - asset: fonts/Nunito-Regular.ttf
-     - family: OpenSans
-       fonts:
-         - asset: assets/open-sans.ttf
-     - family: OpenSans
-       fonts:
-         - asset: fonts/Poppins-Regular.ttf
-         - asset: fonts/Poppins-Bold.ttf
-     - family: Hind
-       fonts:
-         - asset: fonts/Hind-Bold.ttf
+  # fonts:
+    #  - family: Nunito
+    #    fonts:
+    #      - asset: fonts/Nunito-Regular.ttf
+    #  - family: OpenSans
+    #    fonts:
+    #      - asset: assets/open-sans.ttf
+    #  - family: OpenSans
+    #    fonts:
+    #      - asset: fonts/Poppins-Regular.ttf
+    #      - asset: fonts/Poppins-Bold.ttf
+    #  - family: Hind
+    #    fonts:
+    #      - asset: fonts/Hind-Bold.ttf
   #   - family: Trajan Pro
   #     fonts:
   #       - asset: fonts/TrajanPro.ttf

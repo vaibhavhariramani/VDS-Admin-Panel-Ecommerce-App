@@ -59,7 +59,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyCW_so_r7fO1JPFN2e_boIYw5KVhFiF2rM',
-    appId: '1:348892999903:android:78c132e3568727a607796a',
+    appId: '1:348892999903:android:0e920241a260ae7307796a',
     messagingSenderId: '348892999903',
     projectId: 'ecommerce-26b18',
     databaseURL: 'https://ecommerce-26b18-default-rtdb.firebaseio.com',
@@ -73,10 +73,8 @@ class DefaultFirebaseOptions {
     projectId: 'ecommerce-26b18',
     databaseURL: 'https://ecommerce-26b18-default-rtdb.firebaseio.com',
     storageBucket: 'ecommerce-26b18.appspot.com',
-    androidClientId:
-        '348892999903-1s6rf99hed6cs3g5k7kmjo6grje0njnk.apps.googleusercontent.com',
-    iosClientId:
-        '348892999903-8ofbehmrvmnp26o07c2lfn50ivj10h3k.apps.googleusercontent.com',
+    androidClientId: '348892999903-1s6rf99hed6cs3g5k7kmjo6grje0njnk.apps.googleusercontent.com',
+    iosClientId: '348892999903-8ofbehmrvmnp26o07c2lfn50ivj10h3k.apps.googleusercontent.com',
     iosBundleId: 'com.example.vdsadmin',
   );
 }
