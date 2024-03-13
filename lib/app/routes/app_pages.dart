@@ -12,8 +12,6 @@ import '../modules/billing/views/billing_view.dart';
 import '../modules/deletion_status/bindings/deletion_status_binding.dart';
 import '../modules/deletion_status/controllers/deletion_status_controller.dart';
 import '../modules/deletion_status/views/deletion_status_view.dart';
-import '../modules/help/bindings/help_binding.dart';
-import '../modules/help/views/help_view.dart';
 import '../modules/home/bindings/home_binding.dart';
 import '../modules/home/views/home_view.dart';
 import '../modules/merchants/bindings/merchants_binding.dart';
@@ -36,6 +34,8 @@ import '../modules/shop_listing/bindings/shop_listing_binding.dart';
 import '../modules/shop_listing/views/shop_listing_view.dart';
 import '../utilities/contact_us/bindings/contact_us_binding.dart';
 import '../utilities/contact_us/views/contact_us_view.dart';
+import '../utilities/help/bindings/help_binding.dart';
+import '../utilities/help/views/help_view.dart';
 
 part 'app_routes.dart';
 
