@@ -149,7 +149,7 @@ class _HomeGridProductListState extends State<HomeGridProductList> {
                               style: GoogleFonts.poppins(
                                   color: Colors.white, fontSize: 16)),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
+                            backgroundColor: Color(0xffCB0338),
                             elevation: 0,
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8)),

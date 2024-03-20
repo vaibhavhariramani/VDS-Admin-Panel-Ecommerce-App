@@ -14,12 +14,12 @@ import 'package:vdsadmin/models/utils.dart';
 class PdfInvoiceApi {
   static Future<File> generate(Invoice invoice) async {
     final pdf = Document();
-    final fontData = await rootBundle.load("fonts/Poppins-Regular.ttf");
-    final ttf = pw.Font.ttf(fontData);
-    final fontData2 = await rootBundle.load("fonts/Poppins-Bold.ttf");
-    final ttf2 = pw.Font.ttf(fontData);
-    final fontData3 = await rootBundle.load("fonts/Hind-Bold.ttf");
-    final ttf3 = pw.Font.ttf(fontData);
+    // final fontData = await rootBundle.load("fonts/Poppins-Regular.ttf");
+    // final ttf = pw.Font.ttf(fontData);
+    // final fontData2 = await rootBundle.load("fonts/Poppins-Bold.ttf");
+    // final ttf2 = pw.Font.ttf(fontData);
+    // final fontData3 = await rootBundle.load("fonts/Hind-Bold.ttf");
+    // final ttf3 = pw.Font.ttf(fontData);
     final netTotal = invoice.items
         .map((item) => item.price * item.count)
         .reduce((item1, item2) => item1 + item2);
@@ -62,7 +62,7 @@ class PdfInvoiceApi {
           headerStyle: TextStyle(fontWeight: FontWeight.bold),
           cellStyle: TextStyle(
             fontWeight: FontWeight.bold,
-            font: ttf,
+            // font: ttf,
           ),
           headerDecoration: BoxDecoration(color: PdfColors.grey300),
           cellHeight: 30,
@@ -94,7 +94,7 @@ class PdfInvoiceApi {
                       unite: true,
                       titleStyle: TextStyle(
                         fontWeight: FontWeight.bold,
-                        font: ttf3,
+                        // font: ttf3,
                       ),
                     ),
                     Row(
@@ -110,7 +110,7 @@ class PdfInvoiceApi {
                           '₹ ${Utils.formatPrice(dicount)}',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            font: ttf3,
+                            // font: ttf3,
                           ),
                         ),
                       ],
@@ -140,7 +140,7 @@ class PdfInvoiceApi {
                           '₹ ${Utils.formatPrice(total)}',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            font: ttf3,
+                            // font: ttf3,
                           ),
                         ),
                       ],

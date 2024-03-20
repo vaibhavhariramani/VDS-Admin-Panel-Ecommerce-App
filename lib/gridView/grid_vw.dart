@@ -38,7 +38,7 @@ class _GridScreenState extends State<GridScreen> {
       key: _scaffoldKey,
       backgroundColor: Colors.white10.withOpacity(0.95),
       appBar: AppBar(
-        backgroundColor: Color(0xff6fb840),
+        backgroundColor: Colors.transparent,
         elevation: 1,
         titleSpacing: 0,
         title: Text('grid view'),

@@ -14,12 +14,12 @@ import 'package:vdsadmin/models/utils.dart';
 class PdfInvoiceWebApi {
   static Future<Uint8List> generate(Invoice invoice) async {
     final pdf = Document();
-    final fontData = await rootBundle.load("fonts/Poppins-Regular.ttf");
-    final ttf = pw.Font.ttf(fontData);
-    final fontData2 = await rootBundle.load("fonts/Poppins-Bold.ttf");
-    final ttf2 = pw.Font.ttf(fontData);
-    final fontData3 = await rootBundle.load("fonts/Hind-Bold.ttf");
-    final ttf3 = pw.Font.ttf(fontData);
+    // final fontData = await rootBundle.load("fonts/Poppins-Regular.ttf");
+    // final ttf = pw.Font.ttf(fontData);
+    // final fontData2 = await rootBundle.load("fonts/Poppins-Bold.ttf");
+    // final ttf2 = pw.Font.ttf(fontData);
+    // final fontData3 = await rootBundle.load("fonts/Hind-Bold.ttf");
+    // final ttf3 = pw.Font.ttf(fontData);
     final netTotal = invoice.items
         .map((item) => item.price * item.count)
         .reduce((item1, item2) => item1 + item2);
@@ -55,116 +55,116 @@ class PdfInvoiceWebApi {
         // COmpiling invoice
         buildInvoice(invoice),
 
-        TableHelper.fromTextArray(
-          headers: headers,
-          data: data,
-          border: null,
-          headerStyle: TextStyle(fontWeight: FontWeight.bold),
-          cellStyle: TextStyle(
-            fontWeight: FontWeight.bold,
-            font: ttf,
-          ),
-          headerDecoration: BoxDecoration(color: PdfColors.grey300),
-          cellHeight: 30,
-          cellAlignments: {
-            0: Alignment.centerLeft,
-            1: Alignment.centerRight,
-            2: Alignment.centerRight,
-            3: Alignment.centerRight,
-            4: Alignment.centerRight,
-            5: Alignment.centerLeft,
-          },
-        ),
+        // TableHelper.fromTextArray(
+        //   headers: headers,
+        //   data: data,
+        //   border: null,
+        //   headerStyle: TextStyle(fontWeight: FontWeight.bold),
+        //   cellStyle: TextStyle(
+        //     fontWeight: FontWeight.bold,
+        //     // font: ttf,
+        //   ),
+        //   headerDecoration: BoxDecoration(color: PdfColors.grey300),
+        //   cellHeight: 30,
+        //   cellAlignments: {
+        //     0: Alignment.centerLeft,
+        //     1: Alignment.centerRight,
+        //     2: Alignment.centerRight,
+        //     3: Alignment.centerRight,
+        //     4: Alignment.centerRight,
+        //     5: Alignment.centerLeft,
+        //   },
+        // ),
         Divider(),
 
         buildTotal(invoice),
-        Container(
-          alignment: Alignment.centerRight,
-          child: Row(
-            children: [
-              Spacer(flex: 6),
-              Expanded(
-                flex: 4,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    buildText(
-                      title: 'Net total',
-                      value: '₹ ${Utils.formatPrice(netTotalMRP)}',
-                      unite: true,
-                      titleStyle: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        font: ttf3,
-                      ),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Discount off',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          '₹ ${Utils.formatPrice(dicount)}',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            font: ttf3,
-                          ),
-                        ),
-                      ],
-                    ),
-                    // buildText(
-                    //   title: 'Discount off',
-                    //   value: Utils.formatPrice(dicount),
-                    //   unite: true,
-                    // ),
-                    // buildText(
-                    //   title: 'MRP ${MRPPercent * 100} %',
-                    //   value: Utils.formatPrice(MRP),
-                    //   unite: true,
-                    // ),
-                    Divider(),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Total amount ',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          '₹ ${Utils.formatPrice(total)}',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            font: ttf3,
-                          ),
-                        ),
-                      ],
-                    ),
+        // Container(
+        //   alignment: Alignment.centerRight,
+        //   child: Row(
+        //     children: [
+        //       Spacer(flex: 6),
+        //       Expanded(
+        //         flex: 4,
+        //         child: Column(
+        //           crossAxisAlignment: CrossAxisAlignment.start,
+        //           children: [
+        //             buildText(
+        //               title: 'Net total',
+        //               value: '₹ ${Utils.formatPrice(netTotalMRP)}',
+        //               unite: true,
+        //               titleStyle: TextStyle(
+        //                 fontWeight: FontWeight.bold,
+        //                 // font: ttf3,
+        //               ),
+        //             ),
+        //             Row(
+        //               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //               children: [
+        //                 Text(
+        //                   'Discount off',
+        //                   style: TextStyle(
+        //                     fontWeight: FontWeight.bold,
+        //                   ),
+        //                 ),
+        //                 Text(
+        //                   '₹ ${Utils.formatPrice(dicount)}',
+        //                   style: TextStyle(
+        //                     fontWeight: FontWeight.bold,
+        //                     // font: ttf3,
+        //                   ),
+        //                 ),
+        //               ],
+        //             ),
+        //             // buildText(
+        //             //   title: 'Discount off',
+        //             //   value: Utils.formatPrice(dicount),
+        //             //   unite: true,
+        //             // ),
+        //             // buildText(
+        //             //   title: 'MRP ${MRPPercent * 100} %',
+        //             //   value: Utils.formatPrice(MRP),
+        //             //   unite: true,
+        //             // ),
+        //             Divider(),
+        //             Row(
+        //               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //               children: [
+        //                 Text(
+        //                   'Total amount ',
+        //                   style: TextStyle(
+        //                     fontSize: 14,
+        //                     fontWeight: FontWeight.bold,
+        //                   ),
+        //                 ),
+        //                 Text(
+        //                   '₹ ${Utils.formatPrice(total)}',
+        //                   style: TextStyle(
+        //                     fontWeight: FontWeight.bold,
+        //                     // font: ttf3,
+        //                   ),
+        //                 ),
+        //               ],
+        //             ),
 
-                    // buildText(
-                    //   title: 'Total amount ',
-                    //   titleStyle: TextStyle(
-                    //     fontSize: 14,
-                    //     fontWeight: FontWeight.bold,
-                    //   ),
-                    //   value: Utils.formatPrice(total),
-                    //   unite: true,
-                    // ),
-                    SizedBox(height: 2 * PdfPageFormat.mm),
-                    Container(height: 1, color: PdfColors.grey400),
-                    SizedBox(height: 0.5 * PdfPageFormat.mm),
-                    Container(height: 1, color: PdfColors.grey400),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
+        //             // buildText(
+        //             //   title: 'Total amount ',
+        //             //   titleStyle: TextStyle(
+        //             //     fontSize: 14,
+        //             //     fontWeight: FontWeight.bold,
+        //             //   ),
+        //             //   value: Utils.formatPrice(total),
+        //             //   unite: true,
+        //             // ),
+        //             SizedBox(height: 2 * PdfPageFormat.mm),
+        //             Container(height: 1, color: PdfColors.grey400),
+        //             SizedBox(height: 0.5 * PdfPageFormat.mm),
+        //             Container(height: 1, color: PdfColors.grey400),
+        //           ],
+        //         ),
+        //       ),
+        //     ],
+        //   ),
+        // ),
       ],
       footer: (context) => buildFooter(invoice),
     ));
@@ -259,18 +259,18 @@ class PdfInvoiceWebApi {
       );
 
   static Widget buildInvoice(Invoice invoice) {
-    final headers = ['Description', 'Quantity', 'MRP', 'Our Price', 'Total'];
+    final headers = ['Description', 'MRP', 'Our Price', 'Quantity', 'Total'];
     // final fontData = await rootBundle.load("assets/open-sans.ttf");
     // final ttf = pw.Font.ttf(fontData);
     final data = invoice.items.map((item) {
       final total = item.price * item.count;
       print("header is built \n title is built \n creating invoice");
       return [
-        item.description,
-        '${item.quantity}',
-        '\$ ${item.mrp}',
-        '\$ ${item.price}',
-        '\$ ${total.toStringAsFixed(2)}',
+        item.name,
+        '${item.mrp}',
+        '${item.price}',
+        '${item.count}',
+        '${total.toStringAsFixed(2)}',
       ];
     }).toList();
     print("Invoice table created");
