@@ -1,8 +1,6 @@
 import 'dart:io' as android;
-import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dotted_border/dotted_border.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -12,8 +10,6 @@ import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:timelines/timelines.dart';
-import 'package:vdsadmin/models/barcodescanner.dart';
 import 'package:vdsadmin/models/data_provider.dart';
 import 'package:vdsadmin/models/firebase.service.dart';
 import 'package:vdsadmin/widgets/raised_gradient_button.dart';
@@ -46,7 +42,7 @@ class _UpdateDBState extends State<UpdateDB> {
   bool check = false;
   bool imageselected = false;
   XFile? bannerFile;
-  bool _load = false;
+  final bool _load = false;
   var url;
   String? Dataseturl;
 
@@ -109,7 +105,7 @@ class _UpdateDBState extends State<UpdateDB> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              '$title',
+              title,
               style: const TextStyle(
                 fontSize: 25,
                 color: Colors.white,
@@ -130,7 +126,7 @@ class _UpdateDBState extends State<UpdateDB> {
                   hintStyle: const TextStyle(
                     color: Colors.white,
                   ),
-                  hintText: "$hint",
+                  hintText: hint,
                   prefixIcon: ic,
                 ),
               ),
@@ -186,9 +182,9 @@ class _UpdateDBState extends State<UpdateDB> {
                               onVisibilityChanged: (VisibilityInfo info) {
                                 visible = info.visibleFraction > 0;
                               },
-                              key: Key('visible-detector-key'),
+                              key: const Key('visible-detector-key'),
                               child: BarcodeKeyboardListener(
-                                bufferDuration: Duration(milliseconds: 200),
+                                bufferDuration: const Duration(milliseconds: 200),
                                 onBarcodeScanned: (barcode) {
                                   if (!visible) return;
                                   print(barcode);
@@ -213,7 +209,7 @@ class _UpdateDBState extends State<UpdateDB> {
                                             _barcode == null
                                                 ? 'SCAN BARCODE'
                                                 : 'BARCODE: $_barcode',
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               color: Colors.white,
                                             ),
                                           ),
@@ -319,7 +315,7 @@ class _UpdateDBState extends State<UpdateDB> {
                     padding: const EdgeInsets.only(left: 8, right: 8),
                     decoration: BoxDecoration(
                         borderRadius:
-                            const BorderRadius.all(const Radius.circular(8)),
+                            const BorderRadius.all(Radius.circular(8)),
                         border: Border.all(color: Colors.white)),
                     child: StreamBuilder<QuerySnapshot>(
                         stream: dataProvider.category(),
@@ -478,7 +474,7 @@ class _UpdateDBState extends State<UpdateDB> {
     var fb = FirebaseStorage.instance;
     XFile? dfile;
     final filePath = '${DateTime.now()}.png';
-    var file;
+    android.File file;
 
     await Permission.photos.request();
     var permissionStatus = await Permission.photos.status;
@@ -575,7 +571,7 @@ class _UpdateDBState extends State<UpdateDB> {
                           right: Radius.circular(10),
                         ),
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.camera_alt_outlined,
                         color: Colors.white,
                         size: 90.0,
@@ -587,7 +583,7 @@ class _UpdateDBState extends State<UpdateDB> {
                       ImagePickerFromCamera();
                     },
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 10,
                   ),
                   const Text(
@@ -614,7 +610,7 @@ class _UpdateDBState extends State<UpdateDB> {
                           right: Radius.circular(10),
                         ),
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.album,
                         color: Colors.white,
                         size: 90.0,
@@ -656,7 +652,7 @@ class _UpdateDBState extends State<UpdateDB> {
                           right: Radius.circular(10),
                         ),
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.album,
                         color: Colors.white,
                         size: 90.0,
@@ -676,7 +672,7 @@ class _UpdateDBState extends State<UpdateDB> {
               Navigator.of(context).pop();
             },
             style: TextButton.styleFrom(
-              textStyle: TextStyle(color: Colors.redAccent, fontSize: 16.0),
+              textStyle: const TextStyle(color: Colors.redAccent, fontSize: 16.0),
             ),
             child: const Text('Cancel'),
           ),

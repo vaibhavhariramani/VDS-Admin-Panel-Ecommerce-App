@@ -15,14 +15,14 @@ class _ItemsDetailsState extends State<ItemsDetails> {
     print(widget.data['image']);
     return Container(
       color: Colors.white,
-      padding: EdgeInsets.only(bottom: 2),
+      padding: const EdgeInsets.only(bottom: 2),
       child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Expanded(
               flex: 4,
-              child: Container(
+              child: SizedBox(
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height * 0.18,
                 child: Padding(
@@ -33,7 +33,7 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                           alignment: Alignment.center,
                           height: MediaQuery.of(context).size.height * 0.18,
                           width: MediaQuery.of(context).size.width * 0.3,
-                          child: Icon(Icons.photo_size_select_actual_outlined)),
+                          child: const Icon(Icons.photo_size_select_actual_outlined)),
                 ),
               ),
             ),
@@ -53,7 +53,7 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                       subtitle: Text(
                         widget.data['description'] ??
                             ' ${widget.data['quantity']}',
-                        style: TextStyle(fontSize: 14.0),
+                        style: const TextStyle(fontSize: 14.0),
                       ),
                     ),
                     Padding(
@@ -63,17 +63,17 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                         decoration: BoxDecoration(
                             border: Border.all(color: Colors.grey.shade300),
                             borderRadius: BorderRadius.circular(4)),
-                        padding: EdgeInsets.all(6),
+                        padding: const EdgeInsets.all(6),
                         child: Row(
                           children: [
                             Text(
                               '${widget.data['quantity']}',
-                              style: TextStyle(),
+                              style: const TextStyle(),
                             ),
-                            Padding(padding: EdgeInsets.only(right: 8)),
+                            const Padding(padding: EdgeInsets.only(right: 8)),
                             Text(
                               '${widget.data['pieces']} pieces',
-                              style: TextStyle(),
+                              style: const TextStyle(),
                             ),
                           ],
                         ),
@@ -97,7 +97,7 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                         ],
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 4,
                     )
                   ],

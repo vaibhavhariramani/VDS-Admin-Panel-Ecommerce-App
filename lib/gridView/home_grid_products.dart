@@ -1,7 +1,5 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:vdsadmin/gridView/gviewer.dart';
 import 'package:vdsadmin/models/data_provider.dart';
 import 'package:vdsadmin/models/product_data.dart';
@@ -43,7 +41,7 @@ class HomeGridProducts extends StatelessWidget {
                             shrinkWrap: true,
                             scrollDirection: Axis.vertical,
                             itemCount: snap.data!.docs.length,
-                            physics: BouncingScrollPhysics(),
+                            physics: const BouncingScrollPhysics(),
                             itemBuilder: (BuildContext context, int index) {
                               return HomeGridProductList(
                                 snapshot: snap.data!.docs[index],
@@ -58,7 +56,7 @@ class HomeGridProducts extends StatelessWidget {
                   )
                 : Container();
           }
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         });
   }
 }

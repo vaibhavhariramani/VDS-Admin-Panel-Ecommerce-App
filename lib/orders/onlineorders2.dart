@@ -5,7 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:vdsadmin/models/data_provider.dart';
 import 'package:vdsadmin/orders/order_details.dart';
-import 'package:vdsadmin/orders/order_details2.dart';
 
 class Orders2 extends StatefulWidget {
   const Orders2({Key? key}) : super(key: key);
@@ -15,7 +14,7 @@ class Orders2 extends StatefulWidget {
 }
 
 class _Orders2State extends State<Orders2> {
-  dynamic? pincode;
+  dynamic pincode;
   String? search;
   late String url;
   DateFormat format = DateFormat.yMMMMd('en_US');
@@ -26,7 +25,7 @@ class _Orders2State extends State<Orders2> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text('Order Onlines'),
+        title: const Text('Order Onlines'),
       ),
       body: ListView(
         children: [
@@ -49,14 +48,14 @@ class _Orders2State extends State<Orders2> {
                           decoration: BoxDecoration(
                               border: Border.all(color: Colors.black26),
                               borderRadius:
-                                  BorderRadius.all(Radius.circular(10))),
+                                  const BorderRadius.all(Radius.circular(10))),
                           child: Row(
                             children: <Widget>[
-                              Expanded(flex: 1, child: Icon(Icons.search)),
+                              const Expanded(flex: 1, child: Icon(Icons.search)),
                               Expanded(
                                 flex: 9,
                                 child: TextField(
-                                  style: TextStyle(color: Colors.black),
+                                  style: const TextStyle(color: Colors.black),
                                   cursorColor: Colors.deepPurple,
                                   onChanged: (v) {
                                     setState(() {});
@@ -76,9 +75,9 @@ class _Orders2State extends State<Orders2> {
                   Expanded(
                     flex: MediaQuery.of(context).size.width < 1000 ? 3 : 2,
                     child: Container(
-                      padding: EdgeInsets.only(left: 8, right: 8),
+                      padding: const EdgeInsets.only(left: 8, right: 8),
                       decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                          borderRadius: const BorderRadius.all(Radius.circular(8)),
                           border: Border.all(color: Colors.black26)),
                       child: StreamBuilder<QuerySnapshot>(
                           stream: dataProvider.regions(null),
@@ -86,13 +85,13 @@ class _Orders2State extends State<Orders2> {
                             if (snapshot.hasData) {
                               return DropdownButton(
                                 value: pincode,
-                                icon: Icon(Icons.keyboard_arrow_down),
+                                icon: const Icon(Icons.keyboard_arrow_down),
                                 iconSize: 24,
                                 elevation: 16,
                                 isExpanded: true,
                                 underline: Container(),
-                                hint: Text('Pincode'),
-                                style: TextStyle(color: Colors.black),
+                                hint: const Text('Pincode'),
+                                style: const TextStyle(color: Colors.black),
                                 onChanged: (v) {
                                   setState(() {
                                     pincode = v;
@@ -109,12 +108,12 @@ class _Orders2State extends State<Orders2> {
                                 }).toList(),
                               );
                             } else {
-                              return Text('Something went wrong');
+                              return const Text('Something went wrong');
                             }
                           }),
                     ),
                   ),
-                  SizedBox(width: 8)
+                  const SizedBox(width: 8)
                 ],
               ),
             ),
@@ -123,10 +122,10 @@ class _Orders2State extends State<Orders2> {
               stream: dataProvider.orders(search: search, filter: pincode),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  return snapshot.data!.docs.length > 0
+                  return snapshot.data!.docs.isNotEmpty
                       ? ListView.builder(
                           shrinkWrap: true,
-                          physics: BouncingScrollPhysics(),
+                          physics: const BouncingScrollPhysics(),
                           itemCount: snapshot.data!.docs.length,
                           itemBuilder: (context, index) {
                             return GestureDetector(
@@ -157,7 +156,7 @@ class _Orders2State extends State<Orders2> {
                                                     BorderRadius.circular(8)),
                                             child: CachedNetworkImage(
                                               placeholder: (context, url) =>
-                                                  CircularProgressIndicator(),
+                                                  const CircularProgressIndicator(),
                                               imageUrl: snapshot
                                                   .data!.docs[index]['image'],
                                               fit: BoxFit.contain,
@@ -186,7 +185,7 @@ class _Orders2State extends State<Orders2> {
                                                   children: [
                                                     TextSpan(
                                                       text:
-                                                          '${time.format(DateTime.fromMicrosecondsSinceEpoch(snapshot.data!.docs[index]['booking']))}',
+                                                          time.format(DateTime.fromMicrosecondsSinceEpoch(snapshot.data!.docs[index]['booking'])),
                                                     )
                                                   ])),
                                             ),
@@ -210,7 +209,7 @@ class _Orders2State extends State<Orders2> {
                                                                       .bold),
                                                     ),
                                                   ),
-                                                  SizedBox(width: 4),
+                                                  const SizedBox(width: 4),
                                                   Padding(
                                                     padding:
                                                         const EdgeInsets.only(
@@ -233,13 +232,13 @@ class _Orders2State extends State<Orders2> {
                                                                             .amber
                                                                             .withOpacity(
                                                                                 0.1)
-                                                                        : Color(0xff32CC34).withOpacity(
+                                                                        : const Color(0xff32CC34).withOpacity(
                                                                             0.1),
                                                                 borderRadius:
                                                                     BorderRadius
                                                                         .circular(
                                                                             8)),
-                                                        padding: EdgeInsets.all(4),
+                                                        padding: const EdgeInsets.all(4),
                                                         child: Text(
                                                           '${snapshot.data!.docs[index]['status']}',
                                                           style: GoogleFonts
@@ -255,7 +254,7 @@ class _Orders2State extends State<Orders2> {
                                                                               'Order Progress'
                                                                           ? Colors
                                                                               .amber
-                                                                          : Color(
+                                                                          : const Color(
                                                                               0xff32CC34),
                                                                   fontWeight:
                                                                       FontWeight
@@ -283,14 +282,14 @@ class _Orders2State extends State<Orders2> {
                             );
                           },
                         )
-                      : Container(
+                      : SizedBox(
                           height: MediaQuery.of(context).size.height * 0.3,
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               CachedNetworkImage(
                                   placeholder: (context, url) =>
-                                      CircularProgressIndicator(),
+                                      const CircularProgressIndicator(),
                                   imageUrl:
                                       'https://firebasestorage.googleapis.com/v0/b/atus-kart.appspot.com/o/static%2Fbasket.png?alt=media&token=4ca7a331-90d3-4ce0-8113-0226e577085e',
                                   width: 120,
@@ -314,7 +313,7 @@ class _Orders2State extends State<Orders2> {
                           ),
                         );
                 }
-                return Center(child: CircularProgressIndicator());
+                return const Center(child: CircularProgressIndicator());
               }),
         ],
       ),

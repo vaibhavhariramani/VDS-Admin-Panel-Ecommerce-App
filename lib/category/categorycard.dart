@@ -32,7 +32,7 @@ class _CategoryCardState extends State<CategoryCard> {
               // ),
               Text(
                 '${widget.data['name']}',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -51,7 +51,7 @@ class _CategoryCardState extends State<CategoryCard> {
         //   fit: BoxFit.cover,
         // ),
         IconButton(
-          icon: Icon(Icons.delete_outline_rounded),
+          icon: const Icon(Icons.delete_outline_rounded),
           onPressed: () {
             deleteCategory('${widget.data['name']}');
           },
@@ -111,32 +111,32 @@ class _CategoryCardState extends State<CategoryCard> {
               ),
               child: StatefulBuilder(
                   builder: (BuildContext context, StateSetter setState) {
-                return Container(
+                return SizedBox(
                   height: MediaQuery.of(context).size.height * 0.5,
                   width: MediaQuery.of(context).size.width * 0.5,
                   child: Padding(
-                    padding: EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(10),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         Center(
                           child: Padding(
-                              padding: EdgeInsets.all(10),
+                              padding: const EdgeInsets.all(10),
                               child: Text(
-                                  "Are you sure do you want to delete ${name}",
+                                  "Are you sure do you want to delete $name",
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                       fontSize: 36,
                                       fontWeight: FontWeight.w400,
                                       color: Colors.black87))),
                         ),
-                        SizedBox(height: 30),
+                        const SizedBox(height: 30),
                         Center(
                           child: Container(
-                            padding: EdgeInsets.only(left: 6, right: 6),
-                            margin: EdgeInsets.all(6),
+                            padding: const EdgeInsets.only(left: 6, right: 6),
+                            margin: const EdgeInsets.all(6),
                             width: MediaQuery.of(context).size.width * 0.2,
                             height: 40,
                             decoration: BoxDecoration(

@@ -4,7 +4,6 @@ import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_share/flutter_share.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:vdsadmin/models/data_provider.dart';
 
 class ProductDetails extends StatefulWidget {
   final DocumentSnapshot snapshot;
@@ -20,7 +19,7 @@ class _ProductDetailsState extends State<ProductDetails> {
       uriPrefix: 'https://ecom.page.link',
       link: Uri.parse(
           'https://atuskart.page.link/${widget.snapshot.get('name')}'),
-      androidParameters: AndroidParameters(
+      androidParameters: const AndroidParameters(
         packageName: "com.diatus.ecom",
         minimumVersion: 0,
       ),
@@ -59,10 +58,10 @@ class _ProductDetailsState extends State<ProductDetails> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xff6fb840),
+        backgroundColor: const Color(0xff6fb840),
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios),
+          icon: const Icon(Icons.arrow_back_ios),
           color: Colors.white,
           onPressed: () {
             Navigator.pop(context);
@@ -70,7 +69,7 @@ class _ProductDetailsState extends State<ProductDetails> {
         ),
         actions: [
           IconButton(
-            icon: Icon(
+            icon: const Icon(
               Icons.share_outlined,
               color: Colors.white,
             ),
@@ -79,7 +78,7 @@ class _ProductDetailsState extends State<ProductDetails> {
             },
           ),
           IconButton(
-            icon: Icon(
+            icon: const Icon(
               Icons.edit,
               color: Colors.white,
             ),
@@ -89,13 +88,13 @@ class _ProductDetailsState extends State<ProductDetails> {
       ),
       body: ListView(
         children: [
-          SizedBox(height: 30),
+          const SizedBox(height: 30),
           CachedNetworkImage(
-              placeholder: (context, url) => CircularProgressIndicator(),
+              placeholder: (context, url) => const CircularProgressIndicator(),
               imageUrl: widget.snapshot.get('image'),
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.width * 0.7),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           ListTile(
             title: Text(
               '${widget.snapshot.get('name')}',
@@ -116,7 +115,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Container(
-                        padding: EdgeInsets.all(4),
+                        padding: const EdgeInsets.all(4),
                         alignment: Alignment.center,
                         child: Text(
                             widget.snapshot
@@ -138,7 +137,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                       child: widget.snapshot.get('tags') != null &&
                               widget.snapshot.get('tags').isNotEmpty
                           ? Container(
-                              padding: EdgeInsets.all(4),
+                              padding: const EdgeInsets.all(4),
                               alignment: Alignment.center,
                               child: Text(
                                   widget.snapshot
@@ -189,7 +188,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                       child: Padding(
                         padding: const EdgeInsets.only(right: 12),
                         child: Container(
-                          padding: EdgeInsets.all(4),
+                          padding: const EdgeInsets.all(4),
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),

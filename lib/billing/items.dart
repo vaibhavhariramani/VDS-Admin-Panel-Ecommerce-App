@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:transparent_image/transparent_image.dart';
 
 class SelectedWithPicture extends StatelessWidget {
   Map<String, dynamic> dataset = {};
-  SelectedWithPicture(this.dataset);
+  SelectedWithPicture(this.dataset, {Key? key}) : super(key: key);
 
   Widget _buildProductItem(BuildContext context, int index) {
     return Row(

@@ -11,6 +11,8 @@ import 'package:vdsadmin/models/data_provider.dart';
 // import 'package:image_picker_for_web/image_picker_for_web.dart';
 
 class Category extends StatefulWidget {
+  const Category({Key? key}) : super(key: key);
+
   @override
   _CategoryState createState() => _CategoryState();
 }
@@ -34,13 +36,14 @@ class _CategoryState extends State<Category> {
   var Iconurl;
   String? Dataseturl;
 
+  @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: MediaQuery.of(context).size.height,
       child: Container(
           child: Column(
         children: [
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Container(
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -76,12 +79,12 @@ class _CategoryState extends State<Category> {
                   ),
                 ]),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           StreamBuilder<QuerySnapshot>(
               stream: dataProvider.category(),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  return Container(
+                  return SizedBox(
                     width: MediaQuery.of(context).size.width,
                     child: GridView.builder(
                       controller: _view,
@@ -96,12 +99,12 @@ class _CategoryState extends State<Category> {
                         if (snapshot.hasData) {
                           return customlist(snapshot.data!.docs[index]);
                         }
-                        return Center(child: CircularProgressIndicator());
+                        return const Center(child: CircularProgressIndicator());
                       },
                     ),
                   );
                 }
-                return Center(child: CircularProgressIndicator());
+                return const Center(child: CircularProgressIndicator());
               }),
         ],
       )),
@@ -130,10 +133,10 @@ class _CategoryState extends State<Category> {
               width: MediaQuery.of(context).size.width * 0.7,
             ),
           ),
-          Container(
+          SizedBox(
               width: MediaQuery.of(context).size.width,
               child: ListTile(
-                leading: Container(
+                leading: SizedBox(
                   width: 80,
                   height: 80,
                   child: Image.network(
@@ -144,21 +147,21 @@ class _CategoryState extends State<Category> {
                 ),
                 title: Text(
                   '${snapshot['name']}',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-                trailing: Container(
+                trailing: SizedBox(
                   width: 80,
                   height: 80,
                   child: Row(
                     children: [
                       IconButton(
-                        icon: Icon(Icons.add),
+                        icon: const Icon(Icons.add),
                         onPressed: () {
                           _addSub(snapshot.id, snapshot['sub']);
                         },
                       ),
                       IconButton(
-                        icon: Icon(Icons.delete_outline_rounded),
+                        icon: const Icon(Icons.delete_outline_rounded),
                         onPressed: () {},
                       )
                     ],
@@ -176,7 +179,7 @@ class _CategoryState extends State<Category> {
               shrinkWrap: true,
               itemCount: snapshot['tags'] != null ? snapshot['tags'].length : 0,
               itemBuilder: (_, i) => ListTile(
-                  leading: Container(
+                  leading: SizedBox(
                     width: 80,
                     height: 80,
                     child: Image.file(
@@ -192,7 +195,7 @@ class _CategoryState extends State<Category> {
                           color: Colors.black)),
                   subtitle: Text("tag :$i"),
                   trailing: IconButton(
-                      icon: Icon(Icons.delete_outline_rounded),
+                      icon: const Icon(Icons.delete_outline_rounded),
                       tooltip: "delete item",
                       iconSize: 25,
                       onPressed: () {})),
@@ -216,7 +219,7 @@ class _CategoryState extends State<Category> {
               child: StatefulBuilder(
                   builder: (BuildContext context, StateSetter setState) {
                 _setState = setState;
-                return Container(
+                return SizedBox(
                   height: MediaQuery.of(context).size.height * 0.8,
                   width: MediaQuery.of(context).size.width * 0.4,
                   child: Padding(
@@ -399,11 +402,11 @@ class _CategoryState extends State<Category> {
             child: StatefulBuilder(
                 builder: (BuildContext context, StateSetter setState) {
               _setState = setState;
-              return Container(
+              return SizedBox(
                 height: MediaQuery.of(context).size.height * 0.6,
                 width: MediaQuery.of(context).size.width * 0.4,
                 child: Padding(
-                  padding: EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(20),
                   child: ListView(
                     children: [
                       const SizedBox(height: 8),
@@ -425,7 +428,7 @@ class _CategoryState extends State<Category> {
                             color: Colors.black12,
                             child: icon != null
                                 ? Image.network(icon!.path)
-                                : Icon(Icons.image),
+                                : const Icon(Icons.image),
                           ),
                           onTap: () {
                             showDialog(
@@ -436,7 +439,7 @@ class _CategoryState extends State<Category> {
                           },
                         ),
                       ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
                       Center(
                         child: Container(
                           width: MediaQuery.of(context).size.width * 0.3,
@@ -456,7 +459,7 @@ class _CategoryState extends State<Category> {
                           ),
                         ),
                       ),
-                      SizedBox(height: 30),
+                      const SizedBox(height: 30),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
@@ -472,11 +475,9 @@ class _CategoryState extends State<Category> {
                           ),
                         ),
                         onPressed: () {
-                          if (s != null) {
-                            setState(() {
-                              sub = List.from(s);
-                            });
-                          }
+                          setState(() {
+                            sub = List.from(s);
+                          });
                           _uploadSub(document);
                         },
                       )
@@ -547,21 +548,21 @@ class _CategoryState extends State<Category> {
               ),
               child: StatefulBuilder(
                   builder: (BuildContext context, StateSetter setState) {
-                return Container(
+                return SizedBox(
                   height: MediaQuery.of(context).size.height * 0.5,
                   width: MediaQuery.of(context).size.width * 0.5,
                   child: Padding(
-                    padding: EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(10),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         Center(
                           child: Padding(
-                              padding: EdgeInsets.all(10),
+                              padding: const EdgeInsets.all(10),
                               child: Text(
-                                  "Are you sure do you want to delete ${name}",
+                                  "Are you sure do you want to delete $name",
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
                                       fontSize: 36,
@@ -621,19 +622,19 @@ class _CategoryState extends State<Category> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(15.0),
             ),
-            child: Container(
+            child: SizedBox(
               height: MediaQuery.of(context).size.height * 0.5,
               width: MediaQuery.of(context).size.width * 0.4,
               child: Padding(
-                padding: EdgeInsets.all(10),
+                padding: const EdgeInsets.all(10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Center(
                       child: Padding(
-                          padding: EdgeInsets.all(10),
+                          padding: const EdgeInsets.all(10),
                           child: Text(
                               "Are you sure do you want to delete \n $name ",
                               textAlign: TextAlign.center,
@@ -645,8 +646,8 @@ class _CategoryState extends State<Category> {
                     const SizedBox(height: 30),
                     Center(
                       child: Container(
-                        padding: EdgeInsets.only(left: 6, right: 6),
-                        margin: EdgeInsets.all(6),
+                        padding: const EdgeInsets.only(left: 6, right: 6),
+                        margin: const EdgeInsets.all(6),
                         width: MediaQuery.of(context).size.width * 0.2,
                         height: 40,
                         decoration: BoxDecoration(
@@ -791,7 +792,7 @@ class _CategoryState extends State<Category> {
                 ImagePickerFromCameraForCategory();
               },
             ),
-            SizedBox(
+            const SizedBox(
               height: 10,
             ),
             const Text(
@@ -838,7 +839,7 @@ class _CategoryState extends State<Category> {
               Navigator.of(context).pop();
             },
             style: TextButton.styleFrom(
-              textStyle: TextStyle(color: Colors.redAccent, fontSize: 16.0),
+              textStyle: const TextStyle(color: Colors.redAccent, fontSize: 16.0),
             ),
             child: const Text('Cancel'),
           ),
@@ -955,7 +956,7 @@ class _CategoryState extends State<Category> {
                 ImagePickerFromCameraForIcon();
               },
             ),
-            SizedBox(
+            const SizedBox(
               height: 10,
             ),
             const Text(
@@ -1002,7 +1003,7 @@ class _CategoryState extends State<Category> {
               Navigator.of(context).pop();
             },
             style: TextButton.styleFrom(
-              textStyle: TextStyle(color: Colors.redAccent, fontSize: 16.0),
+              textStyle: const TextStyle(color: Colors.redAccent, fontSize: 16.0),
             ),
             child: const Text('Cancel'),
           ),

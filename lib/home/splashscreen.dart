@@ -6,7 +6,7 @@ import 'package:vdsadmin/home/loginpage.dart';
 
 class SplashScreen extends StatefulWidget {
   final bool user;
-  SplashScreen(this.user);
+  const SplashScreen(this.user, {Key? key}) : super(key: key);
 
   @override
   _SplashScreenState createState() => _SplashScreenState();
@@ -26,16 +26,16 @@ class _SplashScreenState extends State<SplashScreen> {
         MaterialPageRoute(
             builder: (c) => widget.user
                 ? Dashboard(
-                    MasterproductListForBilling: [],
+                    MasterproductListForBilling: const [],
                   )
-                : Login()),
+                : const Login()),
       );
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
         backgroundColor: Color(0xffF3AB0D),
         body: Center(
           child: Text(

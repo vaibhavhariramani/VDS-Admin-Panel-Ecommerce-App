@@ -21,10 +21,12 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   State<MyApp> createState() => _MyAppState();
 }
@@ -54,10 +56,14 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = ThemeData();
     return MaterialApp(
-      theme: ThemeData(
-        backgroundColor: Color(0xffF5F6F8),
-        fontFamily: "Nunito",
+      // theme:
+      //     ThemeData(fontFamily: "Nunito", backgroundColor: Color(0xffF5F6F8)),
+
+      theme: theme.copyWith(
+        colorScheme:
+            theme.colorScheme.copyWith(secondary: const Color(0xffF5F6F8)),
       ),
       title: 'Admin Panel',
       debugShowCheckedModeBanner: false,

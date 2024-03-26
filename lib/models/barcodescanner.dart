@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
 class Barcode extends StatefulWidget {
+  const Barcode({Key? key}) : super(key: key);
+
   @override
   _BarcodeState createState() => _BarcodeState();
 }
@@ -80,15 +82,15 @@ class _BarcodeState extends State<Barcode> {
                       children: <Widget>[
                         ElevatedButton(
                             onPressed: () => scanBarcodeNormal(),
-                            child: Text('Start barcode scan')),
+                            child: const Text('Start barcode scan')),
                         ElevatedButton(
                             onPressed: () => scanQR(),
-                            child: Text('Start QR scan')),
+                            child: const Text('Start QR scan')),
                         ElevatedButton(
                             onPressed: () => startBarcodeScanStream(),
-                            child: Text('Start barcode scan stream')),
+                            child: const Text('Start barcode scan stream')),
                         Text('Scan result : $_scanBarcode\n',
-                            style: TextStyle(fontSize: 20))
+                            style: const TextStyle(fontSize: 20))
                       ]));
             })));
   }

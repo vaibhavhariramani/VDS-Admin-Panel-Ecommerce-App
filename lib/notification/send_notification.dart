@@ -30,7 +30,7 @@ class _NotifyAllState extends State<NotifyAll> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              '$title',
+              title,
               style: const TextStyle(
                 fontSize: 25,
                 color: Colors.white,
@@ -51,7 +51,7 @@ class _NotifyAllState extends State<NotifyAll> {
                   hintStyle: const TextStyle(
                     color: Colors.white,
                   ),
-                  hintText: "$hint",
+                  hintText: hint,
                   prefixIcon: ic,
                 ),
               ),
@@ -70,7 +70,7 @@ class _NotifyAllState extends State<NotifyAll> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              '$title',
+              title,
               style: const TextStyle(
                 fontSize: 25,
                 color: Colors.white,
@@ -93,7 +93,7 @@ class _NotifyAllState extends State<NotifyAll> {
                   hintStyle: const TextStyle(
                     color: Colors.white,
                   ),
-                  hintText: "$hint",
+                  hintText: hint,
                   prefixIcon: ic,
                 ),
               ),
@@ -160,7 +160,7 @@ class _NotifyAllState extends State<NotifyAll> {
                             .collection('Users')
                             .get()
                             .then((QuerySnapshot querySnapshot) {
-                          querySnapshot.docs.forEach((doc) {
+                          for (var doc in querySnapshot.docs) {
                             print(doc["city"]);
                             if (doc["onesignalTokenID"] != "") {
                               id.add(doc["onesignalTokenID"]);
@@ -168,7 +168,7 @@ class _NotifyAllState extends State<NotifyAll> {
                                   name.text, description.text);
                               print(' id is : ${doc["onesignalTokenID"]}');
                             }
-                          });
+                          }
                         });
                         // sendNotification(id, name.text, description.text);
 
