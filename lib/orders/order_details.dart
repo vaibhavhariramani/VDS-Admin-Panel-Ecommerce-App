@@ -30,7 +30,7 @@ class _OrderDetailsState extends State<OrderDetails> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Color(0xffebebeb),
+        backgroundColor: const Color(0xffebebeb),
         appBar: AppBar(
           backgroundColor: Colors.blueGrey,
           elevation: 0,
@@ -43,11 +43,11 @@ class _OrderDetailsState extends State<OrderDetails> {
             children: [
               Text(
                 widget.mp['phone'],
-                style: TextStyle(fontSize: 16),
+                style: const TextStyle(fontSize: 16),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              SizedBox(
+              const SizedBox(
                 width: 10,
               ),
               DropdownButton(
@@ -58,8 +58,8 @@ class _OrderDetailsState extends State<OrderDetails> {
                 iconSize: 24,
                 elevation: 16,
                 underline: Container(),
-                hint: Text('Status'),
-                style: TextStyle(color: Colors.white, fontSize: 16),
+                hint: const Text('Status'),
+                style: const TextStyle(color: Colors.white, fontSize: 16),
                 items: [
                   'Order Placed',
                   'Order Accepted',
@@ -78,7 +78,7 @@ class _OrderDetailsState extends State<OrderDetails> {
         ),
         body: ListView(
           children: [
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
@@ -99,25 +99,25 @@ class _OrderDetailsState extends State<OrderDetails> {
                               ),
                             ),
                             ListTile(
-                              leading: CircleAvatar(
+                              leading: const CircleAvatar(
                                   child: Icon(Icons.person_outline)),
                               title: Text('${widget.mp['name']}',
                                   style:
-                                      TextStyle(fontWeight: FontWeight.w500)),
+                                      const TextStyle(fontWeight: FontWeight.w500)),
                               subtitle: Text(
                                 '${widget.mp['phone']}',
                               ),
                             ),
                             ListTile(
-                              leading: Icon(Icons.local_shipping_outlined),
-                              title: Text('Shipping Address',
+                              leading: const Icon(Icons.local_shipping_outlined),
+                              title: const Text('Shipping Address',
                                   style:
                                       TextStyle(fontWeight: FontWeight.w500)),
                               subtitle: Text(
                                 '${widget.mp['address']}',
                               ),
                             ),
-                            SizedBox(height: 10)
+                            const SizedBox(height: 10)
                           ],
                         ),
                       ),
@@ -190,17 +190,17 @@ class _OrderDetailsState extends State<OrderDetails> {
                                     fontWeight: FontWeight.w600,
                                     color: Color(0xff6fb840),
                                     fontSize: 16)),
-                            Divider(),
+                            const Divider(),
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Column(
+                                  const Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
-                                    children: const [
+                                    children: [
                                       Text(
                                         'Order Total:',
                                         style: TextStyle(
@@ -219,7 +219,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                                   ),
                                   Text(
                                     "₹${widget.mp['total']}",
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 18),
                                   )
@@ -232,7 +232,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                     ],
                   ),
                 ),
-                SizedBox(width: 5),
+                const SizedBox(width: 5),
                 Expanded(
                     flex: 5,
                     child: Column(
@@ -252,36 +252,36 @@ class _OrderDetailsState extends State<OrderDetails> {
                               ListTile(
                                 title: Text('${widget.mp['booking']}',
                                     style:
-                                        TextStyle(fontWeight: FontWeight.w500)),
+                                        const TextStyle(fontWeight: FontWeight.w500)),
                                 subtitle: Text.rich(TextSpan(
                                     text:
                                         '${format.format(DateTime.fromMicrosecondsSinceEpoch(widget.mp['booking']))}   ',
-                                    style: TextStyle(),
+                                    style: const TextStyle(),
                                     children: [
                                       TextSpan(
                                         text:
-                                            '${time.format(DateTime.fromMicrosecondsSinceEpoch(widget.mp['booking']))}',
+                                            time.format(DateTime.fromMicrosecondsSinceEpoch(widget.mp['booking'])),
                                       )
                                     ])),
                               ),
                               Padding(
                                 padding: const EdgeInsets.all(12.0),
                                 child: Container(
-                                  padding: EdgeInsets.only(left: 8, right: 8),
+                                  padding: const EdgeInsets.only(left: 8, right: 8),
                                   decoration: BoxDecoration(
                                       borderRadius:
-                                          BorderRadius.all(Radius.circular(8)),
+                                          const BorderRadius.all(Radius.circular(8)),
                                       border:
                                           Border.all(color: Colors.black26)),
                                   child: DropdownButton(
                                     value: status,
-                                    icon: Icon(Icons.keyboard_arrow_down),
+                                    icon: const Icon(Icons.keyboard_arrow_down),
                                     iconSize: 24,
                                     elevation: 16,
                                     isExpanded: true,
                                     underline: Container(),
-                                    hint: Text('Status'),
-                                    style: TextStyle(color: Colors.black),
+                                    hint: const Text('Status'),
+                                    style: const TextStyle(color: Colors.black),
                                     items: [
                                       'Order Placed',
                                       'Order Accepted',
@@ -297,7 +297,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                                   ),
                                 ),
                               ),
-                              SizedBox(height: 10)
+                              const SizedBox(height: 10)
                             ],
                           ),
                         ),
@@ -306,7 +306,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                 Expanded(flex: 1, child: Container()),
               ],
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Card(
               elevation: 0,
               child: Column(
@@ -323,12 +323,12 @@ class _OrderDetailsState extends State<OrderDetails> {
                     stream: dataProvider.orderItems(widget.mp['id']),
                     builder: (context, snapshot) {
                       if (snapshot.hasError) {
-                        return Text("Something went wrong");
+                        return const Text("Something went wrong");
                       }
 
                       if (snapshot.hasData) {
                         return ListView.builder(
-                            physics: BouncingScrollPhysics(),
+                            physics: const BouncingScrollPhysics(),
                             shrinkWrap: true,
                             itemCount: snapshot.data!.docs.length,
                             itemBuilder: (BuildContext context, int index) {
@@ -348,13 +348,13 @@ class _OrderDetailsState extends State<OrderDetails> {
                         return Text("Full Name: ${data['image']} ");
                       }
 
-                      return Text("loading");
+                      return const Text("loading");
                     },
                   ),
                 ],
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 10,
             ),
             Card(
@@ -371,7 +371,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                     stream: dataProvider.employee(),
                     builder: (context, snapshot) {
                       if (snapshot.hasError) {
-                        return Text('Something went wrong');
+                        return const Text('Something went wrong');
                       }
                       // if (snapshot.connectionState ==
                       //     ConnectionState.waiting) {
@@ -380,7 +380,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                       // }
                       if (snapshot.hasData) {
                         return ListView.builder(
-                          physics: BouncingScrollPhysics(),
+                          physics: const BouncingScrollPhysics(),
                           shrinkWrap: true,
                           itemCount: snapshot.data!.docs.length,
                           itemBuilder: (BuildContext context, int index) {
@@ -388,7 +388,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                                 snapshot.data!.docs[index].data()
                                     as Map<String, dynamic>;
                             return ListTile(
-                              leading: Container(
+                              leading: SizedBox(
                                   width: 60,
                                   height: 60,
                                   child: Image.network(
@@ -453,23 +453,23 @@ class CustomTile extends StatelessWidget {
   final String tail;
   final TextStyle titlestyle;
   final TextStyle tailstyle;
-  CustomTile(
-      {required this.title,
+  const CustomTile(
+      {Key? key, required this.title,
       required this.tail,
       required this.titlestyle,
-      required this.tailstyle});
+      required this.tailstyle}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: MediaQuery.of(context).size.width,
-      padding: EdgeInsets.only(left: 12, right: 12, top: 12),
+      padding: const EdgeInsets.only(left: 12, right: 12, top: 12),
       child: Row(
         children: [
           Expanded(
             child: Align(
               child: Text(
-                '$title',
+                title,
                 style: titlestyle,
               ),
               alignment: Alignment.centerLeft,
@@ -478,7 +478,7 @@ class CustomTile extends StatelessWidget {
           Expanded(
             child: Align(
               child: Text(
-                '$tail',
+                tail,
                 style: tailstyle,
               ),
               alignment: Alignment.centerRight,

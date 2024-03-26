@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-import 'dart:ui';
 import 'dart:io' as android;
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -15,7 +13,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:vdsadmin/gridView/grid_vw.dart';
 import 'package:vdsadmin/invoice/pdf_invoice_api.dart';
-import 'package:vdsadmin/invoice/pdf_invoice_syncfusion.dart';
 import 'package:vdsadmin/models/customer.dart';
 import 'package:vdsadmin/models/data_provider.dart';
 import 'package:vdsadmin/models/firebase.service.dart';
@@ -123,7 +120,7 @@ class BillState extends State<Bill> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              '$title',
+              title,
               style: const TextStyle(
                 fontSize: 25,
                 color: Colors.white,
@@ -144,7 +141,7 @@ class BillState extends State<Bill> {
                   hintStyle: const TextStyle(
                     color: Colors.white,
                   ),
-                  hintText: "$hint",
+                  hintText: hint,
                   prefixIcon: ic,
                 ),
               ),
@@ -287,7 +284,7 @@ class BillState extends State<Bill> {
                                           TextEditingController(
                                               text: widget.products[index].price
                                                   .toString());
-                                      return Container(
+                                      return SizedBox(
                                         height:
                                             MediaQuery.of(context).size.height *
                                                 0.8,
@@ -392,7 +389,7 @@ class BillState extends State<Bill> {
                                     }));
                               });
                         },
-                        child: Icon(Icons.edit),
+                        child: const Icon(Icons.edit),
                       ),
                     ),
                     Expanded(
@@ -416,7 +413,7 @@ class BillState extends State<Bill> {
                           widget.products.removeAt(index);
                           setState(() {});
                         },
-                        child: Icon(Icons.delete),
+                        child: const Icon(Icons.delete),
                       ),
                     ),
                   ],
@@ -440,7 +437,7 @@ class BillState extends State<Bill> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              '$title',
+              title,
               style: const TextStyle(
                 fontSize: 25,
                 color: Colors.white,
@@ -461,7 +458,7 @@ class BillState extends State<Bill> {
                   hintStyle: const TextStyle(
                     color: Colors.white,
                   ),
-                  hintText: "$hint",
+                  hintText: hint,
                   prefixIcon: ic,
                 ),
                 onChanged: (text) {
@@ -549,67 +546,70 @@ class BillState extends State<Bill> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        title: Text('Billing '),
+        title: const Text('Billing '),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
-          MaterialButton(
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: const Text(
-              'Add Item From Database',
-              style: TextStyle(color: Colors.white),
-            ),
-            color: const Color(0xffCB0338),
-            onPressed: () async {
-              final updatedListOfProducts = await showDialog<List<ProductData>>(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    content: Container(
-                      // Wrap your content in a Container
-                      width: MediaQuery.of(context).size.width *
-                          0.8, // Adjust the width as needed
-                      child: GridScreen(
-                        dataViewer: false,
-                        listOfProductsInBill: widget.products,
+          Flexible(
+            child: MaterialButton(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Text(
+                'Add From Db',
+                style: TextStyle(color: Colors.white),
+              ),
+              color: const Color(0xffCB0338),
+              onPressed: () async {
+                final updatedListOfProducts =
+                    await showDialog<List<ProductData>>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      content: SizedBox(
+                        // Wrap your content in a Container
+                        width: MediaQuery.of(context).size.width *
+                            0.9, // Adjust the width as needed
+                        child: GridScreen(
+                          dataViewer: false,
+                          listOfProductsInBill: widget.products,
+                        ),
+                        // contentPadding: EdgeInsets.fromLTRB(
+                        //     24, 12, 24, 12), // Adjust content padding
+                        // insetPadding:
+                        //     EdgeInsets.all(0), // Remove default inset padding
+                        // Set the width of the AlertDialog by limiting its constraints
+                        // constraints: const BoxConstraints(maxWidth: 400),
                       ),
-                      // contentPadding: EdgeInsets.fromLTRB(
-                      //     24, 12, 24, 12), // Adjust content padding
-                      // insetPadding:
-                      //     EdgeInsets.all(0), // Remove default inset padding
-                      // Set the width of the AlertDialog by limiting its constraints
-                      // constraints: const BoxConstraints(maxWidth: 400),
-                    ),
-                  );
-                },
-              );
+                    );
+                  },
+                );
 
-              // If the user made changes, update the list of products.
-              if (updatedListOfProducts != null) {
-                setState(() {
-                  widget.products = updatedListOfProducts;
-                  mrptotal = widget.products != null
-                      ? widget.products
-                          .map((product) => product.mrp)
-                          .toList()
-                          .reduce((value, element) => value + element)
-                      : 0;
-                  total = widget.products != null
-                      ? widget.products
-                          .map((product) => product.price)
-                          .toList()
-                          .reduce((value, element) => value + element)
-                      : 0;
-                });
-              }
-            },
+                // If the user made changes, update the list of products.
+                if (updatedListOfProducts != null) {
+                  setState(() {
+                    widget.products = updatedListOfProducts;
+                    mrptotal = widget.products != null
+                        ? widget.products
+                            .map((product) => product.mrp)
+                            .toList()
+                            .reduce((value, element) => value + element)
+                        : 0;
+                    total = widget.products != null
+                        ? widget.products
+                            .map((product) => product.price)
+                            .toList()
+                            .reduce((value, element) => value + element)
+                        : 0;
+                  });
+                }
+              },
+            ),
           ),
-          SizedBox(
+          const SizedBox(
             width: 10,
           ),
           MaterialButton(
@@ -624,7 +624,7 @@ class BillState extends State<Bill> {
               onPressed: () {
                 addNewItem();
               }),
-          SizedBox(
+          const SizedBox(
             width: 10,
           ),
           MaterialButton(
@@ -641,7 +641,7 @@ class BillState extends State<Bill> {
               setState(() {});
             },
           ),
-          SizedBox(
+          const SizedBox(
             width: 10,
           ),
         ],
@@ -649,7 +649,7 @@ class BillState extends State<Bill> {
       backgroundColor: Colors.blueGrey,
       body: ListView(
         shrinkWrap: true,
-        physics: BouncingScrollPhysics(),
+        physics: const BouncingScrollPhysics(),
         children: [
           widget.products.isNotEmpty
               ? Card(
@@ -659,7 +659,7 @@ class BillState extends State<Bill> {
                     children: [
                       CustomTile(
                           title: "M.R.P",
-                          tail: "₹${mrptotal}",
+                          tail: "₹$mrptotal",
                           titlestyle: GoogleFonts.poppins(
                               fontWeight: FontWeight.w500, color: Colors.grey),
                           tailstyle: GoogleFonts.poppins(
@@ -680,15 +680,15 @@ class BillState extends State<Bill> {
                           tailstyle: GoogleFonts.poppins(
                               fontWeight: FontWeight.w600,
                               color: Colors.green)),
-                      Divider(),
+                      const Divider(),
                       ListTile(
                         title: Text(
                           'Sub Total:',
                           style:
                               GoogleFonts.poppins(fontWeight: FontWeight.bold),
                         ),
-                        subtitle: Text('(including all taxes)'),
-                        trailing: Text('₹${total}',
+                        subtitle: const Text('(including all taxes)'),
+                        trailing: Text('₹$total',
                             style: GoogleFonts.poppins(
                                 fontSize: 20,
                                 color: Colors.black,
@@ -738,9 +738,9 @@ class BillState extends State<Bill> {
               onVisibilityChanged: (VisibilityInfo info) {
                 visible = info.visibleFraction > 0;
               },
-              key: Key('visible-detector-key'),
+              key: const Key('visible-detector-key'),
               child: BarcodeKeyboardListener(
-                bufferDuration: Duration(milliseconds: 200),
+                bufferDuration: const Duration(milliseconds: 200),
                 onBarcodeScanned: (barcode) {
                   if (!visible) return;
                   print(barcode);
@@ -824,7 +824,7 @@ class BillState extends State<Bill> {
                       _barcode == null
                           ? 'Waiting for new BARCODE'
                           : 'BARCODE: $_barcode',
-                      style: Theme.of(context).textTheme.headline5,
+                      style: Theme.of(context).textTheme.headlineSmall,
                     ),
                   ],
                 ),
@@ -847,7 +847,7 @@ class BillState extends State<Bill> {
               subtitle: Text('including all taxes',
                   style: GoogleFonts.poppins(
                       color: Colors.white.withOpacity(0.9))),
-              trailing: Container(
+              trailing: SizedBox(
                 height: 45,
                 width: MediaQuery.of(context).size.width * 0.5,
                 child: Row(
@@ -857,7 +857,7 @@ class BillState extends State<Bill> {
                       onPressed: () => Clear(),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(80.0)),
-                      padding: EdgeInsets.all(0.0),
+                      padding: const EdgeInsets.all(0.0),
                       child: const Text(
                         "Clear",
                         textAlign: TextAlign.center,
@@ -868,7 +868,7 @@ class BillState extends State<Bill> {
                       ),
                       color: Colors.white,
                     ),
-                    SizedBox(
+                    const SizedBox(
                       width: 10,
                     ),
                     MaterialButton(
@@ -879,7 +879,7 @@ class BillState extends State<Bill> {
                           pdfFileWeb: ''),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(80.0)),
-                      padding: EdgeInsets.all(0.0),
+                      padding: const EdgeInsets.all(0.0),
                       child: const Text(
                         "Checkout",
                         textAlign: TextAlign.center,
@@ -980,7 +980,7 @@ class BillState extends State<Bill> {
       width: size.width,
       alignment: Alignment.center,
       child: Text(
-        '$text',
+        text,
         style: TextStyle(
           fontSize: size.height * 0.025,
           fontWeight: FontWeight.w400,
@@ -1150,7 +1150,7 @@ class BillState extends State<Bill> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              '$title',
+              title,
               style: const TextStyle(
                 fontSize: 25,
                 color: Colors.white,
@@ -1167,13 +1167,13 @@ class BillState extends State<Bill> {
                 keyboardType: TextInputType.phone,
                 showCursor: true,
                 textAlign: TextAlign.left,
-                style: TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
                   border: InputBorder.none,
                   hintStyle: const TextStyle(
                     color: Colors.white,
                   ),
-                  hintText: "$hint",
+                  hintText: hint,
                   prefixIcon: ic,
                 ),
               ),
@@ -1196,7 +1196,7 @@ class BillState extends State<Bill> {
               child: StatefulBuilder(
                   builder: (BuildContext context, StateSetter setState) {
                 var sete = setState;
-                return Container(
+                return SizedBox(
                   height: MediaQuery.of(context).size.height * 0.5,
                   width: MediaQuery.of(context).size.width * 0.8,
                   child: Padding(
@@ -1257,7 +1257,7 @@ class BillState extends State<Bill> {
                             print("got customer number ${contact.text}");
                             print("###############################");
                             final invoice1 = CreateInvoice(saman);
-                            print("Datatype of Invoice generated ${invoice1}");
+                            print("Datatype of Invoice generated $invoice1");
                             if (kIsWeb) {
                               isthisWeb = true;
                               print("ok going for web pdf invoice");
@@ -1363,7 +1363,7 @@ class BillState extends State<Bill> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              '$title',
+              title,
               style: const TextStyle(
                 fontSize: 25,
                 color: Colors.white,
@@ -1384,7 +1384,7 @@ class BillState extends State<Bill> {
                   hintStyle: const TextStyle(
                     color: Colors.white,
                   ),
-                  hintText: "$hint",
+                  hintText: hint,
                   prefixIcon: ic,
                 ),
               ),
@@ -1407,7 +1407,7 @@ class BillState extends State<Bill> {
               child: StatefulBuilder(
                   builder: (BuildContext context, StateSetter setState) {
                 var sete = setState;
-                return Container(
+                return SizedBox(
                   height: MediaQuery.of(context).size.height * 0.8,
                   width: MediaQuery.of(context).size.width * 0.5,
                   child: Padding(
@@ -1492,7 +1492,7 @@ class BillState extends State<Bill> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              '$title',
+              title,
               style: const TextStyle(
                 fontSize: 25,
                 color: Colors.white,
@@ -1513,7 +1513,7 @@ class BillState extends State<Bill> {
                   hintStyle: const TextStyle(
                     color: Colors.white,
                   ),
-                  hintText: "$hint",
+                  hintText: hint,
                   prefixIcon: ic,
                 ),
               ),
@@ -1536,7 +1536,7 @@ class BillState extends State<Bill> {
               child: StatefulBuilder(
                   builder: (BuildContext context, StateSetter setState) {
                 var sete = setState;
-                return Container(
+                return SizedBox(
                   height: MediaQuery.of(context).size.height * 0.8,
                   width: MediaQuery.of(context).size.width * 0.6,
                   child: Padding(
@@ -1588,7 +1588,8 @@ class BillState extends State<Bill> {
                                       padding: const EdgeInsets.all(8.0),
                                       child: Text(
                                         barcode,
-                                        style: TextStyle(color: Colors.white),
+                                        style: const TextStyle(
+                                            color: Colors.white),
                                       ),
                                     ),
                                   ),
@@ -1637,8 +1638,8 @@ class BillState extends State<Bill> {
                         Container(
                           padding: const EdgeInsets.only(left: 8, right: 8),
                           decoration: BoxDecoration(
-                              borderRadius: const BorderRadius.all(
-                                  const Radius.circular(8)),
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(8)),
                               border: Border.all(color: Colors.white)),
                           child: StreamBuilder<QuerySnapshot>(
                               stream: dataProvider.category(),
@@ -1765,7 +1766,7 @@ class BillState extends State<Bill> {
               child: StatefulBuilder(
                   builder: (BuildContext context, StateSetter setState) {
                 sete = setState;
-                return Text('hello World');
+                return const Text('hello World');
               }));
         });
   }
@@ -1837,7 +1838,7 @@ class BillState extends State<Bill> {
     var fb = FirebaseStorage.instance;
     XFile? dfile;
     final filePath = '${DateTime.now()}.png';
-    var file;
+    android.File file;
 
     await Permission.photos.request();
     var permissionStatus = await Permission.photos.status;
@@ -1934,7 +1935,7 @@ class BillState extends State<Bill> {
                           right: Radius.circular(10),
                         ),
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.camera_alt_outlined,
                         color: Colors.white,
                         size: 90.0,
@@ -1946,7 +1947,7 @@ class BillState extends State<Bill> {
                       ImagePickerFromCamera();
                     },
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 10,
                   ),
                   const Text(
@@ -1973,7 +1974,7 @@ class BillState extends State<Bill> {
                           right: Radius.circular(10),
                         ),
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.album,
                         color: Colors.white,
                         size: 90.0,
@@ -2015,7 +2016,7 @@ class BillState extends State<Bill> {
                           right: Radius.circular(10),
                         ),
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.album,
                         color: Colors.white,
                         size: 90.0,
@@ -2035,7 +2036,8 @@ class BillState extends State<Bill> {
               Navigator.of(context).pop();
             },
             style: TextButton.styleFrom(
-              textStyle: TextStyle(color: Colors.redAccent, fontSize: 16.0),
+              textStyle:
+                  const TextStyle(color: Colors.redAccent, fontSize: 16.0),
             ),
             child: const Text('Cancel'),
           ),
@@ -2050,23 +2052,25 @@ class CustomTile extends StatelessWidget {
   final String tail;
   final TextStyle titlestyle;
   final TextStyle tailstyle;
-  CustomTile(
-      {required this.title,
+  const CustomTile(
+      {Key? key,
+      required this.title,
       required this.tail,
       required this.titlestyle,
-      required this.tailstyle});
+      required this.tailstyle})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: MediaQuery.of(context).size.width,
-      padding: EdgeInsets.only(left: 12, right: 12, top: 12),
+      padding: const EdgeInsets.only(left: 12, right: 12, top: 12),
       child: Row(
         children: [
           Expanded(
             child: Align(
               child: Text(
-                '$title',
+                title,
                 style: titlestyle,
               ),
               alignment: Alignment.centerLeft,
@@ -2075,7 +2079,7 @@ class CustomTile extends StatelessWidget {
           Expanded(
             child: Align(
               child: Text(
-                '$tail',
+                tail,
                 style: tailstyle,
               ),
               alignment: Alignment.centerRight,

@@ -30,7 +30,7 @@ class CategoryView extends StatelessWidget {
                   fit: BoxFit.contain,
                 ),
               ),
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
               Text('${snapshot.get('tag')}',
                   style: GoogleFonts.poppins(fontWeight: FontWeight.normal),
                   textAlign: TextAlign.center,

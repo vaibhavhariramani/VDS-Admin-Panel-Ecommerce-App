@@ -15,6 +15,8 @@ import 'package:vdsadmin/models/firebase.service.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 class Category1 extends StatefulWidget {
+  const Category1({Key? key}) : super(key: key);
+
   @override
   _Category1State createState() => _Category1State();
 }
@@ -45,7 +47,7 @@ class _Category1State extends State<Category1> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                SizedBox(
+                const SizedBox(
                   height: 20,
                 ),
                 Container(
@@ -81,20 +83,20 @@ class _Category1State extends State<Category1> {
                     ],
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 StreamBuilder<QuerySnapshot>(
                     stream: dataProvider.category(),
                     builder: (BuildContext context,
                         AsyncSnapshot<QuerySnapshot> snapshot) {
                       if (snapshot.hasError) {
-                        return Text('Something went wrong');
+                        return const Text('Something went wrong');
                       }
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
+                        return const Center(child: CircularProgressIndicator());
                       }
                       if (snapshot.hasData) {
                         return Material(
-                          child: Container(
+                          child: SizedBox(
                             height: MediaQuery.of(context).size.height * 10,
                             child: GridView.count(
                               physics: const NeverScrollableScrollPhysics(),
@@ -114,7 +116,7 @@ class _Category1State extends State<Category1> {
                           ),
                         );
                       }
-                      return Center(child: CircularProgressIndicator());
+                      return const Center(child: CircularProgressIndicator());
                     }),
               ],
             ),
@@ -133,7 +135,7 @@ class _Category1State extends State<Category1> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              '$title',
+              title,
               style: const TextStyle(
                 fontSize: 25,
                 color: Colors.white,
@@ -154,7 +156,7 @@ class _Category1State extends State<Category1> {
                   hintStyle: const TextStyle(
                     color: Colors.white,
                   ),
-                  hintText: "$hint",
+                  hintText: hint,
                   prefixIcon: ic,
                 ),
               ),
@@ -177,7 +179,7 @@ class _Category1State extends State<Category1> {
               child: StatefulBuilder(
                   builder: (BuildContext context, StateSetter setState) {
                 sete = setState;
-                return Container(
+                return SizedBox(
                   height: MediaQuery.of(context).size.height * 0.8,
                   width: MediaQuery.of(context).size.width * 0.5,
                   child: Padding(
@@ -283,7 +285,7 @@ class _Category1State extends State<Category1> {
                               category = null;
                               Navigator.of(context).pop();
                             } else {
-                              CircularProgressIndicator(
+                              const CircularProgressIndicator(
                                 backgroundColor: Colors.amber,
                               );
                             }
@@ -439,7 +441,7 @@ class _Category1State extends State<Category1> {
                       ImagePickerFromCameraForCategory();
                     },
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 10,
                   ),
                   const Text(
@@ -528,7 +530,7 @@ class _Category1State extends State<Category1> {
               Navigator.of(context).pop();
             },
             style: TextButton.styleFrom(
-              textStyle: TextStyle(color: Colors.redAccent, fontSize: 16.0),
+              textStyle: const TextStyle(color: Colors.redAccent, fontSize: 16.0),
             ),
             child: const Text('Cancel'),
           ),
@@ -682,7 +684,7 @@ class _Category1State extends State<Category1> {
                       ImagePickerFromCameraForIcon();
                     },
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 10,
                   ),
                   const Text(
@@ -771,7 +773,7 @@ class _Category1State extends State<Category1> {
               Navigator.of(context).pop();
             },
             style: TextButton.styleFrom(
-              textStyle: TextStyle(color: Colors.redAccent, fontSize: 16.0),
+              textStyle: const TextStyle(color: Colors.redAccent, fontSize: 16.0),
             ),
             child: const Text('Cancel'),
           ),

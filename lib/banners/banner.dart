@@ -10,12 +10,13 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:vdsadmin/banners/bannercard.dart';
-import 'package:vdsadmin/category/categorycard.dart';
 import 'package:vdsadmin/models/data_provider.dart';
 import 'package:vdsadmin/models/firebase.service.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 class BannerDisplay extends StatefulWidget {
+  const BannerDisplay({Key? key}) : super(key: key);
+
   @override
   _BannerDisplayState createState() => _BannerDisplayState();
 }
@@ -38,7 +39,7 @@ class _BannerDisplayState extends State<BannerDisplay> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                SizedBox(
+                const SizedBox(
                   height: 20,
                 ),
                 Container(
@@ -78,20 +79,20 @@ class _BannerDisplayState extends State<BannerDisplay> {
                     ],
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 StreamBuilder<QuerySnapshot>(
                     stream: dataProvider.banners(''),
                     builder: (BuildContext context,
                         AsyncSnapshot<QuerySnapshot> snapshot) {
                       if (snapshot.hasError) {
-                        return Text('Something went wrong');
+                        return const Text('Something went wrong');
                       }
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
+                        return const Center(child: CircularProgressIndicator());
                       }
                       if (snapshot.hasData) {
                         return Material(
-                          child: Container(
+                          child: SizedBox(
                             height: MediaQuery.of(context).size.height * 10,
                             child: GridView.count(
                               physics: const NeverScrollableScrollPhysics(),
@@ -132,7 +133,7 @@ class _BannerDisplayState extends State<BannerDisplay> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              '$title',
+              title,
               style: const TextStyle(
                 fontSize: 25,
                 color: Colors.white,
@@ -153,7 +154,7 @@ class _BannerDisplayState extends State<BannerDisplay> {
                   hintStyle: const TextStyle(
                     color: Colors.white,
                   ),
-                  hintText: "$hint",
+                  hintText: hint,
                   prefixIcon: ic,
                 ),
               ),
@@ -176,7 +177,7 @@ class _BannerDisplayState extends State<BannerDisplay> {
               child: StatefulBuilder(
                   builder: (BuildContext context, StateSetter setState) {
                 sete = setState;
-                return Container(
+                return SizedBox(
                   height: MediaQuery.of(context).size.height * 0.6,
                   width: MediaQuery.of(context).size.width * 0.8,
                   child: Padding(
@@ -235,7 +236,7 @@ class _BannerDisplayState extends State<BannerDisplay> {
                               Banner = null;
                               Navigator.of(context).pop();
                             } else {
-                              CircularProgressIndicator(
+                              const CircularProgressIndicator(
                                 backgroundColor: Colors.amber,
                               );
                             }
@@ -391,7 +392,7 @@ class _BannerDisplayState extends State<BannerDisplay> {
                       ImagePickerFromCameraForBanner();
                     },
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 10,
                   ),
                   const Text(
@@ -480,7 +481,7 @@ class _BannerDisplayState extends State<BannerDisplay> {
               Navigator.of(context).pop();
             },
             style: TextButton.styleFrom(
-              textStyle: TextStyle(color: Colors.redAccent, fontSize: 16.0),
+              textStyle: const TextStyle(color: Colors.redAccent, fontSize: 16.0),
             ),
             child: const Text('Cancel'),
           ),

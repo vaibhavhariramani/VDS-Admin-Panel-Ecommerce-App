@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 // ignore: import_of_legacy_library_into_null_safe
 
 // ignore: import_of_legacy_library_into_null_safe
@@ -24,6 +23,7 @@ class GridScreen extends StatefulWidget {
       {Key? key, required this.dataViewer, required this.listOfProductsInBill})
       : super(key: key);
 
+  @override
   _GridScreenState createState() => _GridScreenState();
 }
 
@@ -41,17 +41,17 @@ class _GridScreenState extends State<GridScreen> {
         backgroundColor: Colors.transparent,
         elevation: 1,
         titleSpacing: 0,
-        title: Text('grid view'),
+        title: const Text('grid view'),
         bottom: PreferredSize(
-          preferredSize: Size.fromHeight(45.0),
+          preferredSize: const Size.fromHeight(45.0),
           child: Padding(
             padding: const EdgeInsets.all(10.0).copyWith(top: 2, bottom: 5),
             child: Container(
-              padding: EdgeInsets.only(left: 8),
+              padding: const EdgeInsets.only(left: 8),
               height: 38,
               // width: 0.75*MediaQuery.of(context).size.width,
               decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(02)),
+                  borderRadius: const BorderRadius.all(Radius.circular(02)),
                   border: Border.all(color: Colors.white),
                   color: Colors.white),
               child: TextField(
@@ -73,7 +73,7 @@ class _GridScreenState extends State<GridScreen> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (BuildContext context) => Search()));
+                          builder: (BuildContext context) => const Search()));
                 },
               ),
             ),
@@ -92,14 +92,14 @@ class _GridScreenState extends State<GridScreen> {
       ),
       body: ListView(
         shrinkWrap: true,
-        physics: ScrollPhysics(),
+        physics: const ScrollPhysics(),
         children: [
-          SizedBox(height: 5),
+          const SizedBox(height: 5),
           StreamBuilder<QuerySnapshot>(
               stream: dataProvider.prd(),
               builder: (context, AsyncSnapshot<QuerySnapshot> snap) {
                 if (snap.hasData) {
-                  return snap.data!.docs.length > 0
+                  return snap.data!.docs.isNotEmpty
                       ? GridView.builder(
                           // itemExtent: 210,
                           gridDelegate:
@@ -119,7 +119,7 @@ class _GridScreenState extends State<GridScreen> {
                           shrinkWrap: true,
                           scrollDirection: Axis.vertical,
                           itemCount: snap.data!.docs.length,
-                          physics: BouncingScrollPhysics(),
+                          physics: const BouncingScrollPhysics(),
                           itemBuilder: (BuildContext context, int index) {
                             return HomeGridProductList(
                               snapshot: snap.data!.docs[index],
@@ -131,9 +131,9 @@ class _GridScreenState extends State<GridScreen> {
                         )
                       : Container();
                 }
-                return Center(child: CircularProgressIndicator());
+                return const Center(child: CircularProgressIndicator());
               }),
-          SizedBox(height: 20)
+          const SizedBox(height: 20)
         ],
       ),
     );
@@ -144,20 +144,20 @@ class _GridScreenState extends State<GridScreen> {
         context: context,
         builder: (context) => Center(
               child: Card(
-                margin: EdgeInsets.symmetric(horizontal: 34),
+                margin: const EdgeInsets.symmetric(horizontal: 34),
                 child: Padding(
-                  padding: EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(12),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      Center(
+                      const Center(
                         child: Icon(
                           Icons.info_outline,
                           size: 65,
                           color: Colors.redAccent,
                         ),
                       ),
-                      SizedBox(height: 25),
+                      const SizedBox(height: 25),
                       Padding(
                         padding: const EdgeInsets.only(left: 8, right: 8),
                         child: Text(
@@ -166,7 +166,7 @@ class _GridScreenState extends State<GridScreen> {
                           textAlign: TextAlign.center,
                         ),
                       ),
-                      SizedBox(height: 25),
+                      const SizedBox(height: 25),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -187,7 +187,7 @@ class _GridScreenState extends State<GridScreen> {
                                   Navigator.pop(context);
                                 }),
                           ),
-                          SizedBox(width: 10),
+                          const SizedBox(width: 10),
                           Container(
                             child: MaterialButton(
                                 elevation: 0,
@@ -209,7 +209,7 @@ class _GridScreenState extends State<GridScreen> {
                                       context,
                                       MaterialPageRoute(
                                           builder: (BuildContext context) =>
-                                              Login()));
+                                              const Login()));
                                 }),
                           ),
                         ],

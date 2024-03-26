@@ -1,12 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 
 class DataProvider {
   final db = FirebaseFirestore.instance;
 
   Stream<QuerySnapshot> banners(String filter) {
-    if (filter != null && filter.isNotEmpty) {
+    if (filter.isNotEmpty) {
       return db
           .collection('Banners')
           .where('screen', isEqualTo: filter)
@@ -106,7 +104,7 @@ class DataProvider {
   profile() {}
 }
 
-DataProvider dataProvider = new DataProvider();
+DataProvider dataProvider = DataProvider();
 
 class UserData {
   String profile;

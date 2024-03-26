@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class TestPlugin extends StatefulWidget {
+  const TestPlugin({Key? key}) : super(key: key);
+
   @override
   _TestPluginState createState() => _TestPluginState();
 }
@@ -8,6 +10,6 @@ class TestPlugin extends StatefulWidget {
 class _TestPluginState extends State<TestPlugin> {
   @override
   Widget build(BuildContext context) {
-    return Text("Mobile");
+    return const Text("Mobile");
   }
 }

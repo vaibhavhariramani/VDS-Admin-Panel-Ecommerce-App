@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:vdsadmin/models/data_provider.dart';
 import 'package:vdsadmin/orders/order_details.dart';
-import 'package:vdsadmin/orders/order_details2.dart';
 
 class Orders extends StatefulWidget {
   const Orders({Key? key}) : super(key: key);
@@ -12,7 +11,7 @@ class Orders extends StatefulWidget {
 }
 
 class _OrdersState extends State<Orders> {
-  dynamic? pincode;
+  dynamic pincode;
   String? search;
 
   @override
@@ -20,7 +19,7 @@ class _OrdersState extends State<Orders> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text('Order Onlines'),
+        title: const Text('Order Onlines'),
       ),
       body: ListView(
         children: [
@@ -43,14 +42,14 @@ class _OrdersState extends State<Orders> {
                           decoration: BoxDecoration(
                               border: Border.all(color: Colors.black26),
                               borderRadius:
-                                  BorderRadius.all(Radius.circular(10))),
+                                  const BorderRadius.all(Radius.circular(10))),
                           child: Row(
                             children: <Widget>[
-                              Expanded(flex: 1, child: Icon(Icons.search)),
+                              const Expanded(flex: 1, child: Icon(Icons.search)),
                               Expanded(
                                 flex: 9,
                                 child: TextField(
-                                  style: TextStyle(color: Colors.black),
+                                  style: const TextStyle(color: Colors.black),
                                   cursorColor: Colors.deepPurple,
                                   onChanged: (v) {
                                     setState(() {});
@@ -70,9 +69,9 @@ class _OrdersState extends State<Orders> {
                   Expanded(
                     flex: MediaQuery.of(context).size.width < 1000 ? 3 : 2,
                     child: Container(
-                      padding: EdgeInsets.only(left: 8, right: 8),
+                      padding: const EdgeInsets.only(left: 8, right: 8),
                       decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                          borderRadius: const BorderRadius.all(Radius.circular(8)),
                           border: Border.all(color: Colors.black26)),
                       child: StreamBuilder<QuerySnapshot>(
                           stream: dataProvider.regions(null),
@@ -80,13 +79,13 @@ class _OrdersState extends State<Orders> {
                             if (snapshot.hasData) {
                               return DropdownButton(
                                 value: pincode,
-                                icon: Icon(Icons.keyboard_arrow_down),
+                                icon: const Icon(Icons.keyboard_arrow_down),
                                 iconSize: 24,
                                 elevation: 16,
                                 isExpanded: true,
                                 underline: Container(),
-                                hint: Text('Pincode'),
-                                style: TextStyle(color: Colors.black),
+                                hint: const Text('Pincode'),
+                                style: const TextStyle(color: Colors.black),
                                 onChanged: (v) {
                                   setState(() {
                                     pincode = v;
@@ -103,12 +102,12 @@ class _OrdersState extends State<Orders> {
                                 }).toList(),
                               );
                             } else {
-                              return Text('Something went wrong');
+                              return const Text('Something went wrong');
                             }
                           }),
                     ),
                   ),
-                  SizedBox(width: 8)
+                  const SizedBox(width: 8)
                 ],
               ),
             ),
@@ -121,7 +120,7 @@ class _OrdersState extends State<Orders> {
                     padding: const EdgeInsets.only(right: 2, top: 12),
                     child: PaginatedDataTable(
                       showCheckboxColumn: false,
-                      rowsPerPage: snapshot.data!.docs.length == 0
+                      rowsPerPage: snapshot.data!.docs.isEmpty
                           ? 1
                           : snapshot.data!.docs.length < 10
                               ? snapshot.data!.docs.length
@@ -138,7 +137,7 @@ class _OrdersState extends State<Orders> {
                     ),
                   );
                 }
-                return Center(child: CircularProgressIndicator());
+                return const Center(child: CircularProgressIndicator());
               }),
         ],
       ),
@@ -151,7 +150,7 @@ class DataSource extends DataTableSource {
 
   final BuildContext context;
   QuerySnapshot? rows;
-  int _selectedCount = 0;
+  final int _selectedCount = 0;
 
   @override
   DataRow? getRow(int index) {
@@ -190,7 +189,7 @@ class DataSource extends DataTableSource {
                                 ? Colors.deepPurple.withOpacity(0.3)
                                 : Colors.red.withOpacity(0.3),
                 borderRadius: BorderRadius.circular(4)),
-            padding: EdgeInsets.all(4),
+            padding: const EdgeInsets.all(4),
             child: Text(
               '${row['status']}',
               style: TextStyle(

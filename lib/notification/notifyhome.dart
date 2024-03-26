@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:vdsadmin/billing/bill.dart';
-import 'package:vdsadmin/constant.dart';
 import 'package:vdsadmin/notification/notify.dart';
 import 'package:vdsadmin/notification/send_notification.dart';
-import 'package:vdsadmin/orders/onlineorders.dart';
 
-import '../example.dart';
 
 class Notificationpage extends StatefulWidget {
+  const Notificationpage({Key? key}) : super(key: key);
+
   @override
   _NotificationpageState createState() => _NotificationpageState();
 }
@@ -17,7 +15,7 @@ class _NotificationpageState extends State<Notificationpage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Notification'),
+        title: const Text('Notification'),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -68,7 +66,7 @@ class _NotificationpageState extends State<Notificationpage> {
                 onPressed: () => Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => NotifyAll(),
+                    builder: (_) => const NotifyAll(),
                   ),
                 ),
               ),
@@ -118,7 +116,7 @@ class _NotificationpageState extends State<Notificationpage> {
                 onPressed: () => Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => UserViewer(),
+                    builder: (_) => const UserViewer(),
                   ),
                 ),
               ),

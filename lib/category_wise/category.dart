@@ -1,6 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 // import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -25,7 +24,7 @@ class _CategoryState extends State<Category> {
       key: _scaffoldKey,
       backgroundColor: Colors.white10.withOpacity(0.95),
       appBar: AppBar(
-        backgroundColor: Color(0xff6fb840),
+        backgroundColor: const Color(0xff6fb840),
         elevation: 1,
         leading: IconButton(
           icon: Image.asset(
@@ -46,22 +45,22 @@ class _CategoryState extends State<Category> {
               fontWeight: FontWeight.w500, color: Colors.white, fontSize: 18),
         ),
         bottom: PreferredSize(
-          preferredSize: Size.fromHeight(45.0),
+          preferredSize: const Size.fromHeight(45.0),
           child: Padding(
             padding: const EdgeInsets.all(10.0).copyWith(top: 2, bottom: 5),
             child: Container(
-              padding: EdgeInsets.only(left: 8),
+              padding: const EdgeInsets.only(left: 8),
               height: 38,
               // width: 0.75*MediaQuery.of(context).size.width,
               decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(02)),
+                  borderRadius: const BorderRadius.all(Radius.circular(02)),
                   border: Border.all(color: Colors.white),
                   color: Colors.white),
               child: TextField(
                 showCursor: true,
                 textAlign: TextAlign.left,
                 readOnly: true,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   prefixIcon: Icon(
                     Icons.search_rounded,
                     color: Color(0xffA0CD4A),
@@ -76,7 +75,7 @@ class _CategoryState extends State<Category> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (BuildContext context) => Search()));
+                          builder: (BuildContext context) => const Search()));
                 },
               ),
             ),
@@ -84,7 +83,7 @@ class _CategoryState extends State<Category> {
         ),
         actions: [
           IconButton(
-            icon: Icon(
+            icon: const Icon(
               Icons.notifications_active,
               color: Colors.white,
               size: 30,
@@ -95,7 +94,7 @@ class _CategoryState extends State<Category> {
       ),
       body: ListView(
         shrinkWrap: true,
-        physics: ScrollPhysics(),
+        physics: const ScrollPhysics(),
         children: [
           Card(
             elevation: 0,
@@ -115,12 +114,12 @@ class _CategoryState extends State<Category> {
                       if (snapshot.hasData) {
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: Container(
+                          child: SizedBox(
                             width: MediaQuery.of(context).size.width,
                             child: GridView.builder(
                               shrinkWrap: true,
                               itemCount: snapshot.data?.docs.length,
-                              physics: BouncingScrollPhysics(),
+                              physics: const BouncingScrollPhysics(),
                               gridDelegate:
                                   const SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: 3,
@@ -144,8 +143,8 @@ class _CategoryState extends State<Category> {
                           ),
                         );
                       }
-                      return Column(
-                        children: const [
+                      return const Column(
+                        children: [
                           CircularProgressIndicator(
                             strokeWidth: 3,
                           ),
@@ -167,7 +166,7 @@ class _CategoryState extends State<Category> {
               builder: (context, snapshot) {
                 return ListView.builder(
                   shrinkWrap: true,
-                  padding: EdgeInsets.only(top: 8),
+                  padding: const EdgeInsets.only(top: 8),
                   itemCount: snapshot.data!.docs.length,
                   itemBuilder: (BuildContext context, int index) {
                     if (snapshot.hasData) {
@@ -177,7 +176,7 @@ class _CategoryState extends State<Category> {
                           style:
                               GoogleFonts.poppins(fontWeight: FontWeight.w500),
                         ),
-                        trailing: Icon(Icons.navigate_next),
+                        trailing: const Icon(Icons.navigate_next),
                         leading: CachedNetworkImage(
                           imageUrl: snapshot.data!.docs[index]['icon'],
                           fit: BoxFit.contain,
@@ -195,7 +194,7 @@ class _CategoryState extends State<Category> {
                         },
                       );
                     }
-                    return Center(child: CircularProgressIndicator());
+                    return const Center(child: CircularProgressIndicator());
                   },
                 );
               }),

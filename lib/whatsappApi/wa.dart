@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:vdsadmin/invoice/pdf_api.dart';
 import 'package:whatsapp_share/whatsapp_share.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:pdfx/pdfx.dart' as nativepdf;
@@ -15,7 +14,7 @@ import 'package:pdf_viewer_plugin/pdf_viewer_plugin.dart';
 class PdfViewerPg extends StatefulWidget {
   final String pth;
   final String number;
-  PdfViewerPg({Key? key, required this.pth, required this.number})
+  const PdfViewerPg({Key? key, required this.pth, required this.number})
       : super(key: key);
 
   @override
@@ -33,7 +32,7 @@ class _PdfViewerPgState extends State<PdfViewerPg> {
 
   Future<void> share() async {
     await WhatsappShare.share(
-      text: '${msg.text}',
+      text: msg.text,
       linkUrl: 'https://flutter.dev/',
       phone: '91${description.text}',
     );
@@ -52,7 +51,7 @@ class _PdfViewerPgState extends State<PdfViewerPg> {
     await WhatsappShare.shareFile(
       text: 'Thank You For Shopping at Vishal Departmental Store',
       phone: '91${widget.number}',
-      filePath: ["${_pdf.path}"],
+      filePath: [(_pdf.path)],
     );
   }
 
@@ -73,7 +72,7 @@ class _PdfViewerPgState extends State<PdfViewerPg> {
 
     // await _controller.capture(path: localPath);
 
-    await Future.delayed(Duration(seconds: 1));
+    await Future.delayed(const Duration(seconds: 1));
 
     await WhatsappShare.shareFile(
       text: 'Whatsapp message text',
@@ -90,7 +89,7 @@ class _PdfViewerPgState extends State<PdfViewerPg> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            '$title',
+            title,
             style: const TextStyle(
               fontSize: 25,
               color: Colors.white,
@@ -111,7 +110,7 @@ class _PdfViewerPgState extends State<PdfViewerPg> {
                 hintStyle: const TextStyle(
                   color: Colors.white,
                 ),
-                hintText: "$hint",
+                hintText: hint,
                 prefixIcon: ic,
               ),
             ),
@@ -160,19 +159,19 @@ class _PdfViewerPgState extends State<PdfViewerPg> {
                   ),
                 )
               else
-                Text("Pdf is not Loaded"),
+                const Text("Pdf is not Loaded"),
               ElevatedButton(
-                child: Text('Send Bill'),
+                child: const Text('Send Bill'),
                 onPressed: shareFile,
               ),
               ElevatedButton(
-                child: Text('Print Bill'),
+                child: const Text('Print Bill'),
                 onPressed: () {
                   PdfApi.openFile(File(widget.pth));
                 },
               ),
               ElevatedButton(
-                child: Text('is Installed'),
+                child: const Text('is Installed'),
                 onPressed: isInstalled,
               ),
             ],
@@ -223,7 +222,7 @@ class _PdfViewerwebState extends State<PdfViewerweb> {
 
   Future<void> share() async {
     await WhatsappShare.share(
-      text: '${msg.text}',
+      text: msg.text,
       linkUrl: 'https://flutter.dev/',
       phone: '91${description.text}',
     );
@@ -242,7 +241,7 @@ class _PdfViewerwebState extends State<PdfViewerweb> {
     await WhatsappShare.shareFile(
       text: 'Thank You For Shopping at Vishal Departmental Store',
       phone: '91${widget.number}',
-      filePath: ["${_pdf.path}"],
+      filePath: [(_pdf.path)],
     );
   }
 
@@ -263,7 +262,7 @@ class _PdfViewerwebState extends State<PdfViewerweb> {
 
     // await _controller.capture(path: localPath);
 
-    await Future.delayed(Duration(seconds: 1));
+    await Future.delayed(const Duration(seconds: 1));
 
     await WhatsappShare.shareFile(
       text: 'Whatsapp message text',
@@ -280,7 +279,7 @@ class _PdfViewerwebState extends State<PdfViewerweb> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            '$title',
+            title,
             style: const TextStyle(
               fontSize: 25,
               color: Colors.white,
@@ -301,7 +300,7 @@ class _PdfViewerwebState extends State<PdfViewerweb> {
                 hintStyle: const TextStyle(
                   color: Colors.white,
                 ),
-                hintText: "$hint",
+                hintText: hint,
                 prefixIcon: ic,
               ),
             ),
@@ -352,7 +351,7 @@ class _PdfViewerwebState extends State<PdfViewerweb> {
                   onPressed: shareFile,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(80.0)),
-                  padding: EdgeInsets.all(0.0),
+                  padding: const EdgeInsets.all(0.0),
                   child: const Text(
                     "Send Bill",
                     textAlign: TextAlign.center,
@@ -364,13 +363,13 @@ class _PdfViewerwebState extends State<PdfViewerweb> {
                   color: Colors.white,
                 ),
                 ElevatedButton(
-                  child: Text('Print Bill'),
+                  child: const Text('Print Bill'),
                   onPressed: () {
                     // PdfApi.openFile(File(widget.data));
                   },
                 ),
                 ElevatedButton(
-                  child: Text('is Installed'),
+                  child: const Text('is Installed'),
                   onPressed: isInstalled,
                 ),
               ],
@@ -391,7 +390,7 @@ class _PdfViewerwebState extends State<PdfViewerweb> {
                   ),
                 )
               else
-                Text("Pdf is not Loaded"),
+                const Text("Pdf is not Loaded"),
             ],
           ),
         ),

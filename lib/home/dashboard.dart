@@ -29,8 +29,8 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
-  late String username;
-  late String fullname;
+  String? username;
+  String? fullname;
 
   @override
   void initState() {
@@ -65,10 +65,10 @@ class _DashboardState extends State<Dashboard> {
   void _logOut() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.remove('user');
-    prefs.setString('username', username);
-    prefs.setString('fullname', fullname);
+    prefs.setString('username', username ?? "");
+    prefs.setString('fullname', fullname ?? "");
     Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (c) => Login()));
+        context, MaterialPageRoute(builder: (c) => const Login()));
   }
 
   String token = '';
@@ -79,7 +79,7 @@ class _DashboardState extends State<Dashboard> {
     CollectionReference reference =
         FirebaseFirestore.instance.collection('Users');
     // final status = await OneSignal.shared.getDeviceState();
-    final status = await OneSignal.User.toString();
+    final status = OneSignal.User.toString();
     // final String? tokenId = status?.userId;
     final String? tokenId = status;
     print('token ID is : $tokenId');
@@ -96,8 +96,8 @@ class _DashboardState extends State<Dashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Column(
-          children: const [
+        title: const Column(
+          children: [
             Text(
               'Vishal Departmental Store',
               style: TextStyle(
@@ -118,16 +118,16 @@ class _DashboardState extends State<Dashboard> {
             ),
           ],
         ),
-        backgroundColor: Color(0xffF3AB0D),
+        backgroundColor: const Color(0xffF3AB0D),
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.get_app),
+            icon: const Icon(Icons.get_app),
             onPressed: () {
               getToken();
               print(token);
             },
           ),
-          IconButton(icon: Icon(Icons.logout), onPressed: _logOut)
+          IconButton(icon: const Icon(Icons.logout), onPressed: _logOut)
         ],
       ),
       body: Center(
@@ -205,7 +205,7 @@ class _DashboardState extends State<Dashboard> {
                                   child: RichText(
                                     text: const TextSpan(
                                       text: 'Click Here',
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         color: Colors.white,
                                       ),
                                       children: [
@@ -308,7 +308,7 @@ class _DashboardState extends State<Dashboard> {
                                             child: RichText(
                                               text: const TextSpan(
                                                 text: 'to stock',
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                   color: Colors.white,
                                                 ),
                                                 children: [
@@ -416,7 +416,7 @@ class _DashboardState extends State<Dashboard> {
                                             child: RichText(
                                               text: const TextSpan(
                                                 text: 'and sub-Category',
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                   color: Colors.white,
                                                 ),
                                                 children: [
@@ -444,7 +444,7 @@ class _DashboardState extends State<Dashboard> {
                           onPressed: () => Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => Category1(),
+                              builder: (_) => const Category1(),
                             ),
                           ),
                         ),
@@ -532,7 +532,7 @@ class _DashboardState extends State<Dashboard> {
                                             child: RichText(
                                               text: const TextSpan(
                                                 text: 'Online and offline',
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                   color: Colors.white,
                                                 ),
                                                 children: [
@@ -560,7 +560,7 @@ class _DashboardState extends State<Dashboard> {
                           onPressed: () => Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => Orderspage(),
+                              builder: (_) => const Orderspage(),
                             ),
                           ),
                         ),
@@ -619,7 +619,7 @@ class _DashboardState extends State<Dashboard> {
                           onPressed: () => Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => BannerDisplay(),
+                              builder: (_) => const BannerDisplay(),
                             ),
                           ),
                         ),
@@ -661,12 +661,11 @@ class _DashboardState extends State<Dashboard> {
                                   ),
                                 ),
                               ),
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 10.0, top: 30.0),
+                              const Padding(
+                                padding: EdgeInsets.only(left: 10.0, top: 30.0),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: const <Widget>[
+                                  children: <Widget>[
                                     Text(
                                       'Notification',
                                       style: TextStyle(
@@ -686,7 +685,7 @@ class _DashboardState extends State<Dashboard> {
                           onPressed: () => Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => Notificationpage(),
+                              builder: (_) => const Notificationpage(),
                             ),
                           ),
                         ),
@@ -756,7 +755,7 @@ class _DashboardState extends State<Dashboard> {
                                             child: RichText(
                                               text: const TextSpan(
                                                 text: '',
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                   color: Colors.white,
                                                 ),
                                                 children: [
@@ -784,7 +783,7 @@ class _DashboardState extends State<Dashboard> {
                           onPressed: () => Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => Example(),
+                              builder: (_) => const Example(),
                             ),
                           ),
                         ),
@@ -826,12 +825,11 @@ class _DashboardState extends State<Dashboard> {
                                   ),
                                 ),
                               ),
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 10.0, top: 30.0),
+                              const Padding(
+                                padding: EdgeInsets.only(left: 10.0, top: 30.0),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: const <Widget>[
+                                  children: <Widget>[
                                     Text(
                                       'Grid view',
                                       style: TextStyle(
@@ -925,7 +923,7 @@ class _DashboardState extends State<Dashboard> {
                                             child: RichText(
                                               text: const TextSpan(
                                                 text: 'Products',
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                   color: Colors.white,
                                                 ),
                                                 children: [
@@ -953,7 +951,7 @@ class _DashboardState extends State<Dashboard> {
                           onPressed: () => Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => Category(),
+                              builder: (_) => const Category(),
                             ),
                           ),
                         ),
@@ -997,7 +995,7 @@ class _DashboardState extends State<Dashboard> {
                             child: CircleAvatar(
                               radius: 50.0,
                               backgroundColor: Colors.grey,
-                              child: const Image(
+                              child: Image(
                                 image: AssetImage(
                                   'images/1.png',
                                 ),
@@ -1014,7 +1012,7 @@ class _DashboardState extends State<Dashboard> {
                             ),
                           ),
                           Text(
-                            username,
+                            username ?? "",
                             style: const TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.w300,

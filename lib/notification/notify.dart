@@ -10,6 +10,8 @@ CollectionReference adminTokenRef =
     FirebaseFirestore.instance.collection('Users');
 
 class UserViewer extends StatefulWidget {
+  const UserViewer({Key? key}) : super(key: key);
+
   @override
   _UserViewerState createState() => _UserViewerState();
 }
@@ -51,7 +53,7 @@ class _UserViewerState extends State<UserViewer> {
                           builder: (BuildContext context,
                               AsyncSnapshot<QuerySnapshot> snapshot) {
                             if (!snapshot.hasData) {
-                              return CircularProgressIndicator();
+                              return const CircularProgressIndicator();
                             }
                             List<DocumentSnapshot> userList = [];
                             snapshot.data!.docs.map((e) {
@@ -141,7 +143,7 @@ class _NotifyState extends State<Notify> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Container(
-        padding: EdgeInsets.only(left: 16, right: 8, top: 25, bottom: 10),
+        padding: const EdgeInsets.only(left: 16, right: 8, top: 25, bottom: 10),
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             color: Colors.white,
@@ -162,7 +164,7 @@ class _NotifyState extends State<Notify> {
               Text(
                 widget.jobTitle,
               ),
-              SizedBox(
+              const SizedBox(
                 height: 8,
               ),
               Column(
@@ -178,10 +180,10 @@ class _NotifyState extends State<Notify> {
                 sendNotification([widget.tokenId], "Testing 123", "Sanjay"),
             child: Container(
               width: 70,
-              padding: EdgeInsets.all(10),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                   color: Colors.green, borderRadius: BorderRadius.circular(8)),
-              child: Text("Send"),
+              child: const Text("Send"),
             ),
           ),
         ]),

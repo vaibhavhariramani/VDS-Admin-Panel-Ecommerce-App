@@ -2,10 +2,8 @@ import 'dart:io';
 // import 'dart:html' as webFile;
 // import 'package:file_picker_web/file_picker_web.dart' as webPicker;
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 
 class PdfApi {

@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -38,7 +37,7 @@ class PdfInvoiceWebApi {
 
       return [
         item.description,
-        '${item.quantity}',
+        (item.quantity),
         '₹ ${item.mrp}',
         '₹ ${item.price}',
         '₹ ${total.toStringAsFixed(2)}',
@@ -270,7 +269,7 @@ class PdfInvoiceWebApi {
         '${item.mrp}',
         '${item.price}',
         '${item.count}',
-        '${total.toStringAsFixed(2)}',
+        (total.toStringAsFixed(2)),
       ];
     }).toList();
     print("Invoice table created");
@@ -282,7 +281,7 @@ class PdfInvoiceWebApi {
       cellStyle: TextStyle(
         fontWeight: FontWeight.bold,
       ),
-      headerDecoration: BoxDecoration(color: PdfColors.grey300),
+      headerDecoration: const BoxDecoration(color: PdfColors.grey300),
       cellHeight: 30,
       cellAlignments: {
         0: Alignment.centerLeft,

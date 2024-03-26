@@ -5,6 +5,8 @@ import 'package:vdsadmin/models/product_data.dart';
 import 'data_assisten.dart';
 
 class Login extends StatefulWidget {
+  const Login({Key? key}) : super(key: key);
+
   @override
   _LoginState createState() => _LoginState();
 }
@@ -37,7 +39,7 @@ class _LoginState extends State<Login> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              '$title',
+              title,
               style: const TextStyle(
                 fontSize: 25,
                 color: Colors.black,
@@ -58,7 +60,7 @@ class _LoginState extends State<Login> {
                   hintStyle: const TextStyle(
                     color: Colors.black,
                   ),
-                  hintText: "$hint",
+                  hintText: hint,
                   prefixIcon: ic,
                 ),
               ),
@@ -101,7 +103,7 @@ class _LoginState extends State<Login> {
                         children: [
                           Container(
                             margin: const EdgeInsets.only(bottom: 8.0),
-                            child: Text(
+                            child: const Text(
                               "Login",
                               style: TextStyle(
                                 fontSize: 16,
@@ -130,7 +132,7 @@ class _LoginState extends State<Login> {
                             children: [
                               Container(
                                 margin: const EdgeInsets.only(top: 8.0),
-                                child: Column(
+                                child: const Column(
                                   children: [
                                     Text(
                                       "Forget Password ?",
@@ -150,7 +152,7 @@ class _LoginState extends State<Login> {
                               child: TextButton(
                                 child: Text(
                                   "Login".toUpperCase(),
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                       fontSize: 16,
                                       color: Colors.white,
                                       fontWeight: FontWeight.w600),
@@ -158,10 +160,10 @@ class _LoginState extends State<Login> {
                                 style: ButtonStyle(
                                   padding:
                                       MaterialStateProperty.all<EdgeInsets>(
-                                          EdgeInsets.all(10)),
+                                          const EdgeInsets.all(10)),
                                   backgroundColor:
                                       MaterialStateProperty.all<Color>(
-                                          Color(0xffF3AB0D)),
+                                          const Color(0xffF3AB0D)),
                                   shape: MaterialStateProperty.all<
                                           RoundedRectangleBorder>(
                                       RoundedRectangleBorder(
@@ -192,7 +194,7 @@ class _LoginState extends State<Login> {
       });
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      Future.delayed(Duration(seconds: 1), () {
+      Future.delayed(const Duration(seconds: 1), () {
         for (int id = 0; id < dataAssisten.length; id++) {
           if (username.text == dataAssisten[id]["UserName"] &&
               pass.text == dataAssisten[id]["PassWord"]) {

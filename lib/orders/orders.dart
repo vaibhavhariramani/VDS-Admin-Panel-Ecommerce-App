@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:vdsadmin/billing/bill.dart';
-import 'package:vdsadmin/constant.dart';
 import 'package:vdsadmin/orders/offlineorders2.dart';
-import 'package:vdsadmin/orders/onlineorders.dart';
 import 'package:vdsadmin/orders/onlineorders2.dart';
 
-import '../example.dart';
-
 class Orderspage extends StatefulWidget {
+  const Orderspage({Key? key}) : super(key: key);
+
   @override
   _OrderspageState createState() => _OrderspageState();
 }
@@ -17,7 +14,7 @@ class _OrderspageState extends State<Orderspage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Orders'),
+        title: const Text('Orders'),
       ),
       body: ListView(
         children: [
@@ -27,16 +24,17 @@ class _OrderspageState extends State<Orderspage> {
                 height: 10,
               ),
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  const SizedBox(
-                    width: 30.0,
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.03,
                   ),
                   MaterialButton(
                     child: Stack(
                       children: <Widget>[
                         Container(
-                          height: MediaQuery.of(context).size.height * 0.4,
-                          width: MediaQuery.of(context).size.width * 0.4,
+                          height: MediaQuery.of(context).size.height * 0.3,
+                          width: MediaQuery.of(context).size.width * 0.35,
                           decoration: BoxDecoration(
                               shape: BoxShape.rectangle,
                               color: const Color(0xFFE44E4F),
@@ -56,16 +54,16 @@ class _OrderspageState extends State<Orderspage> {
                             ),
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
+                        const Padding(
+                          padding: EdgeInsets.all(2.0),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const <Widget>[
+                            children: <Widget>[
                               Text(
                                 'Online Orders',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 24.0,
+                                  fontSize: 16.0,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -84,15 +82,15 @@ class _OrderspageState extends State<Orderspage> {
                       ),
                     ),
                   ),
-                  const SizedBox(
-                    width: 30.0,
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.03,
                   ),
                   MaterialButton(
                     child: Stack(
                       children: <Widget>[
                         Container(
-                          height: MediaQuery.of(context).size.height * 0.4,
-                          width: MediaQuery.of(context).size.width * 0.4,
+                          height: MediaQuery.of(context).size.height * 0.3,
+                          width: MediaQuery.of(context).size.width * 0.35,
                           decoration: BoxDecoration(
                               shape: BoxShape.rectangle,
                               color: const Color(0xFF6674F1),
@@ -107,8 +105,8 @@ class _OrderspageState extends State<Orderspage> {
                             alignment: FractionalOffset.bottomCenter,
                             child: Image.asset(
                               'images/3.png',
-                              height: MediaQuery.of(context).size.height * 0.4,
-                              width: MediaQuery.of(context).size.width * 0.3,
+                              height: MediaQuery.of(context).size.height * 0.3,
+                              width: MediaQuery.of(context).size.width * 0.35,
                             ),
                           ),
                         ),
@@ -119,7 +117,7 @@ class _OrderspageState extends State<Orderspage> {
                               text: 'Offline Orders',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 22.0,
+                                fontSize: 16.0,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -130,7 +128,7 @@ class _OrderspageState extends State<Orderspage> {
                     onPressed: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => OfflineOrders2(),
+                        builder: (_) => const OfflineOrders2(),
                       ),
                     ),
                   ),

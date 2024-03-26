@@ -1,7 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/widgets.dart';
@@ -38,7 +35,7 @@ class PdfInvoiceApi {
 
       return [
         item.description,
-        '${item.quantity}',
+        (item.quantity),
         '₹ ${item.mrp}',
         '₹ ${item.price}',
         '₹ ${total.toStringAsFixed(2)}',
@@ -64,7 +61,7 @@ class PdfInvoiceApi {
             fontWeight: FontWeight.bold,
             // font: ttf,
           ),
-          headerDecoration: BoxDecoration(color: PdfColors.grey300),
+          headerDecoration: const BoxDecoration(color: PdfColors.grey300),
           cellHeight: 30,
           cellAlignments: {
             0: Alignment.centerLeft,
@@ -267,7 +264,7 @@ class PdfInvoiceApi {
       print("header is built \n title is built \n creating invoice");
       return [
         item.description,
-        '${item.quantity}',
+        (item.quantity),
         '\$ ${item.mrp}',
         '\$ ${item.price}',
         '\$ ${total.toStringAsFixed(2)}',
@@ -282,7 +279,7 @@ class PdfInvoiceApi {
       cellStyle: TextStyle(
         fontWeight: FontWeight.bold,
       ),
-      headerDecoration: BoxDecoration(color: PdfColors.grey300),
+      headerDecoration: const BoxDecoration(color: PdfColors.grey300),
       cellHeight: 30,
       cellAlignments: {
         0: Alignment.centerLeft,

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'constant.dart';
 
 class Example extends StatelessWidget {
+  const Example({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,8 +38,8 @@ class Example extends StatelessWidget {
                       shape: BoxShape.rectangle,
                       color: const Color(0xFF003D64),
                       borderRadius: BorderRadius.circular(20.0),
-                      boxShadow: <BoxShadow>[
-                        const BoxShadow(
+                      boxShadow: const <BoxShadow>[
+                        BoxShadow(
                             color: Colors.black45,
                             offset: Offset(0.0, 10.0),
                             blurRadius: 10.0)
@@ -135,7 +137,7 @@ class Example extends StatelessWidget {
                     width: 150,
                     title: 'Symptoms &',
                     subtitle: 'Preventions',
-                    input: Example(),
+                    input: const Example(),
                   ),
                   cards(
                     colour: const Color(0xFFB3E0FF),
@@ -144,7 +146,7 @@ class Example extends StatelessWidget {
                     width: 160,
                     title: ' Prevent ',
                     subtitle: 'Getting Sick',
-                    input: Example(),
+                    input: const Example(),
                   ),
                 ],
               ),
@@ -168,8 +170,8 @@ class Example extends StatelessWidget {
                       shape: BoxShape.rectangle,
                       color: const Color(0xFFFEE8DA),
                       borderRadius: BorderRadius.circular(20.0),
-                      boxShadow: <BoxShadow>[
-                        const BoxShadow(
+                      boxShadow: const <BoxShadow>[
+                        BoxShadow(
                             color: Colors.black38,
                             offset: Offset(0.0, 8.0),
                             blurRadius: 10.0)
@@ -188,22 +190,22 @@ class Example extends StatelessWidget {
                 const SizedBox(
                   height: 10.0,
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 130.0, top: 30.0),
+                const Padding(
+                  padding: EdgeInsets.only(left: 130.0, top: 30.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      const Text(
+                      Text(
                         'Safety and Health Topics',
                         style: TextStyle(
                             color: Color(0xFFEC8537),
                             fontSize: 15.0,
                             fontWeight: FontWeight.w600),
                       ),
-                      const SizedBox(
+                      SizedBox(
                         height: 10.0,
                       ),
-                      const Text(
+                      Text(
                         'if You think you have been exposed to COVID-19 '
                         'if You think you have been?',
                         style: TextStyle(

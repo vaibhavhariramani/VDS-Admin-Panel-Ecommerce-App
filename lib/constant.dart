@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 
-import 'example.dart';
 
 class cards extends StatelessWidget {
   cards(
-      {required this.img,
+      {Key? key, required this.img,
       required this.title,
       required this.subtitle,
       required this.height,
       required this.width,
       required this.colour,
-      required this.input});
+      required this.input}) : super(key: key);
 
   final String img;
   final String title;
@@ -94,13 +93,13 @@ class cards extends StatelessWidget {
 
 class cards2 extends StatelessWidget {
   cards2(
-      {required this.img,
+      {Key? key, required this.img,
       required this.title,
       required this.subtitle,
       required this.height,
       required this.width,
       required this.colour,
-      required this.input});
+      required this.input}) : super(key: key);
 
   final String img;
   final String title;

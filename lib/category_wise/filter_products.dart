@@ -9,7 +9,7 @@ import 'package:vdsadmin/search/search.dart';
 class FilterProduct extends StatefulWidget {
   final DocumentSnapshot snapshot;
 
-  FilterProduct({required this.snapshot});
+  const FilterProduct({Key? key, required this.snapshot}) : super(key: key);
   @override
   _FilterProductState createState() => _FilterProductState();
 }
@@ -23,10 +23,10 @@ class _FilterProductState extends State<FilterProduct> {
     return Scaffold(
       backgroundColor: Colors.white10.withOpacity(0.95),
       appBar: AppBar(
-        backgroundColor: Color(0xff6fb840),
+        backgroundColor: const Color(0xff6fb840),
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios),
+          icon: const Icon(Icons.arrow_back_ios),
           color: Colors.white,
           onPressed: () {
             Navigator.pop(context);
@@ -38,7 +38,7 @@ class _FilterProductState extends State<FilterProduct> {
         ),
         actions: [
           IconButton(
-            icon: Icon(
+            icon: const Icon(
               Icons.search,
               color: Colors.white,
             ),
@@ -46,10 +46,10 @@ class _FilterProductState extends State<FilterProduct> {
               Navigator.push(
                 context,
                 PageRouteBuilder(
-                  pageBuilder: (c, a1, a2) => Search(),
+                  pageBuilder: (c, a1, a2) => const Search(),
                   transitionsBuilder: (c, anim, a2, child) =>
                       FadeTransition(opacity: anim, child: child),
-                  transitionDuration: Duration(milliseconds: 10),
+                  transitionDuration: const Duration(milliseconds: 10),
                 ),
               );
             },
@@ -58,11 +58,11 @@ class _FilterProductState extends State<FilterProduct> {
       ),
       body: ListView(
         shrinkWrap: true,
-        physics: BouncingScrollPhysics(),
+        physics: const BouncingScrollPhysics(),
         children: [
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           widget.snapshot.get('tags') != null
-              ? Container(
+              ? SizedBox(
                   width: MediaQuery.of(context).size.width,
                   height: 60,
                   child: ListView.builder(
@@ -94,8 +94,8 @@ class _FilterProductState extends State<FilterProduct> {
                                       width: 60,
                                       height: 60,
                                     )),
-                                SizedBox(width: 8),
-                                Container(
+                                const SizedBox(width: 8),
+                                SizedBox(
                                     width: 90,
                                     child: Text(
                                         '${widget.snapshot.get('tags')[index]['name']}',
@@ -103,7 +103,7 @@ class _FilterProductState extends State<FilterProduct> {
                                             fontWeight: FontWeight.w600),
                                         maxLines: 2,
                                         overflow: TextOverflow.clip)),
-                                SizedBox(width: 4),
+                                const SizedBox(width: 4),
                               ],
                             ),
                           ),
@@ -119,12 +119,12 @@ class _FilterProductState extends State<FilterProduct> {
                   ),
                 )
               : Container(),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           StreamBuilder<QuerySnapshot>(
               stream: dataProvider.products(widget.snapshot.get('tag')),
               builder: (context, snapshot) {
                 return ListView.builder(
-                  physics: BouncingScrollPhysics(),
+                  physics: const BouncingScrollPhysics(),
                   itemCount: snapshot.data?.docs.length,
                   shrinkWrap: true,
                   itemBuilder: (BuildContext context, int index) {
@@ -143,10 +143,10 @@ class _FilterProductState extends State<FilterProduct> {
                         },
                       );
                     }
-                    return Container(
+                    return SizedBox(
                       width: MediaQuery.of(context).size.width,
                       height: MediaQuery.of(context).size.height * 0.8,
-                      child: Column(
+                      child: const Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           CircularProgressIndicator(),
@@ -154,7 +154,7 @@ class _FilterProductState extends State<FilterProduct> {
                             height: 20,
                           ),
                           Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
+                            padding: EdgeInsets.only(bottom: 8),
                             child: Text(
                               'Loading....',
                               style: TextStyle(
@@ -162,7 +162,7 @@ class _FilterProductState extends State<FilterProduct> {
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.only(left: 80, right: 80),
+                            padding: EdgeInsets.only(left: 80, right: 80),
                             child: Text(
                               "We are looking to match best product for you",
                               style: TextStyle(color: Colors.grey),
@@ -185,7 +185,7 @@ class _FilterProductState extends State<FilterProduct> {
       {required QueryDocumentSnapshot<Object> snapshot,
       Null Function()? onClick}) {
     return Container(
-      child: Text('hello'),
+      child: const Text('hello'),
     );
   }
 }

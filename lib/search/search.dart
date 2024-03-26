@@ -5,6 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:vdsadmin/search/product_details.dart';
 
 class Search extends StatefulWidget {
+  const Search({Key? key}) : super(key: key);
+
   @override
   _SearchState createState() => _SearchState();
 }
@@ -21,7 +23,7 @@ class _SearchState extends State<Search> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-            icon: Icon(
+            icon: const Icon(
               Icons.arrow_back_ios,
               color: Colors.white,
             ),
@@ -29,9 +31,9 @@ class _SearchState extends State<Search> {
         title: Padding(
           padding: const EdgeInsets.only(left: 0, right: 0, top: 4),
           child: Container(
-            padding: EdgeInsets.only(left: 8),
+            padding: const EdgeInsets.only(left: 8),
             height: 38,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(8)),
                 color: Colors.white),
             child: TextField(
@@ -71,11 +73,11 @@ class _SearchState extends State<Search> {
           builder: (context, snapshot) {
             if (snapshot.data!.docs.isNotEmpty) {
               return ListView.builder(
-                padding: EdgeInsets.only(top: 8),
+                padding: const EdgeInsets.only(top: 8),
                 itemCount: snapshot.data!.docs.length,
                 itemBuilder: (BuildContext context, int index) {
                   return GestureDetector(
-                    child: Container(
+                    child: SizedBox(
                       height: 80,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -94,16 +96,16 @@ class _SearchState extends State<Search> {
                                             .isNotEmpty
                                     ? CachedNetworkImage(
                                         placeholder: (context, url) =>
-                                            CircularProgressIndicator(),
+                                            const CircularProgressIndicator(),
                                         imageUrl: snapshot.data!.docs[index]
                                             .get('image'),
                                         width: 80,
                                         height: 50,
                                         fit: BoxFit.contain,
                                       )
-                                    : Icon(Icons.image_not_supported_outlined),
+                                    : const Icon(Icons.image_not_supported_outlined),
                               ),
-                              SizedBox(
+                              const SizedBox(
                                 width: 8,
                               ),
                               Expanded(
@@ -121,7 +123,7 @@ class _SearchState extends State<Search> {
                                   )),
                             ],
                           ),
-                          Divider()
+                          const Divider()
                         ],
                       ),
                     ),
@@ -136,9 +138,9 @@ class _SearchState extends State<Search> {
                 },
               );
             } else {
-              return Container(
+              return SizedBox(
                 width: MediaQuery.of(context).size.width,
-                child: Column(
+                child: const Column(
                   children: [
                     SizedBox(
                       height: 50,
