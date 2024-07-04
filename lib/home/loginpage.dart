@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vdsadmin/home/dashboard.dart';
 import 'package:vdsadmin/models/product_data.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'data_assisten.dart';
 
 class Login extends StatefulWidget {
@@ -194,21 +195,36 @@ class _LoginState extends State<Login> {
       });
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      Future.delayed(const Duration(seconds: 1), () {
-        for (int id = 0; id < dataAssisten.length; id++) {
-          if (username.text == dataAssisten[id]["UserName"] &&
-              pass.text == dataAssisten[id]["PassWord"]) {
-            String? fullname = dataAssisten[id]["FullName"] as String?;
-            String? username = dataAssisten[id]["UserName"] as String?;
-            prefs.setBool('user', true);
-            prefs.setString('username', username!);
-            prefs.setString('fullname', fullname!);
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => Dashboard(
-                          MasterproductListForBilling: productList,
-                        )));
+      Future.delayed(const Duration(seconds: 1), () async {
+        if (username.text.contains("@")) {
+          try {
+            String? email = username.text;
+            String? password = pass.text;
+            final authResult = await FirebaseAuth.instance
+                .signInWithEmailAndPassword(email: email, password: password);
+            User user = authResult.user!;
+          } catch (e) {
+            print(e.toString());
+            return null;
+          }
+        } else {
+          for (int id = 0; id < dataAssisten.length; id++) {
+            if (username.text == dataAssisten[id]["UserName"] &&
+                pass.text == dataAssisten[id]["PassWord"]) {
+              String? fullname;
+              String? username;
+              fullname = dataAssisten[id]["FullName"] as String?;
+              username = dataAssisten[id]["UserName"] as String?;
+              prefs.setBool('user', true);
+              prefs.setString('username', username!);
+              prefs.setString('fullname', fullname!);
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => Dashboard(
+                            MasterproductListForBilling: productList,
+                          )));
+            }
           }
         }
       });
