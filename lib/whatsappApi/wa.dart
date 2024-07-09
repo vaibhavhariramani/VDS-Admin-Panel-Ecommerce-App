@@ -30,7 +30,7 @@ class _PdfViewerPgState extends State<PdfViewerPg> {
   late File _pdf;
   late File _image;
 
-  Future<void> share() async {
+  FutureOr<void> share() async {
     await WhatsappShare.share(
       text: msg.text,
       linkUrl: 'https://flutter.dev/',
@@ -38,7 +38,7 @@ class _PdfViewerPgState extends State<PdfViewerPg> {
     );
   }
 
-  Future<void> shareFile() async {
+  FutureOr<void> shareFile() async {
     await getImage();
     Directory? directory;
     if (Platform.isAndroid) {
@@ -55,12 +55,12 @@ class _PdfViewerPgState extends State<PdfViewerPg> {
     );
   }
 
-  Future<void> isInstalled() async {
+  FutureOr<void> isInstalled() async {
     final val = await WhatsappShare.isInstalled();
     print('Whatsapp is installed: $val');
   }
 
-  Future<void> shareScreenShot() async {
+  FutureOr<void> shareScreenShot() async {
     Directory? directory;
     if (Platform.isAndroid) {
       directory = await getExternalStorageDirectory();
