@@ -1,8 +1,15 @@
+import 'dart:async';
+import 'dart:async';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vdsadmin/home/dashboard.dart';
 import 'package:vdsadmin/models/product_data.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../custom_colors.dart';
+import '../utils/authentication.dart';
+import '../widgets/google_sign_in_button.dart';
 import 'data_assisten.dart';
 
 class Login extends StatefulWidget {
@@ -10,6 +17,24 @@ class Login extends StatefulWidget {
 
   @override
   _LoginState createState() => _LoginState();
+  static Future<bool> checkUser(User user) async {
+    if (user == null) {
+      return false;
+    }
+
+    DocumentSnapshot userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
+
+    if (userDoc.exists) {
+      Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
+      bool isAdmin = userData['isAdmin'] ?? false;
+      return isAdmin;
+    } else {
+      return false;
+    }
+  }
 }
 
 class _LoginState extends State<Login> {
@@ -179,6 +204,23 @@ class _LoginState extends State<Login> {
                       ),
                     ),
                   ]),
+                  Center(child: Text('OR')),
+                  FutureBuilder(
+                    future: Authentication.initializeFirebase(context: context),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return Text('Error initializing Firebase');
+                      } else if (snapshot.connectionState ==
+                          ConnectionState.done) {
+                        return GoogleSignInButton();
+                      }
+                      return CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          CustomColors.firebaseOrange,
+                        ),
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
@@ -188,7 +230,28 @@ class _LoginState extends State<Login> {
     );
   }
 
-  Future<void> _login() async {
+  FutureOr<bool> checkUser(User user) async {
+    if (user == null) {
+      return false;
+    }
+
+    DocumentSnapshot userDoc = await FirebaseFirestore.instance
+        .collection('Admins')
+        .doc(user.uid)
+        .get();
+    print("fetched user details from Admins");
+    print(userDoc);
+    if (userDoc.exists) {
+      Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
+      print("Users admin status is : |${userData['isAdmin']}");
+      bool isAdmin = userData['isAdmin'] ?? false;
+      return isAdmin;
+    } else {
+      return false;
+    }
+  }
+
+  FutureOr<void> _login() async {
     if (username.text.isNotEmpty && pass.text.isNotEmpty) {
       setState(() {
         isLoading = true;
@@ -203,6 +266,22 @@ class _LoginState extends State<Login> {
             final authResult = await FirebaseAuth.instance
                 .signInWithEmailAndPassword(email: email, password: password);
             User user = authResult.user!;
+            print(user);
+            bool isAdmin = await checkUser(user);
+            if (isAdmin) {
+              String? fullname = user.displayName;
+              String? username = user.displayName;
+              prefs.setString('email', email);
+              prefs.setBool('user', true);
+              prefs.setString('username', username!);
+              prefs.setString('fullname', fullname!);
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => Dashboard(
+                            MasterproductListForBilling: productList,
+                          )));
+            }
           } catch (e) {
             print(e.toString());
             return null;
