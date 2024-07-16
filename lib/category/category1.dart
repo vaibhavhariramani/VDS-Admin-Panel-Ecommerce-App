@@ -38,6 +38,28 @@ class _Category1State extends State<Category1> {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        title: Text("Category",
+            style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.w400,
+                color: Colors.white)),
+        actions: [
+          MaterialButton(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)),
+              child: const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text(
+                  'Add New',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+              color: Colors.green,
+              onPressed: () {
+                addCategory();
+              }),
+        ],
       ),
       backgroundColor: Colors.blueGrey,
       body: Container(
@@ -47,43 +69,6 @@ class _Category1State extends State<Category1> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                const SizedBox(
-                  height: 20,
-                ),
-                Container(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.only(
-                            top: 5, right: 8, left: 8, bottom: 5),
-                        child: const Text("Category",
-                            style: TextStyle(
-                                fontSize: 32,
-                                fontWeight: FontWeight.w400,
-                                color: Colors.white)),
-                      ),
-                      Container(
-                        child: MaterialButton(
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20)),
-                            child: const Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                'Add New',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
-                            color: Colors.green,
-                            onPressed: () {
-                              addCategory();
-                            }),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
                 StreamBuilder<QuerySnapshot>(
                     stream: dataProvider.category(),
                     builder: (BuildContext context,
@@ -95,24 +80,40 @@ class _Category1State extends State<Category1> {
                         return const Center(child: CircularProgressIndicator());
                       }
                       if (snapshot.hasData) {
+                        List<Map<String, dynamic>> data = [];
+                        // print(snapshot.data!.docs);
+                        print(
+                            "Data that we are getting here is complete snapshot we are trying to traverse it in list of Map<String, dynamic> data");
+                        data = snapshot.data!.docs
+                            .map((DocumentSnapshot document) {
+                          return document.data() as Map<String, dynamic>;
+                        }).toList();
                         return Material(
                           child: SizedBox(
                             // height: MediaQuery.of(context).size.height * 0.5,
-                            child: GridView.count(
-                              // physics: const NeverScrollableScrollPhysics(),
-                              crossAxisCount: MediaQuery.of(context).size.height>200 ? 2:4,
-                              crossAxisSpacing: 2.0,
-                              mainAxisSpacing: 2.0,
-                              shrinkWrap: true,
-                              children: snapshot.data!.docs
-                                  .map((DocumentSnapshot document) {
-                                Map<String, dynamic> data =
-                                    document.data()! as Map<String, dynamic>;
-                                return CategoryCard(
-                                  data: data,
-                                );
-                              }).toList(),
-                            ),
+                            child: GridView.builder(
+                                // physics: const NeverScrollableScrollPhysics(),
+                                gridDelegate:
+                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount:
+                                            MediaQuery.of(context).size.height >
+                                                    200
+                                                ? 2
+                                                : 4,
+                                        crossAxisSpacing: 2.0,
+                                        mainAxisSpacing: 2.0,
+                                        mainAxisExtent: 336),
+                                shrinkWrap: true,
+                                scrollDirection: Axis.vertical,
+                                itemCount: snapshot.data!.docs.length,
+                                physics: const BouncingScrollPhysics(),
+                                itemBuilder: (BuildContext context, int index) {
+                                  // print(
+                                  //     "data that is getting passed here is : ${data[index]}");
+                                  return CategoryCard(
+                                    data: data[index] as Map<String, dynamic>,
+                                  );
+                                }),
                           ),
                         );
                       }
@@ -530,7 +531,8 @@ class _Category1State extends State<Category1> {
               Navigator.of(context).pop();
             },
             style: TextButton.styleFrom(
-              textStyle: const TextStyle(color: Colors.redAccent, fontSize: 16.0),
+              textStyle:
+                  const TextStyle(color: Colors.redAccent, fontSize: 16.0),
             ),
             child: const Text('Cancel'),
           ),
@@ -773,7 +775,8 @@ class _Category1State extends State<Category1> {
               Navigator.of(context).pop();
             },
             style: TextButton.styleFrom(
-              textStyle: const TextStyle(color: Colors.redAccent, fontSize: 16.0),
+              textStyle:
+                  const TextStyle(color: Colors.redAccent, fontSize: 16.0),
             ),
             child: const Text('Cancel'),
           ),
