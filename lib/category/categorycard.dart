@@ -13,89 +13,94 @@ class CategoryCard extends StatefulWidget {
 class _CategoryCardState extends State<CategoryCard> {
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              FadeInImage.memoryNetwork(
-                placeholder: kTransparentImage,
-                image: widget.data['icon'],
-                height: 20,
-                width: 50,
-              ),
-              // Image.network(
-              //   widget.data['icon'],
-              //   height: 20,
-              //   width: 50,
-              // ),
-              Text(
-                '${widget.data['name']}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ],
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.4,
+      child: Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.only(left: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                FadeInImage.memoryNetwork(
+                  placeholder: kTransparentImage,
+                  image: widget.data['icon'],
+                  height: 20,
+                  width: 50,
+                ),
+                // Image.network(
+                //   widget.data['icon'],
+                //   height: 20,
+                //   width: 50,
+                // ),
+                Text(
+                  '${widget.data['name']}',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
           ),
-        ),
-        FadeInImage.memoryNetwork(
-          placeholder: kTransparentImage,
-          image: widget.data['image'],
-          height: MediaQuery.of(context).size.height * 0.1,
-          width: MediaQuery.of(context).size.width * 0.3,
-          fit: BoxFit.cover,
-        ),
-        // Image.network(
-        //   widget.data['image'],
-        //   height: MediaQuery.of(context).size.height * 0.1,
-        //   width: MediaQuery.of(context).size.width * 0.3,
-        //   fit: BoxFit.cover,
-        // ),
-        IconButton(
-          icon: const Icon(Icons.delete_outline_rounded),
-          onPressed: () {
-            deleteCategory('${widget.data['name']}');
-          },
-        ),
-        // Expanded(
-        //   child: ListView.builder(
-        //     // shrinkWrap: true,
-        //     itemCount:
-        //         widget.data['tags'] != null ? widget.data['tags'].length : 0,
-        //     itemBuilder: (_, i) => Column(
-        //       mainAxisAlignment: MainAxisAlignment.start,
-        //       mainAxisSize: MainAxisSize.min,
-        //       children: [
-        //         Row(
-        //           mainAxisAlignment: MainAxisAlignment.start,
-        //           mainAxisSize: MainAxisSize.min,
-        //           children: [
-        //             Expanded(
-        //               child: Image.network(
-        //                 widget.data['tags'][i]['image'],
-        //                 width: MediaQuery.of(context).size.width * 0.09,
-        //               ),
-        //             ),
-        //             Padding(
-        //               padding: const EdgeInsets.only(left: 2.0),
-        //               child: Text(widget.data['tags'][i]['name'].toString(),
-        //                   style: const TextStyle(
-        //                       fontSize: 14,
-        //                       fontWeight: FontWeight.bold,
-        //                       color: Colors.black)),
-        //             ),
-        //             IconButton(
-        //                 icon: Icon(Icons.delete_outline_rounded),
-        //                 tooltip: "delete item",
-        //                 iconSize: 20,
-        //                 onPressed: () {}),
-        //           ],
-        //         ),
-        //         Text("tag :$i"),
-        //       ],
-        //     ),
-        //   ),
-        // ),
-      ],
+          FadeInImage.memoryNetwork(
+            placeholder: kTransparentImage,
+            image: widget.data['image'],
+            height: MediaQuery.of(context).size.height * 0.3,
+            width: MediaQuery.of(context).size.width * 0.3,
+            fit: BoxFit.fitHeight,
+          ),
+          // Image.network(
+          //   widget.data['image'],
+          //   height: MediaQuery.of(context).size.height * 0.1,
+          //   width: MediaQuery.of(context).size.width * 0.3,
+          //   fit: BoxFit.cover,
+          // ),
+          IconButton(
+            icon: const Icon(Icons.delete_outline_rounded),
+            onPressed: () {
+              deleteCategory('${widget.data['name']}');
+            },
+          ),
+          // Expanded(
+          //   child: ListView.builder(
+          //     // shrinkWrap: true,
+          //     itemCount:
+          //         widget.data['tags'] != null ? widget.data['tags'].length : 0,
+          //     itemBuilder: (_, i) => Column(
+          //       mainAxisAlignment: MainAxisAlignment.start,
+          //       mainAxisSize: MainAxisSize.min,
+          //       children: [
+          //         Row(
+          //           mainAxisAlignment: MainAxisAlignment.start,
+          //           mainAxisSize: MainAxisSize.min,
+          //           children: [
+          //             Expanded(
+          //               child: Image.network(
+          //                 widget.data['tags'][i]['image'],
+          //                 width: MediaQuery.of(context).size.width * 0.09,
+          //               ),
+          //             ),
+          //             Padding(
+          //               padding: const EdgeInsets.only(left: 2.0),
+          //               child: Text(widget.data['tags'][i]['name'].toString(),
+          //                   style: const TextStyle(
+          //                       fontSize: 14,
+          //                       fontWeight: FontWeight.bold,
+          //                       color: Colors.black)),
+          //             ),
+          //             IconButton(
+          //                 icon: Icon(Icons.delete_outline_rounded),
+          //                 tooltip: "delete item",
+          //                 iconSize: 20,
+          //                 onPressed: () {}),
+          //           ],
+          //         ),
+          //         Text("tag :$i"),
+          //       ],
+          //     ),
+          //   ),
+          // ),
+        ],
+      ),
     );
   }
 
