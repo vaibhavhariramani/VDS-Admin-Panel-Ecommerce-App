@@ -97,12 +97,12 @@ class _Category1State extends State<Category1> {
                       if (snapshot.hasData) {
                         return Material(
                           child: SizedBox(
-                            height: MediaQuery.of(context).size.height * 10,
+                            // height: MediaQuery.of(context).size.height * 0.5,
                             child: GridView.count(
-                              physics: const NeverScrollableScrollPhysics(),
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 4.0,
-                              mainAxisSpacing: 8.0,
+                              // physics: const NeverScrollableScrollPhysics(),
+                              crossAxisCount: MediaQuery.of(context).size.height>200 ? 2:4,
+                              crossAxisSpacing: 2.0,
+                              mainAxisSpacing: 2.0,
                               shrinkWrap: true,
                               children: snapshot.data!.docs
                                   .map((DocumentSnapshot document) {
