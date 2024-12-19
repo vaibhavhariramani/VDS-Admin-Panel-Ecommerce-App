@@ -203,5 +203,7 @@ class Shop {
     return Shop();
   }
 
-  static Shop? fromJson(item) {}
+  static Shop? fromJson(item) {
+    return null;
+  }
 }

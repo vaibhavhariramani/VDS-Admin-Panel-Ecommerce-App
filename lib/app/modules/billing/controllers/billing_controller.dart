@@ -74,7 +74,7 @@ class BillingController extends GetxController {
           ? products
               .map((product) => product.price)
               .toList()
-              .reduce((value, element) => value! + element!)
+              .reduce((value, element) => value + element)
           : 0;
     }
   }
@@ -321,18 +321,18 @@ class BillingController extends GetxController {
   }
 
   void removeItem(int index) {
-    total = total - products[index].price!;
+    total = total - products[index].price;
     mrptotal = mrptotal - products[index].mrp;
     products.removeAt(index);
     saman.removeAt(index + 1);
   }
 
   void updateItem(int index, int value) {
-    total = total - products[index].price!;
+    total = total - products[index].price;
     mrptotal = mrptotal - products[index].mrp;
     products[index].count = value;
     saman[index + 1].quantity = value;
-    total = total + products[index].price! * value;
+    total = total + products[index].price * value;
     mrptotal = mrptotal + products[index].mrp * value;
   }
 

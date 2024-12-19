@@ -1,9 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dashboard/flutter_dashboard.dart';
 import 'package:iconly/iconly.dart';
 
 import '../../../../../models/Orders.dart';
-import '../../../../../models/Users.dart';
 import '../../controllers/orders_controller.dart';
 import '../order_details.dart';
 // import '../../controllers/Orders_controller.dart';
@@ -20,6 +20,9 @@ class DataSourceOrders extends DataTableSource {
     assert(index >= 0);
     if (index >= rows.length) return null;
     final row = rows[index];
+    Timestamp t = row?.dateOfOrder; //Timestamp
+    DateTime dateOfOrder = t.toDate(); //DateTime
+
     return DataRow.byIndex(
       selected: false,
       index: index,
@@ -67,9 +70,8 @@ class DataSourceOrders extends DataTableSource {
             ],
           ),
         ),
-        DataCell(Text(row?.deliveryDate.toString() == 'null'
-            ? ''
-            : row!.deliveryDate.toString())),
+        DataCell(Text(
+            dateOfOrder.toString() == 'null' ? '' : dateOfOrder.toString())),
         DataCell(Text(row?.customerNumber.toString() == 'null'
             ? ''
             : row!.customerNumber!)),

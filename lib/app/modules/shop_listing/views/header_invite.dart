@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dashboard/flutter_dashboard.dart';
 import 'package:get/get.dart';
-import 'package:iconly/iconly.dart';
 
 import '../../../widgets/utils/padding_wrapper.dart';
 

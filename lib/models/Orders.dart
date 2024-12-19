@@ -113,6 +113,10 @@ class Orders {
     return _deliveryTime;
   }
 
+  get dateOfOrder {
+    return _dateOfOrder;
+  }
+
   void printOrderDetails() {
     print('Order ID: $orderId');
     print('Customer Name: $_customerName');

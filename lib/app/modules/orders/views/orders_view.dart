@@ -5,16 +5,10 @@ import 'package:flutter_dashboard/flutter_dashboard.dart';
 import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
 
-import '../../../../themes/app_theme.dart';
-import '../../../widgets/components/animated_submit_button.dart';
 import '../../../widgets/components/common_card.dart';
-import '../../../widgets/components/form_input_field.dart';
-import '../../../widgets/components/labled_textfield.dart';
-import '../../../widgets/components/reactive_time_picker.dart';
 import '../../../widgets/utils/padding_wrapper.dart';
 import '../controllers/orders_controller.dart';
 import 'online_orders_table.dart';
-import 'onlineorders.dart';
 
 class OrdersView extends GetResponsiveView<OrdersController> {
   OrdersView({Key? key}) : super(key: key);
@@ -122,7 +116,7 @@ class OrdersView extends GetResponsiveView<OrdersController> {
             textScaleFactor: Get.textScaleFactor,
             style: DefaultTextStyle.of(screen.context).style.copyWith(
                   fontSize:
-                      Theme.of(screen.context).textTheme.headline6?.fontSize,
+                      Theme.of(screen.context).textTheme.titleLarge?.fontSize,
                 ),
           ),
         ],

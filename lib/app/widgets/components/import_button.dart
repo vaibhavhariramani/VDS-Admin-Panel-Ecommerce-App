@@ -32,7 +32,7 @@ class ImportButton extends GetResponsiveView {
                           textScaleFactor: Get.textScaleFactor,
                           style: Theme.of(screen.context)
                               .textTheme
-                              .bodyText2
+                              .bodyMedium
                               ?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 fontSize: Get.textScaleFactor * 20,

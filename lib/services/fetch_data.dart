@@ -1,10 +1,8 @@
 import 'dart:convert';
-import 'dart:js_interop';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 
 import 'package:http/http.dart' as http;
 
@@ -364,7 +362,7 @@ class FetchService extends GetxService {
           print('ShopsUnderMerchant: $shopsUnderMerchant');
           DocumentSnapshot<Object?> querySnapshot =
               await UsersDB.doc(merchantUserID).get();
-          if (querySnapshot.data().isDefinedAndNotNull) {
+          if (querySnapshot.data() != null) {
             // Assuming 'email' is a unique field, so there should be at most one document
             var userDataMap = querySnapshot.data() as Map<String, dynamic>;
             print(userDataMap);

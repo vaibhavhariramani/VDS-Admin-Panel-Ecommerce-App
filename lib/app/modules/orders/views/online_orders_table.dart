@@ -59,7 +59,7 @@ class OnlineOrderstableView extends GetResponsiveView<OrdersController> {
                                   : 10,
                           columns: const [
                             DataColumn(label: Text('Name')),
-                            DataColumn(label: Text('Country')),
+                            DataColumn(label: Text('Date Of order')),
                             DataColumn(label: Text('contact')),
                             DataColumn(label: Text('Status')),
                             DataColumn(label: Text('Delivery Boy')),

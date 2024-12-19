@@ -72,6 +72,7 @@ class DataService extends GetxService {
 
       // return null;
     }
+    return null;
   }
 
   // void _startProductSubscriptions() async {
@@ -805,7 +806,7 @@ class DataService extends GetxService {
         for (var shopId in shopIDs) {
           DocumentSnapshot<Object?> querySnapshot =
               await ShopsDB.doc(shopId).get();
-          if (querySnapshot.data()!.isDefinedAndNotNull) {
+          if (querySnapshot.data() != Null) {
             // Assuming 'email' is a unique field, so there should be at most one document
             var ShopsDataMap = querySnapshot.data() as Map<String, dynamic>;
             print(ShopsDataMap);
@@ -930,6 +931,7 @@ class DataService extends GetxService {
 
   Future<String?> addUserImage(String id, String image) async {
     print(image);
+    return null;
 
     // return await client!
     //     .query(QueryOptions(
@@ -1024,6 +1026,7 @@ class DataService extends GetxService {
 
       // return null;
     }
+    return null;
   }
 
   Future<Users?> FetchUpdatedData({

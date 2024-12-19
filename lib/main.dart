@@ -28,7 +28,7 @@ Future<void> main() async {
   await GetStorage.init();
   // await initHiveForFlutter();
   packageInfo = await PackageInfo.fromPlatform();
-  runApp(const RootApp());
+  runApp(MaterialApp(home: RootApp()));
 }
 
 class RootApp extends AppConfig {
@@ -36,14 +36,16 @@ class RootApp extends AppConfig {
 
   @override
   Widget build(BuildContext context) {
-    // return _ClientProvider(
-    //   child:
+    // return Container(
+    //   color: Colors.blue,
+    //   child: Text('Colored Card'),
     // );
 
     return FlutterDashboardMaterialApp(
       title: "Emart Admin",
-      config: AppConfig.dashboardConfig,
       dashboardItems: AppPages.allPages(context),
+      // config: AppConfig.dashboardConfig,
+
       drawerOptions: AppConfig.drawerOptions(context),
       appBarOptions: AppConfig.rootAppBarOptions,
       overrideActions: [

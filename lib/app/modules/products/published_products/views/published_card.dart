@@ -305,7 +305,7 @@ class PublishedProductCard
                               .copyWith(
                                 fontSize: Theme.of(screen.context)
                                     .textTheme
-                                    .button
+                                    .labelLarge
                                     ?.fontSize,
                                 color: AppColors.white,
                               ),
@@ -579,7 +579,7 @@ class PublishedProductCard
               textScaleFactor: Get.textScaleFactor,
               style: DefaultTextStyle.of(screen.context).style.copyWith(
                     fontSize:
-                        Theme.of(screen.context).textTheme.button?.fontSize,
+                        Theme.of(screen.context).textTheme.labelLarge?.fontSize,
                     color: AppColors.white,
                   ),
             ),
@@ -641,7 +641,7 @@ class PublishedProductCard
                     style: DefaultTextStyle.of(screen.context).style.copyWith(
                           fontSize: Theme.of(screen.context)
                               .textTheme
-                              .button
+                              .labelLarge
                               ?.fontSize,
                           color: AppColors.white,
                         ),
@@ -680,7 +680,7 @@ class PublishedProductCard
                     style: DefaultTextStyle.of(screen.context).style.copyWith(
                           fontSize: Theme.of(screen.context)
                               .textTheme
-                              .button
+                              .labelLarge
                               ?.fontSize,
                           color: AppColors.white,
                         ),

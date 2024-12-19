@@ -16,43 +16,43 @@ class LightColors {
 class LightAppTheme {
   static TextTheme get _textTheme =>
       AppTheme.globalThemeData.textTheme.copyWith(
-        headline1: AppTheme.globalTextTheme.headline1?.copyWith(
+        displayLarge: AppTheme.globalTextTheme.displayLarge?.copyWith(
           color: LightColors.primary_color,
         ),
-        headline2: AppTheme.globalTextTheme.headline2?.copyWith(
+        displayMedium: AppTheme.globalTextTheme.displayMedium?.copyWith(
           color: LightColors.primary_color,
         ),
-        headline3: AppTheme.globalTextTheme.headline3?.copyWith(
+        displaySmall: AppTheme.globalTextTheme.displaySmall?.copyWith(
           color: LightColors.primary_color,
         ),
-        headline4: AppTheme.globalTextTheme.headline4?.copyWith(
+        headlineMedium: AppTheme.globalTextTheme.headlineMedium?.copyWith(
           color: LightColors.primary_color,
         ),
-        headline5: AppTheme.globalTextTheme.headline5?.copyWith(
+        headlineSmall: AppTheme.globalTextTheme.headlineSmall?.copyWith(
           color: LightColors.primary_color,
         ),
-        headline6: AppTheme.globalTextTheme.headline6?.copyWith(
+        titleLarge: AppTheme.globalTextTheme.titleLarge?.copyWith(
           color: LightColors.primary_color,
         ),
-        bodyText1: AppTheme.globalTextTheme.bodyText1?.copyWith(
+        bodyLarge: AppTheme.globalTextTheme.bodyLarge?.copyWith(
           color: LightColors.primary_color,
         ),
-        bodyText2: AppTheme.globalTextTheme.bodyText2?.copyWith(
+        bodyMedium: AppTheme.globalTextTheme.bodyMedium?.copyWith(
           color: LightColors.primary_color,
         ),
-        subtitle1: AppTheme.globalTextTheme.subtitle1?.copyWith(
+        titleMedium: AppTheme.globalTextTheme.titleMedium?.copyWith(
           color: LightColors.light_text1,
         ),
-        subtitle2: AppTheme.globalTextTheme.subtitle2?.copyWith(
+        titleSmall: AppTheme.globalTextTheme.titleSmall?.copyWith(
           color: LightColors.light_text1,
         ),
-        caption: AppTheme.globalTextTheme.caption?.copyWith(
+        bodySmall: AppTheme.globalTextTheme.bodySmall?.copyWith(
           color: LightColors.light_text1,
         ),
-        button: AppTheme.globalTextTheme.button?.copyWith(
+        labelLarge: AppTheme.globalTextTheme.labelLarge?.copyWith(
           color: LightColors.light_text2,
         ),
-        overline: AppTheme.globalTextTheme.overline?.copyWith(
+        labelSmall: AppTheme.globalTextTheme.labelSmall?.copyWith(
           color: LightColors.light_text1,
         ),
       );
@@ -110,12 +110,12 @@ class LightAppTheme {
         iconTheme: const IconThemeData(
           color: LightColors.primary_color,
         ),
-        toolbarTextStyle: _textTheme.headline4?.copyWith(
+        toolbarTextStyle: _textTheme.headlineMedium?.copyWith(
           color: LightColors.primary_color,
           fontSize: 20,
           fontWeight: FontWeight.bold,
         ),
-        titleTextStyle: _textTheme.headline4?.copyWith(
+        titleTextStyle: _textTheme.headlineMedium?.copyWith(
           color: LightColors.primary_color,
           fontSize: 20,
           fontWeight: FontWeight.bold,
@@ -140,14 +140,14 @@ class LightAppTheme {
             AppTheme.globalThemeData.scaffoldBackgroundColor,
         textSelectionTheme: _textSelectionTheme,
         tabBarTheme: TabBarTheme(
-          labelStyle: _textTheme.button?.copyWith(
+          labelStyle: _textTheme.labelLarge?.copyWith(
             color: LightColors.primary_color,
             fontWeight: FontWeight.w600,
             fontStyle: FontStyle.normal,
           ),
           labelColor: LightColors.primary_color,
           unselectedLabelColor: LightColors.light_text1,
-          unselectedLabelStyle: _textTheme.button?.copyWith(
+          unselectedLabelStyle: _textTheme.labelLarge?.copyWith(
             color: LightColors.light_text1,
             fontWeight: FontWeight.w500,
             fontStyle: FontStyle.normal,

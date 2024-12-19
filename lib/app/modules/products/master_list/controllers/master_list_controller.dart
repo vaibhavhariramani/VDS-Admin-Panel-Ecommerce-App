@@ -350,8 +350,8 @@ class MasterListController extends GetxController {
     ProductDetails?.deal_type == ProductDealType.GREENDEALS
         ? await _dataService.updateProductData(
             id: productId!,
-            product_name: product_name!,
-            price: price!,
+            product_name: product_name,
+            price: price,
             discount: discount!,
             available_from: available_from!,
             expire_on: expires_on!,
@@ -359,8 +359,8 @@ class MasterListController extends GetxController {
         : await _dataService.updateHotDealProductData(
             startson: startson!,
             id: productId!,
-            product_name: product_name!,
-            price: price!,
+            product_name: product_name,
+            price: price,
             discount: discount!,
             available_from: available_from!,
             expire_on: expires_on!,

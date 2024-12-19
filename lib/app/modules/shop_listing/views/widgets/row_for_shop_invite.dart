@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dashboard/flutter_dashboard.dart';
-import 'package:iconly/iconly.dart';
 
 import '../../../../../models/InvitedUser.dart';
 

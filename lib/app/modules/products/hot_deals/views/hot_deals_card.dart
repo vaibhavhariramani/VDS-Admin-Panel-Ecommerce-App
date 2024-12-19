@@ -311,7 +311,7 @@ class HotDealProductCard extends GetResponsiveView<HotDealsController> {
                               .copyWith(
                                 fontSize: Theme.of(screen.context)
                                     .textTheme
-                                    .button
+                                    .labelLarge
                                     ?.fontSize,
                                 color: AppColors.white,
                               ),
@@ -584,7 +584,7 @@ class HotDealProductCard extends GetResponsiveView<HotDealsController> {
               textScaleFactor: Get.textScaleFactor,
               style: DefaultTextStyle.of(screen.context).style.copyWith(
                     fontSize:
-                        Theme.of(screen.context).textTheme.button?.fontSize,
+                        Theme.of(screen.context).textTheme.labelLarge?.fontSize,
                     color: AppColors.white,
                   ),
             ),
@@ -646,7 +646,7 @@ class HotDealProductCard extends GetResponsiveView<HotDealsController> {
                     style: DefaultTextStyle.of(screen.context).style.copyWith(
                           fontSize: Theme.of(screen.context)
                               .textTheme
-                              .button
+                              .labelLarge
                               ?.fontSize,
                           color: AppColors.white,
                         ),
@@ -685,7 +685,7 @@ class HotDealProductCard extends GetResponsiveView<HotDealsController> {
                     style: DefaultTextStyle.of(screen.context).style.copyWith(
                           fontSize: Theme.of(screen.context)
                               .textTheme
-                              .button
+                              .labelLarge
                               ?.fontSize,
                           color: AppColors.white,
                         ),

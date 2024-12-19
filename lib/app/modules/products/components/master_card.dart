@@ -463,7 +463,7 @@ class MasterCard extends GetResponsiveView<MasterListController> {
               textScaleFactor: Get.textScaleFactor,
               style: DefaultTextStyle.of(screen.context).style.copyWith(
                     fontSize:
-                        Theme.of(screen.context).textTheme.button?.fontSize,
+                        Theme.of(screen.context).textTheme.labelLarge?.fontSize,
                     color: AppColors.white,
                   ),
             ),
@@ -525,7 +525,7 @@ class MasterCard extends GetResponsiveView<MasterListController> {
                       style: DefaultTextStyle.of(screen.context).style.copyWith(
                             fontSize: Theme.of(screen.context)
                                 .textTheme
-                                .button
+                                .labelLarge
                                 ?.fontSize,
                             color: AppColors.white,
                           ),
@@ -539,7 +539,7 @@ class MasterCard extends GetResponsiveView<MasterListController> {
             ),
             Expanded(
               child: MaterialButton(
-                onPressed: productItem.is_published?.toString() == "true"
+                onPressed: productItem.is_published.toString() == "true"
                     ? null
                     : () {
                         Get.defaultDialog(
@@ -575,7 +575,7 @@ class MasterCard extends GetResponsiveView<MasterListController> {
                                       .copyWith(
                                         fontSize: Theme.of(screen.context)
                                             .textTheme
-                                            .button
+                                            .labelLarge
                                             ?.fontSize,
                                         color: AppColors.white,
                                       ),
@@ -647,7 +647,7 @@ class MasterCard extends GetResponsiveView<MasterListController> {
                       style: DefaultTextStyle.of(screen.context).style.copyWith(
                             fontSize: Theme.of(screen.context)
                                 .textTheme
-                                .button
+                                .labelLarge
                                 ?.fontSize,
                             color: AppColors.white,
                           ),

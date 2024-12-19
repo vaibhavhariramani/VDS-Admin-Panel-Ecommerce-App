@@ -192,8 +192,8 @@ class HotDealsController extends GetxController {
     isLoading(true);
     var x = await _dataService.updateHotDealProductData(
       id: productId!,
-      product_name: product_name!,
-      price: price!,
+      product_name: product_name,
+      price: price,
       discount: discount!,
       available_from: available_from!,
       expire_on: expires_on!,

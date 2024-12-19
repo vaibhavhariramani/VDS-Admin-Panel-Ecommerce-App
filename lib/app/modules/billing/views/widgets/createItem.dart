@@ -27,7 +27,7 @@ Widget buildProductItem(BuildContext context, int index) {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                controller.products[index].name!, //product name
+                controller.products[index].name, //product name
                 style: GoogleFonts.poppins(
                     fontSize: 18.0,
                     color: Colors.black,
@@ -171,7 +171,7 @@ Widget buildProductItem(BuildContext context, int index) {
                                             const SizedBox(height: 8),
                                             form(
                                               'Product name',
-                                              controller.products[index].name!,
+                                              controller.products[index].name,
                                               FBProductName,
                                               const Icon(
                                                 Icons.description,

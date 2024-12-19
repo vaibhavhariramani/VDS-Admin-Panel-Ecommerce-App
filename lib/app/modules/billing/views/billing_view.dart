@@ -8,17 +8,13 @@ import 'package:flutter_dashboard/flutter_dashboard.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:get/get.dart';
-import 'package:vdsadmin/app/modules/billing/views/widgets/createItem.dart';
 
 import '../../../../constants/constants.dart';
-import '../../../../models/Product.dart';
-import '../../../../models/invoice.dart';
 import '../../../../themes/app_theme.dart';
 import '../../../widgets/components/common_card.dart';
 import '../../../widgets/utils/padding_wrapper.dart';
 import '../../deletion_status/views/deletion_status_view.dart';
 import '../../home/views/home_view.dart';
-import '../../orders/views/order_details.dart';
 import '../controllers/billing_controller.dart';
 
 class BillingView extends GetResponsiveView<BillingController> {
@@ -231,7 +227,7 @@ class BillingView extends GetResponsiveView<BillingController> {
       title: Text(
         "$totalCount".replaceAllMapped(numberFormatterRegex, formatNumberCount),
         textScaleFactor: Get.textScaleFactor,
-        style: Theme.of(screen.context).textTheme.bodyText1?.copyWith(
+        style: Theme.of(screen.context).textTheme.bodyLarge?.copyWith(
               // color: AppColors.white,
               color: color,
               fontSize: 32,
@@ -240,7 +236,7 @@ class BillingView extends GetResponsiveView<BillingController> {
       subtitle: Text(
         title,
         textScaleFactor: Get.textScaleFactor,
-        style: Theme.of(screen.context).textTheme.bodyText1?.copyWith(
+        style: Theme.of(screen.context).textTheme.bodyLarge?.copyWith(
               // color: AppColors.white,
               color: color,
               fontSize: 14,

@@ -304,7 +304,7 @@ class AuthService extends GetxService {
       if (loginby == "login") {
         print("loginging user credentials");
         print("---> User email Id: ${credential!['email']} <----");
-        print("---> Password : ${credential!['password']} <----");
+        print("---> Password : ${credential['password']} <----");
         try {
           userCredential = await _auth.signInWithEmailAndPassword(
               email: credential['email'], password: credential["password"]!);
@@ -418,7 +418,8 @@ class AuthService extends GetxService {
         if (loginResult.accessToken != null) {
           Get.log(loginResult.accessToken.toString());
           final OAuthCredential facebookAuthCredential =
-              FacebookAuthProvider.credential(loginResult.accessToken!.token);
+              FacebookAuthProvider.credential(
+                  loginResult.accessToken!.tokenString);
           return await FirebaseAuth.instance
               .signInWithCredential(facebookAuthCredential);
         }
@@ -598,7 +599,7 @@ class AuthService extends GetxService {
 
     DocumentSnapshot<Object?> querySnapshot = await UsersDB.doc(uid).get();
     print(querySnapshot);
-    if (querySnapshot.data().isDefinedAndNotNull) {
+    if (querySnapshot.data() != null) {
       // Assuming 'email' is a unique field, so there should be at most one document
       var userDataMap = querySnapshot.data() as Map<String, dynamic>;
       print(userDataMap);

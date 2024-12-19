@@ -69,7 +69,7 @@ class ReactiveTimePickerField<T> extends ReactiveFormField<T, TimeOfDay> {
                       borderRadius: BorderRadius.circular(8),
                       side: _state.errorText != null
                           ? BorderSide(
-                              color: Theme.of(_state.context).errorColor,
+                              color: Theme.of(_state.context).colorScheme.error,
                             )
                           : BorderSide.none,
                     ),
@@ -117,7 +117,7 @@ class ReactiveTimePickerField<T> extends ReactiveFormField<T, TimeOfDay> {
                       _state.errorText ?? "",
                       textScaleFactor: Get.textScaleFactor,
                       style: DefaultTextStyle.of(_state.context).style.copyWith(
-                            color: Theme.of(_state.context).errorColor,
+                            color: Theme.of(_state.context).colorScheme.error,
                             fontSize: 12,
                           ),
                     ),

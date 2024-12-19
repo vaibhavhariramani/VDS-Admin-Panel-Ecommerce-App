@@ -159,5 +159,7 @@ class Users {
         shops: shops);
   }
 
-  static Users? fromJson(versionResopnseMap) {}
+  static Users? fromJson(versionResopnseMap) {
+    return null;
+  }
 }
