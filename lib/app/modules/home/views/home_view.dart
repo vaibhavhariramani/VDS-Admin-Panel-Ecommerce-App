@@ -223,7 +223,7 @@ class _RootAdminHome extends GetResponsiveView<HomeController> {
       title: Text(
         "$totalCount".replaceAllMapped(numberFormatterRegex, formatNumberCount),
         textScaleFactor: Get.textScaleFactor,
-        style: Theme.of(screen.context).textTheme.bodyText1?.copyWith(
+        style: Theme.of(screen.context).textTheme.bodyLarge?.copyWith(
               // color: AppColors.white,
               color: color,
               fontSize: 32,
@@ -232,7 +232,7 @@ class _RootAdminHome extends GetResponsiveView<HomeController> {
       subtitle: Text(
         title,
         textScaleFactor: Get.textScaleFactor,
-        style: Theme.of(screen.context).textTheme.bodyText1?.copyWith(
+        style: Theme.of(screen.context).textTheme.bodyLarge?.copyWith(
               // color: AppColors.white,
               color: color,
               fontSize: 14,
@@ -414,7 +414,7 @@ class _AffiliatesAdminView extends GetResponsiveView<HomeController> {
       title: Text(
         "$totalCount".replaceAllMapped(numberFormatterRegex, formatNumberCount),
         textScaleFactor: Get.textScaleFactor,
-        style: Theme.of(screen.context).textTheme.bodyText1?.copyWith(
+        style: Theme.of(screen.context).textTheme.bodyLarge?.copyWith(
               // color: AppColors.white,
               color: color,
               fontSize: 32,
@@ -423,7 +423,7 @@ class _AffiliatesAdminView extends GetResponsiveView<HomeController> {
       subtitle: Text(
         title,
         textScaleFactor: Get.textScaleFactor,
-        style: Theme.of(screen.context).textTheme.bodyText1?.copyWith(
+        style: Theme.of(screen.context).textTheme.bodyLarge?.copyWith(
               // color: AppColors.white,
               color: color,
               fontSize: 14,
@@ -605,7 +605,7 @@ class _CountryAdminView extends GetResponsiveView<HomeController> {
       title: Text(
         "$totalCount".replaceAllMapped(numberFormatterRegex, formatNumberCount),
         textScaleFactor: Get.textScaleFactor,
-        style: Theme.of(screen.context).textTheme.bodyText1?.copyWith(
+        style: Theme.of(screen.context).textTheme.bodyLarge?.copyWith(
               // color: AppColors.white,
               color: color,
               fontSize: 32,
@@ -614,7 +614,7 @@ class _CountryAdminView extends GetResponsiveView<HomeController> {
       subtitle: Text(
         title,
         textScaleFactor: Get.textScaleFactor,
-        style: Theme.of(screen.context).textTheme.bodyText1?.copyWith(
+        style: Theme.of(screen.context).textTheme.bodyLarge?.copyWith(
               // color: AppColors.white,
               color: color,
               fontSize: 14,
@@ -798,7 +798,7 @@ class _MerchantAdminView extends GetResponsiveView<HomeController> {
       title: Text(
         "$totalCount".replaceAllMapped(numberFormatterRegex, formatNumberCount),
         textScaleFactor: Get.textScaleFactor,
-        style: Theme.of(screen.context).textTheme.bodyText1?.copyWith(
+        style: Theme.of(screen.context).textTheme.bodyLarge?.copyWith(
               // color: AppColors.white,
               color: color,
               fontSize: 32,
@@ -807,7 +807,7 @@ class _MerchantAdminView extends GetResponsiveView<HomeController> {
       subtitle: Text(
         title,
         textScaleFactor: Get.textScaleFactor,
-        style: Theme.of(screen.context).textTheme.bodyText1?.copyWith(
+        style: Theme.of(screen.context).textTheme.bodyLarge?.copyWith(
               // color: AppColors.white,
               color: color,
               fontSize: 14,
@@ -990,7 +990,7 @@ class _ShopAdminView extends GetResponsiveView<HomeController> {
       title: Text(
         "$totalCount".replaceAllMapped(numberFormatterRegex, formatNumberCount),
         textScaleFactor: Get.textScaleFactor,
-        style: Theme.of(screen.context).textTheme.bodyText1?.copyWith(
+        style: Theme.of(screen.context).textTheme.bodyLarge?.copyWith(
               // color: AppColors.white,
               color: color,
               fontSize: 32,
@@ -999,7 +999,7 @@ class _ShopAdminView extends GetResponsiveView<HomeController> {
       subtitle: Text(
         title,
         textScaleFactor: Get.textScaleFactor,
-        style: Theme.of(screen.context).textTheme.bodyText1?.copyWith(
+        style: Theme.of(screen.context).textTheme.bodyLarge?.copyWith(
               // color: AppColors.white,
               color: color,
               fontSize: 14,

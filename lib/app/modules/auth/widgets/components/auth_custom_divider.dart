@@ -36,7 +36,7 @@ class AuthCustomDivider extends StatelessWidget {
           ),
           child: Text(
             'Or $title With'.tr,
-            style: Theme.of(context).textTheme.button?.copyWith(
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   color: Theme.of(context).disabledColor,
                   fontSize: 16,
                   fontWeight: FontWeight.w400,

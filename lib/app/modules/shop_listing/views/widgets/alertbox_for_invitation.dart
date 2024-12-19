@@ -71,9 +71,10 @@ class InvitationBox extends GetResponsiveView<ShopListingController> {
                 child: Text(
                   'Inviting User',
                   textScaleFactor: Get.textScaleFactor,
-                  style: Theme.of(screen.context).textTheme.bodyText2?.copyWith(
-                        color: Theme.of(screen.context).disabledColor,
-                      ),
+                  style:
+                      Theme.of(screen.context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(screen.context).disabledColor,
+                          ),
                 ),
               ),
               Padding(

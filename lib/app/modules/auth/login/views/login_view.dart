@@ -309,7 +309,7 @@ class LoginView extends GetResponsiveView<LoginController> {
               child: Text(
                 'Email Address',
                 textScaleFactor: Get.textScaleFactor,
-                style: Theme.of(screen.context).textTheme.bodyText2?.copyWith(
+                style: Theme.of(screen.context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(screen.context).disabledColor,
                     ),
               ),
@@ -362,7 +362,7 @@ class LoginView extends GetResponsiveView<LoginController> {
               child: Text(
                 'Password',
                 textScaleFactor: Get.textScaleFactor,
-                style: Theme.of(screen.context).textTheme.bodyText2?.copyWith(
+                style: Theme.of(screen.context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(screen.context).disabledColor,
                     ),
               ),
@@ -437,9 +437,10 @@ class LoginView extends GetResponsiveView<LoginController> {
                 highlightColor: Colors.transparent,
                 child: Text(
                   'Forgot Password?',
-                  style: Theme.of(screen.context).textTheme.subtitle1?.copyWith(
-                        color: AppColors.grey,
-                      ),
+                  style:
+                      Theme.of(screen.context).textTheme.titleMedium?.copyWith(
+                            color: AppColors.grey,
+                          ),
                 ),
               ),
             ),
@@ -470,10 +471,12 @@ class LoginView extends GetResponsiveView<LoginController> {
                   ),
                   child: Text(
                     'Trouble Log in?',
-                    style:
-                        Theme.of(screen.context).textTheme.subtitle1?.copyWith(
-                              color: AppColors.grey,
-                            ),
+                    style: Theme.of(screen.context)
+                        .textTheme
+                        .titleMedium
+                        ?.copyWith(
+                          color: AppColors.grey,
+                        ),
                   ),
                 ),
               ),
@@ -499,7 +502,7 @@ class LoginView extends GetResponsiveView<LoginController> {
       Text(
         "Log in",
         textScaleFactor: Get.textScaleFactor,
-        style: Theme.of(screen.context).textTheme.headline4?.copyWith(
+        style: Theme.of(screen.context).textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.bold,
               color: Get.isDarkMode ? Get.theme.primaryColor : Colors.black,
             ),
@@ -510,7 +513,7 @@ class LoginView extends GetResponsiveView<LoginController> {
       Text(
         "Enter below details to continue ",
         textScaleFactor: Get.textScaleFactor,
-        style: Theme.of(screen.context).textTheme.subtitle2?.copyWith(
+        style: Theme.of(screen.context).textTheme.titleSmall?.copyWith(
               color: Theme.of(screen.context).disabledColor,
               fontWeight: FontWeight.normal,
             ),
@@ -529,7 +532,7 @@ class LoginView extends GetResponsiveView<LoginController> {
       Text(
         "Forgot Password",
         textScaleFactor: Get.textScaleFactor,
-        style: Theme.of(screen.context).textTheme.headline4?.copyWith(
+        style: Theme.of(screen.context).textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.bold,
               color: Get.isDarkMode ? Get.theme.primaryColor : Colors.black,
             ),
@@ -541,7 +544,7 @@ class LoginView extends GetResponsiveView<LoginController> {
         "No worries! we will send you the reset password link to your registered email",
         softWrap: true,
         textScaleFactor: Get.textScaleFactor,
-        style: Theme.of(screen.context).textTheme.subtitle1?.copyWith(
+        style: Theme.of(screen.context).textTheme.titleMedium?.copyWith(
               color: Theme.of(screen.context).disabledColor,
               fontWeight: FontWeight.normal,
             ),
@@ -554,7 +557,7 @@ class LoginView extends GetResponsiveView<LoginController> {
       Text(
         "Create new password",
         textScaleFactor: Get.textScaleFactor,
-        style: Theme.of(screen.context).textTheme.headline4?.copyWith(
+        style: Theme.of(screen.context).textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.bold,
               color: Get.isDarkMode ? Get.theme.primaryColor : Colors.black,
             ),
@@ -576,9 +579,9 @@ class LoginView extends GetResponsiveView<LoginController> {
           defaultWidget: Text(
             'Login to Continue',
             textScaleFactor: Get.textScaleFactor,
-            style: Theme.of(context).textTheme.button?.copyWith(
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   color: screen.context.isDarkMode
-                      ? Theme.of(context).textTheme.button?.color
+                      ? Theme.of(context).textTheme.labelLarge?.color
                       : Theme.of(context).scaffoldBackgroundColor,
                 ),
           ),
@@ -611,9 +614,9 @@ class LoginView extends GetResponsiveView<LoginController> {
           defaultWidget: Text(
             'Reset Password',
             textScaleFactor: Get.textScaleFactor,
-            style: Theme.of(context).textTheme.button?.copyWith(
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   color: screen.context.isDarkMode
-                      ? Theme.of(context).textTheme.button?.color
+                      ? Theme.of(context).textTheme.labelLarge?.color
                       : Theme.of(context).scaffoldBackgroundColor,
                 ),
           ),
@@ -650,7 +653,7 @@ class LoginView extends GetResponsiveView<LoginController> {
               child: Text(
                 'Email Address',
                 textScaleFactor: Get.textScaleFactor,
-                style: Theme.of(screen.context).textTheme.bodyText2?.copyWith(
+                style: Theme.of(screen.context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(screen.context).disabledColor,
                     ),
               ),
@@ -725,7 +728,7 @@ class LoginView extends GetResponsiveView<LoginController> {
               child: Text(
                 'Enter new password',
                 textScaleFactor: Get.textScaleFactor,
-                style: Theme.of(screen.context).textTheme.bodyText2?.copyWith(
+                style: Theme.of(screen.context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(screen.context).disabledColor,
                     ),
               ),
@@ -793,7 +796,7 @@ class LoginView extends GetResponsiveView<LoginController> {
               child: Text(
                 'Re-enter password',
                 textScaleFactor: Get.textScaleFactor,
-                style: Theme.of(screen.context).textTheme.bodyText2?.copyWith(
+                style: Theme.of(screen.context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(screen.context).disabledColor,
                     ),
               ),
@@ -880,9 +883,9 @@ class LoginView extends GetResponsiveView<LoginController> {
           defaultWidget: Text(
             'Continue',
             textScaleFactor: Get.textScaleFactor,
-            style: Theme.of(context).textTheme.button?.copyWith(
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   color: screen.context.isDarkMode
-                      ? Theme.of(context).textTheme.button?.color
+                      ? Theme.of(context).textTheme.labelLarge?.color
                       : Theme.of(context).scaffoldBackgroundColor,
                 ),
           ),

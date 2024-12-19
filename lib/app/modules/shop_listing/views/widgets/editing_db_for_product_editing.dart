@@ -43,9 +43,10 @@ class ProductEditingBox extends GetResponsiveView<ShopListingController> {
                 child: Text(
                   'Edit Product Details',
                   textScaleFactor: Get.textScaleFactor,
-                  style: Theme.of(screen.context).textTheme.bodyText2?.copyWith(
-                        color: Theme.of(screen.context).disabledColor,
-                      ),
+                  style:
+                      Theme.of(screen.context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(screen.context).disabledColor,
+                          ),
                 ),
               ),
               Padding(

@@ -34,7 +34,7 @@ class BuildCard extends GetResponsiveView {
             textScaleFactor: Get.textScaleFactor,
             style: DefaultTextStyle.of(screen.context).style.copyWith(
                   fontSize:
-                      Theme.of(screen.context).textTheme.headline6?.fontSize,
+                      Theme.of(screen.context).textTheme.titleLarge?.fontSize,
                 ),
           ),
         ],

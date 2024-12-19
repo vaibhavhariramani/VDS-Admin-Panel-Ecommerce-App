@@ -6,7 +6,6 @@ import '../../../../../widgets/components/form_input_field.dart';
 import '../../../../../widgets/components/labled_textfield.dart';
 import '../../../../../widgets/components/reactive_datetime_picker.dart';
 import '../../../../home/views/home_view.dart';
-import '../../../products_listing/views/products_listing_view.dart';
 import 'build_buttons.dart';
 
 class buildFormFields extends GetResponsiveView {

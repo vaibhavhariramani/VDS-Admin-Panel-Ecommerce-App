@@ -259,7 +259,7 @@ class ScheduledProductCard
                                     .copyWith(
                                       fontSize: Theme.of(screen.context)
                                           .textTheme
-                                          .button
+                                          .labelLarge
                                           ?.fontSize,
                                       color: AppColors.white,
                                     ),
@@ -332,7 +332,7 @@ class ScheduledProductCard
                               .copyWith(
                                 fontSize: Theme.of(screen.context)
                                     .textTheme
-                                    .button
+                                    .labelLarge
                                     ?.fontSize,
                                 color: AppColors.white,
                               ),
@@ -598,7 +598,7 @@ class ScheduledProductCard
               textScaleFactor: Get.textScaleFactor,
               style: DefaultTextStyle.of(screen.context).style.copyWith(
                     fontSize:
-                        Theme.of(screen.context).textTheme.button?.fontSize,
+                        Theme.of(screen.context).textTheme.labelLarge?.fontSize,
                     color: AppColors.white,
                   ),
             ),
@@ -660,7 +660,7 @@ class ScheduledProductCard
                     style: DefaultTextStyle.of(screen.context).style.copyWith(
                           fontSize: Theme.of(screen.context)
                               .textTheme
-                              .button
+                              .labelLarge
                               ?.fontSize,
                           color: AppColors.white,
                         ),
@@ -699,7 +699,7 @@ class ScheduledProductCard
                     style: DefaultTextStyle.of(screen.context).style.copyWith(
                           fontSize: Theme.of(screen.context)
                               .textTheme
-                              .button
+                              .labelLarge
                               ?.fontSize,
                           color: AppColors.white,
                         ),

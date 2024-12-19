@@ -60,7 +60,7 @@ class FormTextInputField<T> extends ReactiveFormField<T, String> {
                     borderRadius: BorderRadius.circular(8),
                     side: _state.errorText != null
                         ? BorderSide(
-                            color: Theme.of(_state.context).errorColor,
+                            color: Theme.of(_state.context).colorScheme.error,
                           )
                         : BorderSide.none,
                   ),
@@ -115,7 +115,7 @@ class FormTextInputField<T> extends ReactiveFormField<T, String> {
                     _state.errorText ?? "",
                     textScaleFactor: Get.textScaleFactor,
                     style: DefaultTextStyle.of(_state.context).style.copyWith(
-                          color: Theme.of(_state.context).errorColor,
+                          color: Theme.of(_state.context).colorScheme.error,
                           fontSize: 12,
                         ),
                   ),

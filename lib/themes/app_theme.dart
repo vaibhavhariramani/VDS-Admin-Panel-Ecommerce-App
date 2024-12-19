@@ -31,43 +31,43 @@ class AppTheme {
 
   static final TextTheme globalTextTheme =
       GoogleFonts.poppinsTextTheme().copyWith(
-    headline1: globalFontStyle.copyWith(
+    displayLarge: globalFontStyle.copyWith(
       fontSize: 30,
     ),
-    headline2: globalFontStyle.copyWith(
+    displayMedium: globalFontStyle.copyWith(
       fontSize: 28,
     ),
-    headline3: globalFontStyle.copyWith(
+    displaySmall: globalFontStyle.copyWith(
       fontSize: 26,
     ),
-    headline4: globalFontStyle.copyWith(
+    headlineMedium: globalFontStyle.copyWith(
       fontSize: 24,
     ),
-    headline5: globalFontStyle.copyWith(
+    headlineSmall: globalFontStyle.copyWith(
       fontSize: 22,
     ),
-    headline6: globalFontStyle.copyWith(
+    titleLarge: globalFontStyle.copyWith(
       fontSize: 20,
     ),
-    subtitle1: globalFontStyle.copyWith(
+    titleMedium: globalFontStyle.copyWith(
       fontSize: 14,
     ),
-    subtitle2: globalFontStyle.copyWith(
+    titleSmall: globalFontStyle.copyWith(
       fontSize: 12,
     ),
-    bodyText1: globalFontStyle.copyWith(
+    bodyLarge: globalFontStyle.copyWith(
       fontSize: 16,
     ),
-    bodyText2: globalFontStyle.copyWith(
+    bodyMedium: globalFontStyle.copyWith(
       fontSize: 14,
     ),
-    caption: globalFontStyle.copyWith(
+    bodySmall: globalFontStyle.copyWith(
       fontSize: 12,
     ),
-    button: globalFontStyle.copyWith(
+    labelLarge: globalFontStyle.copyWith(
       fontSize: 16,
     ),
-    overline: globalFontStyle.copyWith(
+    labelSmall: globalFontStyle.copyWith(
       fontSize: 12,
     ),
   );

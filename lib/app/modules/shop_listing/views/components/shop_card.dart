@@ -176,7 +176,7 @@ class ShopCard extends GetResponsiveView<ShopListingController> {
                     style: DefaultTextStyle.of(screen.context).style.copyWith(
                           fontSize: Theme.of(screen.context)
                               .textTheme
-                              .button
+                              .labelLarge
                               ?.fontSize,
                           color: AppColors.white,
                         ),

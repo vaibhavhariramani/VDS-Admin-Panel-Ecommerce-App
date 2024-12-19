@@ -292,7 +292,7 @@ class ProductCard extends GetResponsiveView<ScheduledProductsController> {
                               .copyWith(
                                 fontSize: Theme.of(screen.context)
                                     .textTheme
-                                    .button
+                                    .labelLarge
                                     ?.fontSize,
                                 color: AppColors.white,
                               ),
@@ -475,7 +475,7 @@ class ProductCard extends GetResponsiveView<ScheduledProductsController> {
               textScaleFactor: Get.textScaleFactor,
               style: DefaultTextStyle.of(screen.context).style.copyWith(
                     fontSize:
-                        Theme.of(screen.context).textTheme.button?.fontSize,
+                        Theme.of(screen.context).textTheme.labelLarge?.fontSize,
                     color: AppColors.white,
                   ),
             ),
@@ -537,7 +537,7 @@ class ProductCard extends GetResponsiveView<ScheduledProductsController> {
                     style: DefaultTextStyle.of(screen.context).style.copyWith(
                           fontSize: Theme.of(screen.context)
                               .textTheme
-                              .button
+                              .labelLarge
                               ?.fontSize,
                           color: AppColors.white,
                         ),
@@ -576,7 +576,7 @@ class ProductCard extends GetResponsiveView<ScheduledProductsController> {
                     style: DefaultTextStyle.of(screen.context).style.copyWith(
                           fontSize: Theme.of(screen.context)
                               .textTheme
-                              .button
+                              .labelLarge
                               ?.fontSize,
                           color: AppColors.white,
                         ),

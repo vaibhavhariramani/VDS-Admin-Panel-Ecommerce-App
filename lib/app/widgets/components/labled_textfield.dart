@@ -41,7 +41,7 @@ class LabeledTextField extends StatelessWidget {
                 TextSpan(
                   text: isRequired ? " *" : "",
                   style: DefaultTextStyle.of(context).style.copyWith(
-                        color: Theme.of(context).errorColor,
+                        color: Theme.of(context).colorScheme.error,
                         fontSize: 16,
                       ),
                 ),
