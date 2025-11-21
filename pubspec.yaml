@@ -30,6 +30,7 @@ dependencies:
   cloud_firestore:
   permission_handler:
   firebase_storage:
+  firebase_auth: 
   fluttertoast:
   visibility_detector: ^0.4.0+2
   flutter_barcode_listener: ^0.1.1
@@ -57,6 +58,7 @@ dependencies:
   syncfusion_flutter_pdf: ^31.1.19
   printing: ^5.12.0
   pdfx:
+  google_sign_in:
     # path: plugins/pdfx
 
 dev_dependencies:
