@@ -601,7 +601,7 @@ class _BillState extends State<Bill> {
                     children: [
                       CachedNetworkImage(
                           imageUrl:
-                              'https://firebasestorage.googleapis.com/v0/b/atus-kart.appspot.com/o/static%2Fbasket.png?alt=media&token=4ca7a331-90d3-4ce0-8113-0226e577085e',
+                              'https://firebasestorage.googleapis.com/v0/b/ecommerce-26b18.appspot.com/o/icon%2FVDS_no_image.png?alt=media&token=31e046b8-4665-4985-af21-f5ca990009b6',
                           width: 120,
                           height: 120),
                       const Padding(
