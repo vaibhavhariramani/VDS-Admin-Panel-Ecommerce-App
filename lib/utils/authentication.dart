@@ -6,10 +6,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:google_sign_in_platform_interface/google_sign_in_platform_interface.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../home/dashboard.dart';
 import '../models/product_data.dart';
-import '../user_info/user_info_screen.dart';
 
 class Authentication {
   static SnackBar customSnackBar({required String content}) {
@@ -96,17 +96,17 @@ class Authentication {
         print(e);
       }
     } else {
-      final GoogleSignIn googleSignIn = GoogleSignIn();
+      final GoogleSignIn googleSignIn = GoogleSignIn.instance;
 
       final GoogleSignInAccount? googleSignInAccount =
-          await googleSignIn.signIn();
+          await googleSignIn.authenticate();
 
       if (googleSignInAccount != null) {
         final GoogleSignInAuthentication googleSignInAuthentication =
             await googleSignInAccount.authentication;
 
         final AuthCredential credential = GoogleAuthProvider.credential(
-          accessToken: googleSignInAuthentication.accessToken,
+          accessToken: googleSignInAuthentication.idToken,
           idToken: googleSignInAuthentication.idToken,
         );
 
@@ -145,7 +145,7 @@ class Authentication {
   }
 
   static FutureOr<void> signOut({required BuildContext context}) async {
-    final GoogleSignIn googleSignIn = GoogleSignIn();
+    final GoogleSignIn googleSignIn = GoogleSignIn.instance;
 
     try {
       if (!kIsWeb) {
