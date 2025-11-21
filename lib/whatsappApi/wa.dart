@@ -68,7 +68,7 @@ class _PdfViewerPgState extends State<PdfViewerPg> {
       directory = await getApplicationDocumentsDirectory();
     }
     final String localPath =
-        '${directory!.path}/${DateTime.now().toIso8601String()}.png';
+        '${directory?.path}/${DateTime.now().toIso8601String()}.png';
 
     // await _controller.capture(path: localPath);
 
@@ -258,7 +258,7 @@ class _PdfViewerwebState extends State<PdfViewerweb> {
       directory = await getApplicationDocumentsDirectory();
     }
     final String localPath =
-        '${directory!.path}/${DateTime.now().toIso8601String()}.png';
+        '${directory?.path}/${DateTime.now().toIso8601String()}.png';
 
     // await _controller.capture(path: localPath);
 

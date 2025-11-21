@@ -481,7 +481,8 @@ class _BannerDisplayState extends State<BannerDisplay> {
               Navigator.of(context).pop();
             },
             style: TextButton.styleFrom(
-              textStyle: const TextStyle(color: Colors.redAccent, fontSize: 16.0),
+              textStyle:
+                  const TextStyle(color: Colors.redAccent, fontSize: 16.0),
             ),
             child: const Text('Cancel'),
           ),

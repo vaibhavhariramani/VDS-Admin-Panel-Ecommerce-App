@@ -530,7 +530,8 @@ class _Category1State extends State<Category1> {
               Navigator.of(context).pop();
             },
             style: TextButton.styleFrom(
-              textStyle: const TextStyle(color: Colors.redAccent, fontSize: 16.0),
+              textStyle:
+                  const TextStyle(color: Colors.redAccent, fontSize: 16.0),
             ),
             child: const Text('Cancel'),
           ),
@@ -773,7 +774,8 @@ class _Category1State extends State<Category1> {
               Navigator.of(context).pop();
             },
             style: TextButton.styleFrom(
-              textStyle: const TextStyle(color: Colors.redAccent, fontSize: 16.0),
+              textStyle:
+                  const TextStyle(color: Colors.redAccent, fontSize: 16.0),
             ),
             child: const Text('Cancel'),
           ),
