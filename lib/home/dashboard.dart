@@ -74,8 +74,8 @@ class _DashboardState extends State<Dashboard> {
     token = (await firebaseMessaging.getToken())!;
     CollectionReference reference =
         FirebaseFirestore.instance.collection('Users');
-    final status = await OneSignal.shared.getDeviceState();
-    final String? tokenId = status?.userId;
+    final status = await OneSignal.User.pushSubscription.id;
+    final String? tokenId = status;
     print('token ID is : $tokenId');
     try {
       reference.doc(username).update({

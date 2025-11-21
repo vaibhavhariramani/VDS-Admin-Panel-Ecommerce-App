@@ -43,3 +43,45 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+android/app/keystore.jks
+android/app/google-services.json
+android/key.properties
+android/app/src/main/res/values/secrets.xml
+android/app/*.keystore
+android/app/*.jks
+
+# iOS sensitive files
+ios/Runner/GoogleService-Info.plist
+ios/Runner/Release.xcconfig
+ios/*.p12
+ios/*.p8
+ios/ExportOptions.plist
+
+# Flutter Web & General
+web/firebase-config.js
+.env
+.env.*
+*.env
+secrets/
+keys/
+
+# Firebase
+lib/firebase_options.dart
+firebase.json
+firebase-credentials.json
+firebase-adminsdk-*.json
+
+# General secrets
+**/secrets.xml
+**/keys.xml
+**/config.properties
+
+## Generic file
+.firebaserc
+upkeystore.jks
+.flutter-plugins
+.flutter-plugins-dependencies
+.dart_tool
+.firebase
+.env
+plugins

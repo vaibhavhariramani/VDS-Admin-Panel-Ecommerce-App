@@ -6,7 +6,7 @@ class DataProvider {
   final db = FirebaseFirestore.instance;
 
   Stream<QuerySnapshot> banners(String filter) {
-    if (filter != null && filter.isNotEmpty) {
+    if (filter.isNotEmpty) {
       return db
           .collection('Banners')
           .where('screen', isEqualTo: filter)

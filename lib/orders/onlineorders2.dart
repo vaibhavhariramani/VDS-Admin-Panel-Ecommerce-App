@@ -15,7 +15,7 @@ class Orders2 extends StatefulWidget {
 }
 
 class _Orders2State extends State<Orders2> {
-  dynamic? pincode;
+  dynamic pincode;
   String? search;
   late String url;
   DateFormat format = DateFormat.yMMMMd('en_US');

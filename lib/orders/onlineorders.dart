@@ -12,7 +12,7 @@ class Orders extends StatefulWidget {
 }
 
 class _OrdersState extends State<Orders> {
-  dynamic? pincode;
+  dynamic pincode;
   String? search;
 
   @override

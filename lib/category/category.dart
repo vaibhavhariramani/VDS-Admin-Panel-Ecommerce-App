@@ -472,12 +472,10 @@ class _CategoryState extends State<Category> {
                           ),
                         ),
                         onPressed: () {
-                          if (s != null) {
-                            setState(() {
-                              sub = List.from(s);
-                            });
-                          }
-                          _uploadSub(document);
+                          setState(() {
+                            sub = List.from(s);
+                          });
+                                                  _uploadSub(document);
                         },
                       )
                     ],

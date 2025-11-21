@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vdsadmin/home/splashscreen.dart';
+// import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -29,7 +30,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void configOneSignel() {
-    OneSignal.shared.setAppId('d43fa4f9-2fa5-48a3-a184-49636c9d96c5');
+    OneSignal.initialize('d43fa4f9-2fa5-48a3-a184-49636c9d96c5');
   }
 
   void _initCheck() async {
@@ -45,7 +46,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-        backgroundColor: Color(0xffF5F6F8),
+        scaffoldBackgroundColor: Color(0xffF5F6F8),
         fontFamily: "Nunito",
       ),
       title: 'VDS: ADMIN PANEL',

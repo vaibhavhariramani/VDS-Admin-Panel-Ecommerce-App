@@ -13,16 +13,15 @@ class BannerCard extends StatefulWidget {
 }
 
 class _BannerCardState extends State<BannerCard> {
+  bool _hasError = false;
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        CachedNetworkImage(
-          imageUrl: widget.data['image'],
-          height: MediaQuery.of(context).size.height * 0.1,
-          width: MediaQuery.of(context).size.width * 0.5,
-          fit: BoxFit.fill,
-        ),
+        _hasError
+            ? _buildErrorPlaceholder()
+            : _buildCachedNetworkImage(),
         IconButton(
           icon: Icon(Icons.delete_outline_rounded),
           onPressed: () {
@@ -32,6 +31,72 @@ class _BannerCardState extends State<BannerCard> {
       ],
     );
   }
+
+  Widget _buildCachedNetworkImage() {
+    return CachedNetworkImage(
+      imageUrl: widget.data['image'],
+      cacheKey: '${widget.data['image']}_${DateTime.now().millisecondsSinceEpoch}',
+      memCacheWidth: 500,
+      memCacheHeight: 300,
+      maxWidthDiskCache: 500,
+      maxHeightDiskCache: 300,
+      filterQuality: FilterQuality.low,
+      httpHeaders: {
+        'Accept': 'image/*',
+        'Cache-Control': 'no-cache',
+      },
+      fit: BoxFit.cover,
+      placeholder: (context, url) => Container(
+        color: Colors.grey[300],
+        child: Center(
+          child: CircularProgressIndicator(),
+        ),
+      ),
+      errorWidget: (context, url, error) {
+        print('Image load error: $error for URL: $url');
+        print('Error type: ${error.runtimeType}');
+        
+        // Set error state and rebuild
+        WidgetsBinding.instance?.addPostFrameCallback((_) {
+          if (mounted) {
+            setState(() {
+              _hasError = true;
+            });
+          }
+        });
+        
+        return _buildErrorPlaceholder();
+      },
+    );
+  }
+
+  Widget _buildErrorPlaceholder() {
+    return Container(
+      width: double.infinity,
+      height: 150,
+      color: Colors.grey[200],
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.broken_image,
+            color: Colors.grey[400],
+            size: 40,
+          ),
+          SizedBox(height: 8),
+          Text(
+            'Failed to load image',
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+
 
   deleteBanner(String name) {
     showDialog(
