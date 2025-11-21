@@ -365,6 +365,7 @@ class _PdfViewerwebState extends State<PdfViewerweb> {
                 ElevatedButton(
                   child: const Text('Print Bill'),
                   onPressed: () {
+                    print('print button pressed');
                     // PdfApi.openFile(File(widget.data));
                   },
                 ),
