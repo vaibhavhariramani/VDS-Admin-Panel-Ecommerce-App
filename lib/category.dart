@@ -1,9 +1,13 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:typed_data';
+
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_picker_for_web/image_picker_for_web.dart';
-import 'package:firebase/firebase.dart' as fb;
+import 'package:firebase_core/firebase_core.dart'; // Always needed for initialization
+import 'package:cloud_firestore/cloud_firestore.dart'; // For Firestore
+import 'package:firebase_auth/firebase_auth.dart'; // For Authentication
+import 'package:firebase_storage/firebase_storage.dart'; // For Cloud Storage
 import 'package:ecom_admin_panel/models/data_provider.dart';
 
 import 'componds/imagess.dart';
@@ -19,8 +23,8 @@ class _CategoryState extends State<Category> {
   TextEditingController tag = TextEditingController();
   TextEditingController index = TextEditingController();
   TextEditingController sunname = TextEditingController();
-  late PickedFile category;
-  late PickedFile icon;
+  late PickedFile? category;
+  late PickedFile? icon;
   late StateSetter _setState;
   final _picker = ImagePickerPlugin();
   List<dynamic> sub = [];
@@ -83,7 +87,15 @@ class _CategoryState extends State<Category> {
                       ),
                       itemBuilder: (BuildContext context, int index) {
                         if (snapshot.hasData) {
-                          return customlist(snapshot.data!.docs[index]);
+                          DocumentSnapshot doc = snapshot.data!.docs[index];
+                          // Safely get the tags list
+                          List<dynamic> tagsList = [];
+                          if (doc.data() != null) {
+                            final data = doc.data() as Map<String, dynamic>;
+                            tagsList =
+                                data.containsKey('tags') ? data['tags'] : [];
+                          }
+                          return customlist(doc);
                         }
                         return Center(child: CircularProgressIndicator());
                       },
@@ -98,82 +110,114 @@ class _CategoryState extends State<Category> {
   }
 
   Widget customlist(DocumentSnapshot snapshot) {
-    return Card(
-      elevation: 0,
+  List<dynamic> tagsList = [];
+  if (snapshot.data() != null) {
+    final data = snapshot.data() as Map<String, dynamic>;
+    tagsList = data.containsKey('tags') ? data['tags'] : [];
+  }
+
+  return Card(
+    elevation: 2,
+    margin: EdgeInsets.all(8),
+    child: Container(
+      width: MediaQuery.of(context).size.width * 0.9, // 90% of screen width
+      height: MediaQuery.of(context).size.height * 0.6, // 60% of screen height
       child: Column(
-        mainAxisSize: MainAxisSize.max,
+        mainAxisSize: MainAxisSize.min,
         children: [
+          // Image section - responsive height
           Container(
-            width: MediaQuery.of(context).size.width,
-            height: 200,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(8), topLeft: Radius.circular(8)),
-            ),
+            width: double.infinity,
+            height: MediaQuery.of(context).size.height * 0.2, // 20% of screen height
             child: MyImage(imageUrl: snapshot['image']),
           ),
-          Container(
-              width: MediaQuery.of(context).size.width,
-              child: ListTile(
-                leading: Container(
-                    width: 80,
-                    height: 80,
-                    child: MyImage(imageUrl: snapshot['icon'])),
-                title: Text(
-                  '${snapshot['name']}',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                trailing: Container(
-                  width: 80,
-                  height: 80,
-                  child: Row(
+          
+          // Content section - flexible
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Category info row
+                  Row(
                     children: [
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.08, // 8% of screen width
+                        height: MediaQuery.of(context).size.width * 0.08,
+                        child: MyImage(imageUrl: snapshot['icon']),
+                      ),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '${snapshot['name']}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: MediaQuery.of(context).size.width * 0.02, // Responsive font
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
                       IconButton(
                         icon: Icon(Icons.add),
                         onPressed: () {
-                          _addSub(snapshot.id, snapshot['sub']);
+                          _addSub(snapshot.id, tagsList);
                         },
                       ),
                       IconButton(
                         icon: Icon(Icons.delete_outline_rounded),
                         onPressed: () {},
-                      )
+                      ),
                     ],
                   ),
-                ),
-              )),
-          Container(
-            width: MediaQuery.of(context).size.width,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.only(
-                  bottomRight: Radius.circular(15),
-                  bottomLeft: Radius.circular(15)),
-            ),
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: snapshot['tags'] != null ? snapshot['tags'].length : 0,
-              itemBuilder: (_, i) => ListTile(
-                  leading: Container(
-                      width: 80,
-                      height: 80,
-                      child: MyImage(imageUrl: snapshot['tags'][i]['image'])),
-                  title: Text(snapshot['tags'][i]['name'].toString(),
-                      style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.normal,
-                          color: Colors.black)),
-                  subtitle: Text("tag :$i"),
-                  trailing: IconButton(
-                      icon: Icon(Icons.delete_outline_rounded),
-                      tooltip: "delete item",
-                      iconSize: 25,
-                      onPressed: () {})),
+                  
+                  SizedBox(height: 8),
+                  
+                  // Tags section - flexible
+                  Expanded(
+                    child: tagsList.isEmpty
+                        ? Center(
+                            child: Text(
+                              'No sub-categories',
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          )
+                        : ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: tagsList.length,
+                            itemBuilder: (_, i) => ListTile(
+                              dense: true,
+                              leading: Container(
+                                width: MediaQuery.of(context).size.width * 0.06,
+                                height: MediaQuery.of(context).size.width * 0.06,
+                                child: MyImage(imageUrl: tagsList[i]['image']),
+                              ),
+                              title: Text(
+                                tagsList[i]['name'].toString(),
+                                style: TextStyle(
+                                  fontSize: MediaQuery.of(context).size.width * 0.015,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              subtitle: Text("tag :$i"),
+                              trailing: IconButton(
+                                icon: Icon(Icons.delete_outline_rounded),
+                                onPressed: () {},
+                              ),
+                            ),
+                          ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   _addCategory() {
     showDialog(
@@ -212,7 +256,7 @@ class _CategoryState extends State<Category> {
                               height: MediaQuery.of(context).size.height * 0.2,
                               color: Colors.black12,
                               child: category != null
-                                  ? Image.network(category.path)
+                                  ? Image.network(category!.path)
                                   : Icon(Icons.image),
                             ),
                             onTap: () {
@@ -228,7 +272,7 @@ class _CategoryState extends State<Category> {
                               height: MediaQuery.of(context).size.height * 0.2,
                               color: Colors.black12,
                               child: icon != null
-                                  ? Image.network(icon.path)
+                                  ? Image.network(icon!.path)
                                   : Icon(Icons.image),
                             ),
                             onTap: () {
@@ -329,60 +373,82 @@ class _CategoryState extends State<Category> {
   }
 
   Future _upload() async {
-    Navigator.pop(context);
-    final filePath = 'category/${DateTime.now()}.png';
-    final iconPath = 'icon/${DateTime.now()}.png';
     showDialog(
-        context: context,
-        builder: (context) {
-          return Center(
-              child: CircularProgressIndicator(
+      context: context,
+      builder: (context) {
+        return Center(
+          child: CircularProgressIndicator(
             backgroundColor: Colors.amber,
-          ));
-        },
-        barrierDismissible: false);
-    String catogoryUrl;
-    String iconUrl;
-    if (category != null && icon != null) {
-      await category.readAsBytes().then((value) async {
-        final ref = fb
-            .storage()
-            .refFromURL("gs://atus-kart.appspot.com")
-            .child("$filePath");
-        await ref.put(value).future;
-        catogoryUrl = (await ref.getDownloadURL()).toString();
-        icon.readAsBytes().then((value) async {
-          final ref = fb
-              .storage()
-              .refFromURL("gs://atus-kart.appspot.com")
-              .child("$iconPath");
-          await ref.put(value).future;
-          iconUrl = (await ref.getDownloadURL()).toString();
-          if (catogoryUrl != null && iconUrl != null) {
-            CollectionReference reference =
-                FirebaseFirestore.instance.collection('Category');
-            reference.doc().set({
-              'index': index.text,
-              'name': name.text,
-              'tag': name.text,
-              'icon': iconUrl,
-              'image': catogoryUrl,
-            }).then((value) {
-              setState(() {
-                index.text = '';
-                tag.text = '';
-                icon = '' as PickedFile;
-                category = '' as PickedFile;
-              });
-              setState(() {});
-            }).catchError((onError) {
-              print(onError.toString());
-            });
-          }
-        });
-      });
+          ),
+        );
+      },
+      barrierDismissible: false,
+    );
+
+    try {
+      final filePath = 'category/${DateTime.now()}.png';
+      final iconPath = 'icon/${DateTime.now()}.png';
+
+      String categoryUrl;
+      String iconUrl;
+
+      if (category != null && icon != null) {
+        // Read both files as bytes
+        Uint8List? categoryBytes = await category?.readAsBytes();
+        Uint8List? iconBytes = await icon?.readAsBytes();
+
+        // Upload category image
+        final categoryRef = FirebaseStorage.instance.ref().child(filePath);
+
+        final categoryUploadTask = categoryRef.putData(
+          categoryBytes!,
+          SettableMetadata(contentType: 'image/png'),
+        );
+
+        final categorySnapshot = await categoryUploadTask;
+        categoryUrl = await categorySnapshot.ref.getDownloadURL();
+
+        // Upload icon image
+        final iconRef = FirebaseStorage.instance.ref().child(iconPath);
+
+        final iconUploadTask = iconRef.putData(
+          iconBytes!,
+          SettableMetadata(contentType: 'image/png'),
+        );
+
+        final iconSnapshot = await iconUploadTask;
+        iconUrl = await iconSnapshot.ref.getDownloadURL();
+
+        // Save to Firestore
+        if (categoryUrl != null && iconUrl != null) {
+          CollectionReference reference =
+              FirebaseFirestore.instance.collection('Category');
+
+          await reference.doc().set({
+            'index': index.text,
+            'name': name.text,
+            'tag': name
+                .text, // Note: you're using name.text twice, maybe you meant tag.text?
+            'icon': iconUrl,
+            'image': categoryUrl,
+          });
+
+          // Clear form
+          setState(() {
+            index.text = '';
+            name.text = '';
+            tag.text = '';
+            icon = null;
+            category = null;
+          });
+        }
+      }
+
+      Navigator.pop(context); // Close the dialog
+    } catch (onError) {
+      Navigator.pop(context); // Close the dialog on error too
+      print('Error uploading: $onError');
     }
-    Navigator.pop(context);
   }
 
   _addSub(String document, List<dynamic> s) {
@@ -423,7 +489,7 @@ class _CategoryState extends State<Category> {
                             height: MediaQuery.of(context).size.height * 0.2,
                             color: Colors.black12,
                             child: icon != null
-                                ? Image.network(icon.path)
+                                ? Image.network(icon!.path)
                                 : Icon(Icons.image),
                           ),
                           onTap: () {
@@ -485,48 +551,86 @@ class _CategoryState extends State<Category> {
   }
 
   Future _uploadSub(String document) async {
-    Navigator.pop(context);
+  showDialog(
+    context: context,
+    builder: (context) {
+      return Center(
+        child: CircularProgressIndicator(
+          backgroundColor: Colors.amber,
+        ),
+      );
+    },
+    barrierDismissible: false,
+  );
+
+  try {
     CollectionReference tags = FirebaseFirestore.instance.collection('Tags');
     final iconPath = 'icon/${DateTime.now()}.png';
-    showDialog(
-        context: context,
-        builder: (context) {
-          return Center(
-              child: CircularProgressIndicator(
-            backgroundColor: Colors.amber,
-          ));
-        },
-        barrierDismissible: false);
     String iconUrl;
+
     if (icon != null) {
-      icon.readAsBytes().then((value) async {
-        final ref = fb
-            .storage()
-            .refFromURL("gs://atus-kart.appspot.com")
-            .child("$iconPath");
-        await ref.put(value).future;
-        iconUrl = (await ref.getDownloadURL()).toString();
-        var v = {'name': sunname.text, 'image': iconUrl};
-        sub.add(v);
-        await tags.doc().set(v);
-        CollectionReference reference =
-            FirebaseFirestore.instance.collection('Category');
-        reference.doc(document).set({
-          'tags': sub,
-        }).then((value) {
-          setState(() {
-            index.text = '';
-            tag.text = '';
-            icon = '' as PickedFile;
-            category = '' as PickedFile;
-            sub = '' as List;
+      // Read icon file as bytes
+      Uint8List iconBytes = await icon!.readAsBytes();
+      
+      // Upload icon to Firebase Storage
+      final ref = FirebaseStorage.instance
+          .ref()
+          .child(iconPath);
+      
+      final uploadTask = ref.putData(
+        iconBytes,
+        SettableMetadata(contentType: 'image/png'),
+      );
+      
+      final taskSnapshot = await uploadTask;
+      iconUrl = await taskSnapshot.ref.getDownloadURL();
+      
+      // Create tag data
+      var v = {'name': sunname.text, 'image': iconUrl};
+      
+      // Update local sub list
+      sub.add(v);
+      
+      // Add to Tags collection
+      await tags.doc().set(v);
+      
+      // Update Category document - ensure tags field exists
+      CollectionReference reference =
+          FirebaseFirestore.instance.collection('Category');
+      
+      // First, get the current document to check if tags field exists
+      DocumentSnapshot docSnapshot = await reference.doc(document).get();
+      
+      if (docSnapshot.exists) {
+        final data = docSnapshot.data() as Map<String, dynamic>?;
+        
+        if (data != null && data.containsKey('tags')) {
+          // Tags field exists, add to it
+          await reference.doc(document).update({
+            'tags': FieldValue.arrayUnion([v]),
           });
-          setState(() {});
-        });
+        } else {
+          // Tags field doesn't exist, create it
+          await reference.doc(document).update({
+            'tags': [v]
+          });
+        }
+      }
+      
+      // Clear form
+      setState(() {
+        sunname.text = '';
+        icon = null;
       });
     }
-    Navigator.pop(context);
+    
+    Navigator.pop(context); // Close the dialog
+    
+  } catch (error) {
+    Navigator.pop(context); // Close the dialog on error
+    print('Error uploading subcategory: $error');
   }
+}
 
   _deleteCategory(String name) {
     showDialog(

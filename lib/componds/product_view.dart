@@ -77,12 +77,16 @@ class ProductView extends StatelessWidget {
                                   fontWeight: FontWeight.w500,
                                   letterSpacing: 0.5,
                                 ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                               subtitle: Text(
                                 description,
                                 style: TextStyle(
                                   fontSize: 14.0,
                                 ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
                               trailing: IconButton(
                                   padding: EdgeInsets.all(0),

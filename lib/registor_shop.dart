@@ -1,5 +1,9 @@
 import 'dart:math';
-import 'package:firebase/firebase.dart' as fb;
+// import 'package:firebase/firebase.dart' as fb;
+import 'package:firebase_core/firebase_core.dart'; // Always needed for initialization
+import 'package:cloud_firestore/cloud_firestore.dart'; // For Firestore
+import 'package:firebase_auth/firebase_auth.dart'; // For Authentication
+import 'package:firebase_storage/firebase_storage.dart'; // For Cloud Storage
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,7 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_picker_for_web/image_picker_for_web.dart';
-import 'package:timelines/timelines.dart';
+// import 'package:timelines/timelines.dart';
+import 'package:timelines_plus/timelines_plus.dart';
 
 import 'models/data_provider.dart';
 
@@ -33,7 +38,7 @@ class _ShopRegisterState extends State<ShopRegister> {
   int index = 0;
   bool check = false;
 
-  late PickedFile bannerFile;
+  PickedFile? bannerFile;
   final _picker = ImagePickerPlugin();
 
   @override
@@ -149,8 +154,6 @@ class _ShopRegisterState extends State<ShopRegister> {
                       height: MediaQuery.of(context).size.width * 0.15,
                       color: Colors.white,
                       child: DottedBorder(
-                        color: Colors.black,
-                        strokeWidth: 1,
                         child: bannerFile == null
                             ? Center(
                                 child: IconButton(
@@ -160,7 +163,7 @@ class _ShopRegisterState extends State<ShopRegister> {
                                     }),
                               )
                             : Image.network(
-                                bannerFile.path,
+                                bannerFile!.path,
                                 width: MediaQuery.of(context).size.width,
                                 fit: BoxFit.cover,
                               ),
@@ -922,57 +925,75 @@ class _ShopRegisterState extends State<ShopRegister> {
   }
 
   Future _upload() async {
-    showDialog(
-        context: context,
-        builder: (context) {
-          return Center(
-              child: CircularProgressIndicator(
-            backgroundColor: Colors.amber,
-          ));
-        },
-        barrierDismissible: false);
+  showDialog(
+    context: context,
+    builder: (context) {
+      return Center(
+        child: CircularProgressIndicator(
+          backgroundColor: Colors.amber,
+        ),
+      );
+    },
+    barrierDismissible: false,
+  );
+
+  try {
     final filePath = '${DateTime.now()}.png';
-    String banner;
-    await bannerFile.readAsBytes().then((value) async {
-      final ref = fb
-          .storage()
-          .refFromURL("gs://subgkart.appspot.com")
-          .child("shops$filePath");
-      await ref.put(value).future;
-      banner = (await ref.getDownloadURL()).toString();
-      CollectionReference reference =
-          FirebaseFirestore.instance.collection('Products');
-      reference.doc().set(
-        {
-          'name': name.text,
-          'description': description.text,
-          'quantity': quantity.text,
-          'mrp': double.parse(mrp.text),
-          'image': banner,
-          'price': double.parse(price.text),
-          'selling': double.parse(selling.text),
-          'pincode': pincode,
-          'category': [category1, category2],
-          'tags': [tags1, tags2],
-        },
-      ).then((value) {
-        setState(() {
-          bannerFile = '' as PickedFile;
-        });
-        Navigator.pop(context);
-        setState(() {
-          index = 0;
-          name.text = '';
-          description.text = '';
-          quantity.text = '';
-        });
-        pickImage();
-      }).catchError((onError) {
-        Navigator.pop(context);
-        print(onError.toString());
-      });
+    
+    // Read file as bytes
+    Uint8List? bytes = await bannerFile?.readAsBytes();
+    
+    // Create reference to Firebase Storage using FlutterFire
+    final ref = FirebaseStorage.instance
+        .ref()
+        .child("shops$filePath");
+    
+    // Upload to Firebase Storage
+    final uploadTask = ref.putData(
+      bytes!,
+      SettableMetadata(contentType: 'image/png'),
+    );
+    
+    // Wait for upload to complete
+    final taskSnapshot = await uploadTask;
+    
+    // Get download URL
+    final banner = await taskSnapshot.ref.getDownloadURL();
+    
+    // Save to Firestore
+    CollectionReference reference =
+        FirebaseFirestore.instance.collection('Products');
+    
+    await reference.doc().set({
+      'name': name.text,
+      'description': description.text,
+      'quantity': quantity.text,
+      'mrp': double.parse(mrp.text),
+      'image': banner,
+      'price': double.parse(price.text),
+      'selling': double.parse(selling.text),
+      'pincode': pincode,
+      'category': [category1, category2],
+      'tags': [tags1, tags2],
     });
+    
+    // Clear form and navigate
+    setState(() {
+      bannerFile = null; // or your initial value
+      index = 0;
+      name.text = '';
+      description.text = '';
+      quantity.text = '';
+    });
+    
+    Navigator.pop(context); // Close the dialog
+    pickImage();
+    
+  } catch (onError) {
+    Navigator.pop(context); // Close the dialog on error too
+    print('Error uploading: $onError');
   }
+}
 
   void pickImage() {
     showDialog(

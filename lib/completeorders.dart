@@ -12,7 +12,7 @@ class CompleteOrders extends StatefulWidget {
 }
 
 class _CompleteOrdersState extends State<CompleteOrders> {
-  late String pincode;
+  String? pincode;
   String search = '';
 
   @override
@@ -48,7 +48,9 @@ class _CompleteOrdersState extends State<CompleteOrders> {
                                 style: TextStyle(color: Colors.black),
                                 cursorColor: Colors.deepPurple,
                                 onChanged: (v) {
-                                  setState(() {});
+                                  setState(() {
+                                    search = v; // Fixed: Actually update search variable
+                                  });
                                 },
                                 decoration: InputDecoration(
                                   hintText: "Search orders",
@@ -113,7 +115,7 @@ class _CompleteOrdersState extends State<CompleteOrders> {
                   padding: const EdgeInsets.only(right: 32, top: 12),
                   child: PaginatedDataTable(
                     showCheckboxColumn: false,
-                    rowsPerPage: snapshot.data?.docs.length == 0
+                    rowsPerPage: snapshot.data!.docs.isEmpty
                         ? 1
                         : snapshot.data!.docs.length < 10
                             ? snapshot.data!.docs.length
@@ -127,11 +129,15 @@ class _CompleteOrdersState extends State<CompleteOrders> {
                       DataColumn(label: Text('Pincode')),
                       DataColumn(label: Text('Status')),
                     ],
-                    source:
-                        DataSource(context, snapshot as QuerySnapshot<Object?>),
+                    source: DataSource(context, snapshot.data!), // FIXED: Use snapshot.data!
                   ),
                 );
               }
+              
+              if (snapshot.hasError) {
+                return Center(child: Text('Error loading orders'));
+              }
+              
               return Center(child: CircularProgressIndicator());
             }),
       ],
@@ -143,14 +149,25 @@ class DataSource extends DataTableSource {
   DataSource(this.context, this.rows);
 
   final BuildContext context;
-  QuerySnapshot rows;
+  final QuerySnapshot rows;
   int _selectedCount = 0;
+
+  // Helper method for safe data access
+  String _getFieldValue(QueryDocumentSnapshot doc, String fieldName) {
+    try {
+      final data = doc.data() as Map<String, dynamic>?;
+      return data?[fieldName]?.toString() ?? '';
+    } catch (e) {
+      return '';
+    }
+  }
 
   @override
   DataRow? getRow(int index) {
     assert(index >= 0);
     if (index >= rows.docs.length) return null;
     final row = rows.docs[index];
+    
     return DataRow.byIndex(
       selected: false,
       index: index,
@@ -164,35 +181,27 @@ class DataSource extends DataTableSource {
       cells: [
         DataCell(CircleAvatar(
           backgroundColor: Colors.white,
-          child: row != null
-              ? Container(
-                  width: 40,
-                  height: 40,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(70),
-                    child: MyImage(imageUrl: row['image']),
-                  ),
-                )
-              : ClipRRect(
-                  borderRadius: BorderRadius.circular(70),
-                  child: Icon(
-                    Icons.photo,
-                    color: Colors.white,
-                  ),
-                ),
+          child: Container(
+            width: 40,
+            height: 40,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(70),
+              child: MyImage(imageUrl: _getFieldValue(row, 'image')),
+            ),
+          ),
         )),
-        DataCell(Text('${row['booking']}')),
-        DataCell(Text('${row['name']}')),
-        DataCell(Text('${row['phone']}')),
-        DataCell(Text('₹${row['total']}')),
-        DataCell(Text('${row['pincode']}')),
+        DataCell(Text(_getFieldValue(row, 'booking'))),
+        DataCell(Text(_getFieldValue(row, 'name'))),
+        DataCell(Text(_getFieldValue(row, 'phone'))),
+        DataCell(Text('₹${_getFieldValue(row, 'total')}')),
+        DataCell(Text(_getFieldValue(row, 'pincode'))),
         DataCell(Container(
             decoration: BoxDecoration(
                 color: Colors.green.withOpacity(0.4),
                 borderRadius: BorderRadius.circular(4)),
             padding: EdgeInsets.all(4),
             child: Text(
-              '${row['status']}',
+              _getFieldValue(row, 'status'),
               style: TextStyle(color: Colors.green),
             ))),
       ],

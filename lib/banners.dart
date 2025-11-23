@@ -19,7 +19,7 @@ class Banners extends StatefulWidget {
 }
 
 class _BannersState extends State<Banners> {
-  late PickedFile bannerFile;
+  PickedFile? bannerFile;
   final _picker = ImagePickerPlugin();
 
   @override
@@ -71,8 +71,6 @@ class _BannersState extends State<Banners> {
                                       MediaQuery.of(context).size.width * 0.2,
                                   color: Colors.white,
                                   child: DottedBorder(
-                                    color: Colors.black,
-                                    strokeWidth: 1,
                                     child: Center(
                                       child: IconButton(
                                           icon: Icon(Icons.add),
@@ -92,8 +90,6 @@ class _BannersState extends State<Banners> {
                     width: MediaQuery.of(context).size.width * 2,
                     color: Colors.white,
                     child: DottedBorder(
-                      color: Colors.black,
-                      strokeWidth: 1,
                       child: Center(
                         child: IconButton(
                             icon: Icon(Icons.add),
@@ -134,7 +130,7 @@ class _BannersState extends State<Banners> {
         },
         barrierDismissible: false);
     String banner;
-    await bannerFile.readAsBytes().then((value) async {
+    await bannerFile?.readAsBytes().then((value) async {
       final ref = fb.ref().child("$filePath");
       await ref.putFile(value as File);
       banner = (await ref.getDownloadURL()).toString();

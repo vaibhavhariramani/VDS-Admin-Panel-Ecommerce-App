@@ -16,21 +16,38 @@ class _UsersViewState extends State<UsersView> {
   List<UserData> users = [];
 
   Future _get() async {
-    CollectionReference reference =
-        FirebaseFirestore.instance.collection('Users');
-    try {
-      QuerySnapshot querySnapshot = await reference.get();
-      querySnapshot.docs.map((e) {
-        setState(() {
-          u.add(UserData(e['profile'], e['name'], e['number'], e['region'],
-              e['pincode'].toString(), e.id, e['token']));
-          users = List.from(u);
-        });
+  CollectionReference reference =
+      FirebaseFirestore.instance.collection('Users');
+  try {
+    QuerySnapshot querySnapshot = await reference.get();
+    setState(() {
+      u = querySnapshot.docs.map((e) {
+        final data = e.data() as Map<String, dynamic>;
+        
+        // Helper function to safely convert any value to string
+        String safeToString(dynamic value, [String defaultValue = '']) {
+          if (value == null) return defaultValue;
+          return value.toString();
+        }
+
+        // Safely extract and convert all fields
+        String profile = safeToString(data['profile']);
+        String name = safeToString(data['name'], 
+                       safeToString(data['phone'], 
+                       safeToString(data['number'], 'Unknown User')));
+        String number = safeToString(data['number'], safeToString(data['phone']));
+        String region = safeToString(data['region'], 'No Region');
+        String pincode = safeToString(data['pincode'], 'No Pincode');
+        String token = safeToString(data['token'], safeToString(data['onesignalTokenID']));
+
+        return UserData(profile, name, number, region, pincode, e.id, token);
       }).toList();
-    } catch (e) {
-      print(e.toString());
-    }
+      users = List.from(u);
+    });
+  } catch (e) {
+    print('Error fetching users: $e');
   }
+}
 
   onItemChange(String value) {
     setState(() {

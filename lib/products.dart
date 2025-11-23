@@ -14,7 +14,62 @@ class Products extends StatefulWidget {
 
 class _ProductsState extends State<Products> {
   String search = '';
-  String filter = '';
+  String? selectedCategory;
+  List<Map<String, dynamic>> categories = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCategories();
+  }
+
+  Future<void> _loadCategories() async {
+    try {
+      final snapshot = await dataProvider.category().first;
+      setState(() {
+        categories = snapshot.docs.map((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          return {
+            'tag': data['tag']?.toString() ?? '',
+            'name': data['name']?.toString() ?? '',
+            'id': doc.id,
+          };
+        }).toList();
+      });
+    } catch (e) {
+      print('Error loading categories: $e');
+    }
+  }
+
+  Widget _buildLoadingState() {
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height * 0.8,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(),
+          SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text(
+              'Loading....',
+              style: TextStyle(
+                  fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 80, right: 80),
+            child: Text(
+              "We are looking to match best product for you",
+              style: TextStyle(color: Colors.grey),
+              textAlign: TextAlign.center,
+            ),
+          )
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +84,7 @@ class _ProductsState extends State<Products> {
             ),
             child: Row(
               children: [
+                // Search bar
                 Expanded(
                   flex: MediaQuery.of(context).size.width < 1000 ? 7 : 8,
                   child: Padding(
@@ -37,9 +93,9 @@ class _ProductsState extends State<Products> {
                       padding: const EdgeInsets.all(8.0),
                       child: Container(
                         decoration: BoxDecoration(
-                            border: Border.all(color: Colors.black26),
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
+                          border: Border.all(color: Colors.black26),
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                        ),
                         child: Row(
                           children: <Widget>[
                             Expanded(flex: 1, child: Icon(Icons.search)),
@@ -65,152 +121,101 @@ class _ProductsState extends State<Products> {
                     ),
                   ),
                 ),
+                // Category dropdown
                 Expanded(
                   flex: MediaQuery.of(context).size.width < 1000 ? 3 : 2,
                   child: Container(
                     padding: EdgeInsets.only(left: 8, right: 8),
                     decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(8)),
-                        border: Border.all(color: Colors.black26)),
-                    child: StreamBuilder<QuerySnapshot>(
-                        stream: dataProvider.category(),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData) {
-                            return DropdownButton(
-                              value: filter,
-                              icon: Icon(Icons.keyboard_arrow_down),
-                              iconSize: 24,
-                              elevation: 16,
-                              isExpanded: true,
-                              underline: Container(),
-                              hint: Text('Category'),
-                              style: TextStyle(color: Colors.black),
-                              onChanged: (v) {
-                                setState(() {
-                                  filter = v.toString();
-                                });
-                              },
-                              items: snapshot.data!.docs.map((value) {
-                                return DropdownMenuItem(
-                                  value: value['tag'].toString(),
-                                  child: Text(value['tag'].toString()),
-                                );
-                              }).toList(),
-                            );
-                          } else {
-                            return Text('Something went wrong');
-                          }
-                        }),
+                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                      border: Border.all(color: Colors.black26),
+                    ),
+                    child: DropdownButton<String>(
+                      value: selectedCategory,
+                      icon: Icon(Icons.keyboard_arrow_down),
+                      iconSize: 24,
+                      elevation: 16,
+                      isExpanded: true,
+                      underline: Container(),
+                      hint: Text('All Categories'),
+                      style: TextStyle(color: Colors.black),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          selectedCategory = newValue;
+                        });
+                      },
+                      items: [
+                        DropdownMenuItem<String>(
+                          value: null,
+                          child: Text('All Categories'),
+                        ),
+                        ...categories.map((category) {
+                          return DropdownMenuItem<String>(
+                            value: category['tag'],
+                            child: Text(category['tag']),
+                          );
+                        }).toList(),
+                      ],
+                    ),
                   ),
                 ),
-                SizedBox(width: 8)
+                SizedBox(width: 8),
               ],
             ),
           ),
         ),
         SizedBox(height: 10),
         StreamBuilder<QuerySnapshot>(
-            stream: dataProvider.products(search: search, filter: filter),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return GridView.builder(
-                  physics: BouncingScrollPhysics(),
-                  itemCount: snapshot.data!.docs.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 4, childAspectRatio: 3 / 2),
-                  shrinkWrap: true,
-                  itemBuilder: (BuildContext context, int index) {
-                    if (snapshot.hasData) {
-                      return snapshot.data!.docs.length > 0
-                          ? ProductView(
-                              image: snapshot.data!.docs[index]['image'],
-                              name: snapshot.data!.docs[index]['name'],
-                              description: snapshot.data!.docs[index]
-                                  ['description'],
-                              quantity: snapshot.data!.docs[index]['quantity'],
-                              mrp: snapshot.data!.docs[index]['mrp'].toString(),
-                              wholesale: snapshot.data!.docs[index]['selling']
-                                  .toString(),
-                              onClick: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (BuildContext context) =>
-                                            ProductDetails(
-                                                snapshot: snapshot
-                                                    .data!.docs[index])));
-                              },
-                              onDelete: () async {
-                                await snapshot.data!.docs[index].reference
-                                    .delete();
-                              },
-                            )
-                          : Container(
-                              width: MediaQuery.of(context).size.width,
-                              height: MediaQuery.of(context).size.height * 0.8,
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  CircularProgressIndicator(),
-                                  SizedBox(
-                                    height: 20,
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(bottom: 8),
-                                    child: Text(
-                                      'Loading....',
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 80, right: 80),
-                                    child: Text(
-                                      "We are looking to match best product for you",
-                                      style: TextStyle(color: Colors.grey),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  )
-                                ],
-                              ),
-                            );
-                    }
-                    return Container(
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.height * 0.8,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          CircularProgressIndicator(),
-                          SizedBox(
-                            height: 20,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: Text(
-                              'Loading....',
-                              style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 80, right: 80),
-                            child: Text(
-                              "We are looking to match best product for you",
-                              style: TextStyle(color: Colors.grey),
-                              textAlign: TextAlign.center,
-                            ),
-                          )
-                        ],
-                      ),
-                    );
-                  },
-                );
+          stream: dataProvider.products(search: search, filter: selectedCategory ?? ''),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              final docs = snapshot.data!.docs;
+              if (docs.isEmpty) {
+                return Center(child: Text('No products found'));
               }
-              return Center(child: CircularProgressIndicator());
-            })
+              
+              return GridView.builder(
+                physics: BouncingScrollPhysics(),
+                itemCount: docs.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4, childAspectRatio: 3 / 2),
+                shrinkWrap: true,
+                itemBuilder: (BuildContext context, int index) {
+                  final doc = docs[index];
+                  final data = doc.data() as Map<String, dynamic>;
+                  
+                  // Safe type conversion for all fields
+                  String safeToString(dynamic value) => value?.toString() ?? '';
+                  
+                  return ProductView(
+                    image: safeToString(data['image']),
+                    name: safeToString(data['name']),
+                    description: safeToString(data['description']),
+                    quantity: safeToString(data['quantity']),
+                    mrp: safeToString(data['mrp']),
+                    wholesale: safeToString(data['selling']),
+                    onClick: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (BuildContext context) =>
+                                  ProductDetails(snapshot: doc)));
+                    },
+                    onDelete: () async {
+                      await doc.reference.delete();
+                    },
+                  );
+                },
+              );
+            }
+            
+            if (snapshot.hasError) {
+              return Center(child: Text('Error loading products'));
+            }
+            
+            return Center(child: CircularProgressIndicator());
+          },
+        ),
       ],
     );
   }

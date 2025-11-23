@@ -1,10 +1,16 @@
+import 'dart:typed_data';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_picker_for_web/image_picker_for_web.dart';
-import 'package:firebase/firebase.dart' as fb;
+// import 'package:firebase/firebase.dart' as fb;
+import 'package:firebase_core/firebase_core.dart'; // Always needed for initialization
+import 'package:cloud_firestore/cloud_firestore.dart'; // For Firestore
+import 'package:firebase_auth/firebase_auth.dart'; // For Authentication
+import 'package:firebase_storage/firebase_storage.dart'; // For Cloud Storage
 
 class RegistrationEmployee extends StatefulWidget {
   const RegistrationEmployee({Key? key}) : super(key: key);
@@ -20,8 +26,8 @@ class _RegistrationEmployeeState extends State<RegistrationEmployee> {
   TextEditingController deliveryLicence = new TextEditingController();
   TextEditingController adharNumber = new TextEditingController();
   TextEditingController registrationNO = new TextEditingController();
-  late String role;
-  late PickedFile bannerFile;
+  String? role;
+  PickedFile? bannerFile;
   final _picker = ImagePickerPlugin();
 
   @override
@@ -80,8 +86,6 @@ class _RegistrationEmployeeState extends State<RegistrationEmployee> {
                             height: MediaQuery.of(context).size.width * 0.1,
                             color: Colors.white,
                             child: DottedBorder(
-                              color: Colors.black,
-                              strokeWidth: 1,
                               child: bannerFile == null
                                   ? Center(
                                       child: IconButton(
@@ -92,7 +96,7 @@ class _RegistrationEmployeeState extends State<RegistrationEmployee> {
                                           }),
                                     )
                                   : Image.network(
-                                      bannerFile.path,
+                                      bannerFile!.path,
                                       width: MediaQuery.of(context).size.width,
                                       fit: BoxFit.cover,
                                     ),
@@ -399,40 +403,47 @@ class _RegistrationEmployeeState extends State<RegistrationEmployee> {
     try {
       final filePath = '${DateTime.now()}.png';
       String banner;
-      await bannerFile.readAsBytes().then((value) async {
-        final ref = fb
-            .storage()
-            .refFromURL("gs://subgkart.appspot.com")
-            .child("employee$filePath");
-        await ref.put(value).future;
-        banner = (await ref.getDownloadURL()).toString();
-        reference.doc(user.uid).set({
-          'name': name.text,
-          'mail': email.text,
-          'phone': phone.text,
-          'role': role,
-          'licence': deliveryLicence.text,
-          'adharNO': adharNumber.text,
-          'no': registrationNO.text,
-          'image': banner
-        }).then((value) {
-          setState(() {
-            bannerFile = '' as PickedFile;
-          });
-          Navigator.pop(context);
-          setState(() {
-            name.text = '';
-            email.text = '';
-            phone.text = '';
-          });
-          pickImage();
-        }).catchError((onError) {
-          Navigator.pop(context);
-          print(onError.toString());
-        });
+      // Read file as bytes
+      Uint8List? bytes = await bannerFile?.readAsBytes();
+      // Create reference to Firebase Storage using FlutterFire
+      final ref = FirebaseStorage.instance
+          .ref()
+          .child("employee$filePath");
+      
+      // Upload to Firebase Storage
+      final uploadTask = ref.putData(
+        bytes!,
+        SettableMetadata(contentType: 'image/png'),
+      );
+      
+      // Wait for upload to complete
+      final taskSnapshot = await uploadTask;
+      
+      // Get download URL
+      banner = await taskSnapshot.ref.getDownloadURL();
+      // Save to Firestore
+      await reference.doc(user.uid).set({
+        'name': name.text,
+        'mail': email.text,
+        'phone': phone.text,
+        'role': role,
+        'licence': deliveryLicence.text,
+        'adharNO': adharNumber.text,
+        'no': registrationNO.text,
+        'image': banner
       });
-    } catch (e) {
+          // Clear form and navigate
+      setState(() {
+        bannerFile = null; // or whatever initial value you use
+        name.text = '';
+        email.text = '';
+        phone.text = '';
+      });
+          Navigator.pop(context);
+    }   
+      catch (e) {
       Navigator.pop(context);
+      print('Error uploading: $e');
     }
   }
 

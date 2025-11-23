@@ -58,8 +58,6 @@ class _ProductDetailsState extends State<ProductDetails> {
               height: MediaQuery.of(context).size.width * 0.15,
               color: Colors.white,
               child: DottedBorder(
-                color: Colors.black,
-                strokeWidth: 1,
                 child: MyImage(imageUrl: widget.snapshot['image']),
               ),
             ),
