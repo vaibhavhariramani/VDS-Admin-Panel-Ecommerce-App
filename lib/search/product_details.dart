@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
+// import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_share/flutter_share.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -15,27 +15,27 @@ class ProductDetails extends StatefulWidget {
 
 class _ProductDetailsState extends State<ProductDetails> {
   Future<void> _createDynamicLink(bool short) async {
-    final DynamicLinkParameters parameters = DynamicLinkParameters(
-      uriPrefix: 'https://ecom.page.link',
-      link: Uri.parse(
-          'https://atuskart.page.link/${widget.snapshot.get('name')}'),
-      androidParameters: const AndroidParameters(
-        packageName: "com.diatus.ecom",
-        minimumVersion: 0,
-      ),
-      // dynamicLinkParametersOptions: DynamicLinkParametersOptions(
-      //   shortDynamicLinkPathLength: ShortDynamicLinkPathLength.short,
-      // ),
-      // iosParameters: IosParameters(
-      //   bundleId: 'com.google.FirebaseCppDynamicLinksTestApp.dev',
-      //   minimumVersion: '0',
-      // ),
-      socialMetaTagParameters: SocialMetaTagParameters(
-        title: widget.snapshot.get('name'),
-        imageUrl: Uri.parse(widget.snapshot.get('image')),
-        description: 'Check out this amazing product',
-      ),
-    );
+    // final DynamicLinkParameters parameters = DynamicLinkParameters(
+    //   uriPrefix: 'https://ecom.page.link',
+    //   link: Uri.parse(
+    //       'https://atuskart.page.link/${widget.snapshot.get('name')}'),
+    //   androidParameters: const AndroidParameters(
+    //     packageName: "com.diatus.ecom",
+    //     minimumVersion: 0,
+    //   ),
+    //   // dynamicLinkParametersOptions: DynamicLinkParametersOptions(
+    //   //   shortDynamicLinkPathLength: ShortDynamicLinkPathLength.short,
+    //   // ),
+    //   // iosParameters: IosParameters(
+    //   //   bundleId: 'com.google.FirebaseCppDynamicLinksTestApp.dev',
+    //   //   minimumVersion: '0',
+    //   // ),
+    //   socialMetaTagParameters: SocialMetaTagParameters(
+    //     title: widget.snapshot.get('name'),
+    //     imageUrl: Uri.parse(widget.snapshot.get('image')),
+    //     description: 'Check out this amazing product',
+    //   ),
+    // );
 
     String url = 'https://ecommerce-26b18.firebaseapp.com/#/';
     // if (short) {

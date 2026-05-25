@@ -1,6 +1,7 @@
 run for debugging
 
 flutter run -d chrome --web-renderer html
+flutter run -d edge --web-renderer html
 flutter run -d chrome --web-renderer html --no-sound-null-safety
 production release
 
