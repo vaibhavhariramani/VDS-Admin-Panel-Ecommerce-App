@@ -123,4 +123,5 @@ class OrdersView extends GetResponsiveView<OrdersController> {
       ),
     );
   }
+
 }

@@ -115,7 +115,7 @@ class _RootAdminHome extends GetResponsiveView<HomeController> {
                 buildItem: (BuildContext context, int index) {
                   return _buildBody(
                     screen,
-                    chartData: <ChartSeries<ShopVisitorChartData, String>>[
+                    chartData: <CartesianSeries<dynamic, dynamic>>[
                       ColumnSeries<ShopVisitorChartData, String>(
                         dataSource: controller.data,
                         xValueMapper: (ShopVisitorChartData data, _) => data.x,
@@ -306,7 +306,7 @@ class _AffiliatesAdminView extends GetResponsiveView<HomeController> {
                 buildItem: (BuildContext context, int index) {
                   return _buildBody(
                     screen,
-                    chartData: <ChartSeries<ShopVisitorChartData, String>>[
+                    chartData: <CartesianSeries<dynamic, dynamic>>[
                       ColumnSeries<ShopVisitorChartData, String>(
                         dataSource: controller.data,
                         xValueMapper: (ShopVisitorChartData data, _) => data.x,
@@ -497,7 +497,7 @@ class _CountryAdminView extends GetResponsiveView<HomeController> {
                 buildItem: (BuildContext context, int index) {
                   return _buildBody(
                     screen,
-                    chartData: <ChartSeries<ShopVisitorChartData, String>>[
+                    chartData: <CartesianSeries<dynamic, dynamic>>[
                       ColumnSeries<ShopVisitorChartData, String>(
                         dataSource: controller.data,
                         xValueMapper: (ShopVisitorChartData data, _) => data.x,
@@ -687,7 +687,7 @@ class _MerchantAdminView extends GetResponsiveView<HomeController> {
                   buildItem: (BuildContext context, int index) {
                     return _buildBody(
                       screen,
-                      chartData: <ChartSeries<ShopVisitorChartData, String>>[
+                      chartData: <CartesianSeries<dynamic, dynamic>>[
                         ColumnSeries<ShopVisitorChartData, String>(
                           dataSource: controller.data,
                           xValueMapper: (ShopVisitorChartData data, _) =>
@@ -879,7 +879,7 @@ class _ShopAdminView extends GetResponsiveView<HomeController> {
                   buildItem: (BuildContext context, int index) {
                     return _buildBody(
                       screen,
-                      chartData: <ChartSeries<ShopVisitorChartData, String>>[
+                      chartData: <CartesianSeries<dynamic, dynamic>>[
                         ColumnSeries<ShopVisitorChartData, String>(
                           dataSource: controller.data,
                           xValueMapper: (ShopVisitorChartData data, _) =>
