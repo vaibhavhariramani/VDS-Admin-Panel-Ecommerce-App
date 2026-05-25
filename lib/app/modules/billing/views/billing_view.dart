@@ -6,6 +6,7 @@ import 'package:flutter_barcode_listener/flutter_barcode_listener.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter_dashboard/flutter_dashboard.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:iconly/iconly.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:get/get.dart';
 
@@ -58,90 +59,89 @@ class BillingView extends GetResponsiveView<BillingController> {
               ),
             ),
           ),
-          // SliverVisibility(
-          //   visible: !deletionStatusController.isVisible.value,
-          //   sliver: PaddingWrapper(
-          //       isSliverItem: true,
-          //       horizontalPadding: 20,
-          //       topPadding: 20,
-          //       child: FlutterDashboardListView(
-          //         slivers: [
-          //           // Expanded(
-          //           //   // height: MediaQuery.of(context).size.height * 0.3,
-          //           //   child: Column(
-          //           //     mainAxisAlignment: MainAxisAlignment.center,
-          //           //     children: [
-          //           //       CachedNetworkImage(
-          //           //           imageUrl:
-          //           //               'https://firebasestorage.googleapis.com/v0/b/atus-kart.appspot.com/o/static%2Fbasket.png?alt=media&token=4ca7a331-90d3-4ce0-8113-0226e577085e',
-          //           //           width: 120,
-          //           //           height: 120),
-          //           //       const Padding(
-          //           //         padding: EdgeInsets.only(bottom: 8, top: 12),
-          //           //         child: Text('No items in your cart!',
-          //           //             style: TextStyle(color: Colors.grey)),
-          //           //       ),
-          //           //       const Padding(
-          //           //         padding: EdgeInsets.only(left: 60, right: 60),
-          //           //         child: Text(
-          //           //           "We are looking to provide our services for you",
-          //           //           style: TextStyle(
-          //           //               fontSize: 18, fontWeight: FontWeight.bold),
-          //           //           textAlign: TextAlign.center,
-          //           //         ),
-          //           //       ),
-          //           //     ],
-          //           //   ),
-          //           // ),
-          //         ],
-          //       )),
-          // ), // ListView(
-          //   // shrinkWrap: true,
-          //   physics: BouncingScrollPhysics(),
-          //   children: [
-
-          // ListView.builder(
-          //   // shrinkWrap: true,
-          //   scrollDirection: Axis.vertical,
-          //   physics: const BouncingScrollPhysics(),
-          //   itemBuilder: buildProductItem,
-          //   itemCount: controller.products.length,
-          // ),
-          // Center(
-          //   // Add visiblity detector to handle barcode
-          //   // values only when widget is visible
-          //   child: VisibilityDetector(
-          //     onVisibilityChanged: (VisibilityInfo info) {
-          //       controller.visible = info.visibleFraction > 0;
-          //     },
-          //     key: Key('visible-detector-key'),
-          //     child: BarcodeKeyboardListener(
-          //       bufferDuration: Duration(milliseconds: 200),
-          //       onBarcodeScanned: (barcode) {
-          //         controller.productfetcher((barcode));
-          //       },
-          //       // child: SizedBox(
-          //       //   height: 1,
-          //       // ),
-          //       child: Column(
-          //         children: <Widget>[
-          //           Text(
-          //             controller.barcode == null
-          //                 ? 'Waiting for new BARCODE'
-          //                 : 'BARCODE: ${controller.barcode}',
-          //             style: Theme.of(context).textTheme.headline5,
-          //           ),
-          //         ],
-          //       ),
-          //     ),
-          //   ),
-          // ),
-          //   ],
-          // ),
+          _BillButtons(),
+          
         ],
       ),
     );
   }
+
+  Widget _BillButtons() {
+    return SliverVisibility(
+      visible: true,
+      sliver: PaddingWrapper(
+        isSliverItem: true,
+        topPadding: screen.isDesktop ? 50 : 20,
+        horizontalPadding: screen.isDesktop ? 60 : 20,
+        child: FlutterDashboardListView.grid(
+          isSliverItem: true,
+          childCount: 2,
+          mainAxisSpacing: screen.isPhone ? 20 : 50,
+          crossAxisSpacing: screen.isPhone ? 20 : 50,
+          gridDelegate: !screen.isPhone
+              ? FlutterDashboardGridDelegates.columns_2(
+                  width: screen.width,
+                  length: 2,
+                )
+              : FlutterDashboardGridDelegates.columns_1(
+                  width: screen.width,
+                  length: 2,
+                ),
+          buildItem: (BuildContext context, int index) {
+            return _cardItems()[index];
+          },
+          listType: FlutterDashboardListType.Grid,
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _cardItems() {
+    return [
+      _buildCard(
+        text: 'Start Billing',
+        onPressed: () {
+          
+        },
+      ),
+      _buildCard(
+        text: 'Start Billing from DB',
+        onPressed: () {
+          
+        },
+      ),
+    ];
+  }
+
+  Widget _buildCard({required String text, required VoidCallback onPressed}) {
+    return CommonCard(
+      onTap: onPressed,
+      height: 300,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(
+            IconlyLight.plus,
+            color: DefaultTextStyle.of(screen.context).style.color,
+            size: 50,
+          ),
+          const Divider(
+            color: Colors.transparent,
+          ),
+          Text(
+            text,
+            textScaleFactor: Get.textScaleFactor,
+            style: DefaultTextStyle.of(screen.context).style.copyWith(
+                  fontSize:
+                      Theme.of(screen.context).textTheme.titleLarge?.fontSize,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
 
   List<Widget> _buildTiles() {
     return [

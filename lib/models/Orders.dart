@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Orders {
   String orderId;
   String? _customerName;
@@ -19,7 +21,7 @@ class Orders {
   String? _deliveryPersonPhoto;
   String? _deliveryPersonVehicle;
   String? _deliveryPersonVehicleNumber;
-  String? _dateOfOrder;
+  DateTime? _dateOfOrder;
   String? _timeOfOrder;
   String? _pincode;
 
@@ -43,7 +45,7 @@ class Orders {
     String? deliveryPersonPhoto,
     String? deliveryPersonVehicle,
     String? deliveryPersonVehicleNumber,
-    String? dateOfOrder,
+    DateTime? dateOfOrder,
     String? timeOfOrder,
     String? pincode,
   }) {
@@ -124,6 +126,8 @@ class Orders {
     print('ItemsId: $CartItemsId');
   }
 
+  
+
   static Orders fromJson(Map<String, dynamic> data) {
     Orders tempOrder = emptyOrder();
     print("Converted snapshot data into Map");
@@ -146,7 +150,7 @@ class Orders {
     tempOrder._deliveryPersonPhoto = data['DeliveryBoy']['Dimage'];
     tempOrder._deliveryPersonVehicle = 'deliveryPersonVehicle';
     tempOrder._deliveryPersonVehicleNumber = 'deliveryPersonVehicleNumber';
-    tempOrder._dateOfOrder = data['dateOfOrder'].toString();
+    tempOrder._dateOfOrder = (data['dateOfOrder']as Timestamp?)?.toDate();
     tempOrder._timeOfOrder = data['dateOfOrder'].toString();
     tempOrder._pincode = data['pincode'];
     return tempOrder;
@@ -174,7 +178,7 @@ Orders emptyOrder() {
     deliveryPersonPhoto: '',
     deliveryPersonVehicle: '',
     deliveryPersonVehicleNumber: '',
-    dateOfOrder: '',
+    dateOfOrder: null,
     timeOfOrder: '',
     pincode: '',
   );
