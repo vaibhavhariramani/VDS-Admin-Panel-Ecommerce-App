@@ -169,20 +169,17 @@ class ScheduledProductsView
               ],
             ),
           ),
-          // SliverVisibility(
-          //   visible: controller.isEmpty.value &&
-          //       controller.scheduledProducts.isEmpty,
-          //   sliver: Center(
-          //     child: Text(
-          //       "No Scheduled Products",
-          //       textScaleFactor: Get.textScaleFactor,
-          //       style: TextStyle(
-          //         fontSize: 20,
-          //         fontWeight: FontWeight.bold,
-          //       ),
-          //     ),
-          //   ),
-          // ),
+          SliverVisibility(
+              visible: !controller.isLoading.value,
+              sliver: SliverToBoxAdapter(
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(40),
+                        child: Text('No scheduled products found.'),
+                      ),
+                    ),
+                  ), // your existing header + grid
+            ),
           SliverVisibility(
             visible: !controller.isLoading.value &&
                 controller.scheduledProducts.isNotEmpty,

@@ -83,26 +83,27 @@ class ProductCard extends GetResponsiveView<ScheduledProductsController> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '${productItem.name}',
-                      textScaleFactor: Get.textScaleFactor,
-                      style: DefaultTextStyle.of(context).style.copyWith(
-                            fontSize: 14,
-                            color: Theme.of(context).disabledColor,
-                            fontWeight: FontWeight.w800,
-                          ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          productItem.name ?? '',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: DefaultTextStyle.of(context).style.copyWith(
+                                fontSize: 14,
+                                color: Theme.of(context).disabledColor,
+                                fontWeight: FontWeight.w800,
+                              ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            // '\$${productItem.price} ;',
                             '${productItem.currency_type} ${productItem.price}',
-                            textScaleFactor: Get.textScaleFactor,
                             style: DefaultTextStyle.of(context).style.copyWith(
                                   fontSize: 12,
                                   color: Theme.of(context).disabledColor,
@@ -110,10 +111,9 @@ class ProductCard extends GetResponsiveView<ScheduledProductsController> {
                                   decoration: TextDecoration.lineThrough,
                                 ),
                           ),
+                          const SizedBox(height: 2),
                           Text(
-                            // '\$${productItem.price} ;',
                             '${productItem.currency_type} ${productItem.discount}',
-                            textScaleFactor: Get.textScaleFactor,
                             style: DefaultTextStyle.of(context).style.copyWith(
                                   fontSize: 12,
                                   color: Colors.green,
@@ -122,9 +122,8 @@ class ProductCard extends GetResponsiveView<ScheduledProductsController> {
                           ),
                         ],
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
                 const Divider(
                   color: Colors.transparent,
                   height: 10,
@@ -247,14 +246,17 @@ class ProductCard extends GetResponsiveView<ScheduledProductsController> {
                               height: 75,
                               width: 70,
                               child: CachedNetworkImage(
-                                imageUrl: productItem.img_token!,
-                                progressIndicatorBuilder:
-                                    (context, url, progress) => Center(
+                                imageUrl: productItem.img_token ?? '',
+                                fit: BoxFit.cover,   // better than BoxFit.fill
+                                placeholder: (context, url) => Center(
                                   child: CircularProgressIndicator(
                                     color: Theme.of(context).indicatorColor,
                                   ),
                                 ),
-                                fit: BoxFit.fill,
+                                errorWidget: (context, url, error) => Container(
+                                  color: Colors.grey[200],
+                                  child: const Icon(Icons.broken_image, size: 50, color: Colors.grey),
+                                ),
                               ),
                             ),
                             SizedBox(
