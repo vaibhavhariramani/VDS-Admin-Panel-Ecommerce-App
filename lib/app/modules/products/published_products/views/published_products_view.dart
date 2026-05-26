@@ -211,6 +211,17 @@ class PublishedProductsView
               ),
             ),
           ),
+          SliverVisibility(
+              visible: !controller.isLoading.value,
+              sliver: SliverToBoxAdapter(
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(40),
+                        child: Text('No published products found.'),
+                      ),
+                    ),
+                  ), // your existing header + grid
+            )
         ],
       ),
     );

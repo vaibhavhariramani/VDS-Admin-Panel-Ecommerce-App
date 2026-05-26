@@ -316,28 +316,26 @@ class MasterListController extends GetxController {
   Future<void> editProduct({Product? ProductDetails}) async {
     allProducts.clear();
     String? productId = ProductDetails?.id;
-    String? product_name =
-        productEditForm.value["product_name"].toString() == "null"
-            ? ProductDetails!.name
-            : productEditForm.value["product_name"].toString();
-    double? price = productEditForm.value["product_price"].toString() == "null"
-        ? ProductDetails!.price
-        : double.parse(productEditForm.value["product_price"].toString());
-    double? discount = productEditForm.value["discount"].toString() == "null"
-        ? ProductDetails!.discount
-        : double.parse(productEditForm.value["discount"].toString());
-    DateTime? available_from =
-        productEditForm.value["available_from"].toString() == "null"
-            ? ProductDetails?.available_from
-            : DateTime(productEditForm.value["available_from"] as int);
-    DateTime? expires_on =
-        productEditForm.value["expiry_date"].toString() == "null"
-            ? ProductDetails?.expires_on
-            : DateTime(productEditForm.value["expiry_date"] as int);
-    DateTime? startson =
-        productEditForm.value["start_date"].toString() == "null"
-            ? ProductDetails?.available_from
-            : DateTime(productEditForm.value["start_date"] as int);
+    // Handle string / double values safely
+    String? product_name = productEditForm.control('product_name').value;
+    if (product_name == null || product_name == "null") {
+      product_name = ProductDetails!.name;
+    }
+
+    double? price = double.tryParse(productEditForm.control('product_price').value?.toString() ?? '');
+    price ??= ProductDetails?.price;
+
+    double? discount = double.tryParse(productEditForm.control('discount').value?.toString() ?? '');
+    discount ??= ProductDetails?.discount;
+    // ✅ Get DateTime values directly from controls
+    DateTime? available_from = productEditForm.control('available_from').value;
+    DateTime? expires_on = productEditForm.control('expiry_date').value;
+    DateTime? startson = productEditForm.control('start_date').value;
+
+    // Fallback to existing product values if form fields are untouched
+    available_from ??= ProductDetails?.available_from;
+    expires_on ??= ProductDetails?.expires_on;
+    startson ??= ProductDetails?.available_from;
 
     print("productId: $productId");
     print("product_name: $product_name");
@@ -351,7 +349,7 @@ class MasterListController extends GetxController {
         ? await _dataService.updateProductData(
             id: productId!,
             product_name: product_name,
-            price: price,
+            price: price!,
             discount: discount!,
             available_from: available_from!,
             expire_on: expires_on!,
@@ -360,7 +358,7 @@ class MasterListController extends GetxController {
             startson: startson!,
             id: productId!,
             product_name: product_name,
-            price: price,
+            price: price!,
             discount: discount!,
             available_from: available_from!,
             expire_on: expires_on!,
@@ -380,22 +378,21 @@ class MasterListController extends GetxController {
   Future<void> scheduleProduct({Product? ProductDetails}) async {
     allProducts.clear();
     String? productId = ProductDetails?.id;
-    DateTime? available_from =
-        productEditForm.value["available_from"].toString() == "null"
-            ? ProductDetails?.available_from
-            : DateTime(productEditForm.value["available_from"] as int);
-    DateTime? expires_on =
-        productEditForm.value["expiry_date"].toString() == "null"
-            ? ProductDetails?.expires_on
-            : DateTime(productEditForm.value["expiry_date"] as int);
+    DateTime? available_from = productEditForm.control('available_from').value;
+    DateTime? expires_on = productEditForm.control('expiry_date').value;
+
+  available_from ??= ProductDetails?.available_from;
+  expires_on ??= ProductDetails?.expires_on;
 
     print("available_from: $available_from");
     print("expires_on: $expires_on");
+    
     var x = await _dataService.scheduleProductData(
-      id: productId!,
-      available_from: available_from!,
-      expire_on: expires_on!,
+    id: productId!,
+    available_from: available_from!,
+    expire_on: expires_on!,
     );
+
     isLoading(true);
     onInit();
 

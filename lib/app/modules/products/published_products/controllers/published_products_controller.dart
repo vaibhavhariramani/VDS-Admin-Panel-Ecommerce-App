@@ -127,7 +127,7 @@ class PublishedProductsController extends GetxController {
     // if (_dataService.client != null) {
     await getshopId();
     await _fetchAllProducts();
-    fetchAllPublishedProducts();
+    await fetchAllPublishedProducts();
     // }
   }
 
@@ -152,7 +152,7 @@ class PublishedProductsController extends GetxController {
 
   Future<void> fetchAllPublishedProducts() async {
     print("\n");
-    print("Fetching Already Published magazines ");
+    print("Fetching Already Published Products ");
     publishedProducts.clear();
     isLoading(true);
     await Future.delayed(1000.milliseconds, () async {

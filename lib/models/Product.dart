@@ -162,34 +162,51 @@ class Product {
   }
 
   static Product fromJson(Map<String, dynamic> data) {
-    Product tempProduct = emptyProduct();
+    
     print("Converted snapshot data into Map");
     print(data);
-    String barcode1 =
-        data['barcode'] is int ? data['barcode'].toString() : data['barcode'];
-    String quantity1 =
-        data['quantity'] is int ? data['quantity'].toString() : data['barcode'];
+    // Product tempProduct = emptyProduct();
+    // Safely parse barcode as string
+    String barcode = data['barcode']?.toString() ?? '';
+
+    // Safely parse quantity as string (used for the 'quantity' field)
+    String quantity = data['quantity']?.toString() ?? '0';
+
+    // Safely parse count as int (used for the 'count' field)
+    int count = int.tryParse(data['quantity']?.toString() ?? '0') ?? 0;
+
+    // Safely parse price and mrp as doubles
+    double price = (data['price'] is num) ? (data['price'] as num).toDouble() : 0.0;
+    double mrp = (data['mrp'] is num) ? (data['mrp'] as num).toDouble() : 0.0;
+
+    // Parse optional fields with null safety
+    String? shopId = data['shop_id']?.toString();
+    String? description = data['description']?.toString();
+    String category = data['category']?.toString() ?? '';
+    String? image = data['image']?.toString();
+    String? name = data['name']?.toString();
 
     try {
-      tempProduct = Product(
-          price: data['price'],
-          mrp: data['mrp'],
-          barcode: barcode1,
-          shop_id: data['shop_id'],
-          description: data['description'],
-          category: 'category',
-          quantity: quantity1,
-          count: data['quantity'],
-          image: data['image'],
-          name: data['name'],
-          id: data['barcode'].toString());
-      print("Product detail added: ${tempProduct.barcode}");
-    } catch (e, stackTrace) {
-      print('Error parsing product data: $e\n$stackTrace');
-      // Handle the error or rethrow if necessary
-      rethrow;
-    }
+    Product tempProduct = Product(
+      price: price,
+      mrp: mrp,
+      barcode: barcode,
+      shop_id: shopId,
+      description: description,
+      category: category,
+      quantity: quantity,
+      count: count,
+      image: image,
+      name: name,
+      id: barcode, // or use a dedicated 'id' field if available
+    );
+    print("Product detail added: ${tempProduct.barcode}");
     return tempProduct;
+  } catch (e, stackTrace) {
+    print('Error parsing product data: $e\n$stackTrace');
+    rethrow;
+    }
+    
   }
 
   static Product emptyProduct() {
