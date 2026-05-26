@@ -20,8 +20,23 @@ class DataSourceOrders extends DataTableSource {
     assert(index >= 0);
     if (index >= rows.length) return null;
     final row = rows[index];
-    Timestamp t = row?.dateOfOrder; //Timestamp
-    DateTime dateOfOrder = t.toDate(); //DateTime
+    // Safely handle null row
+    if (row == null) {
+      return DataRow.byIndex(
+        index: index,
+        cells: List.generate(6, (_) => DataCell(Text('Deleted'))),
+      );
+    }
+    // Safe conversion
+    DateTime dateOfOrder;
+    final dateValue = row?.dateOfOrder;
+    if (dateValue is Timestamp) {
+      dateOfOrder = dateValue.toDate();
+    } else if (dateValue is DateTime) {
+      dateOfOrder = dateValue;
+    } else {
+      dateOfOrder = DateTime.now();
+    }
 
     return DataRow.byIndex(
       selected: false,
@@ -70,8 +85,7 @@ class DataSourceOrders extends DataTableSource {
             ],
           ),
         ),
-        DataCell(Text(
-            dateOfOrder.toString() == 'null' ? '' : dateOfOrder.toString())),
+        DataCell(Text(dateOfOrder.toString())),
         DataCell(Text(row?.customerNumber.toString() == 'null'
             ? ''
             : row!.customerNumber!)),
