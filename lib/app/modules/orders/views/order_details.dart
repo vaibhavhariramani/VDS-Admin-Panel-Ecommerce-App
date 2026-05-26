@@ -21,6 +21,45 @@ class _OrderDetailsState extends State<OrderDetails> {
   DateFormat time = DateFormat.jm();
   String? delivery;
 
+  // Safe numeric getters
+  double get totalAmount {
+    final v = widget.mp?.totalAmount;
+    if (v is double) return v;
+    if (v is int) return v.toDouble();
+    if (v is String) return double.tryParse(v) ?? 0.0;
+    return 0.0;
+  }
+
+  double get deliveryCharges {
+    final v = widget.mp?.deliveryCharges;
+    if (v is double) return v;
+    if (v is int) return v.toDouble();
+    if (v is String) return double.tryParse(v) ?? 0.0;
+    return 0.0;
+  }
+
+  double get discount {
+    final v = widget.mp?.discount;
+    if (v is double) return v;
+    if (v is int) return v.toDouble();
+    if (v is String) return double.tryParse(v) ?? 0.0;
+    return 0.0;
+  }
+
+  // Safe date parser
+  DateTime? parseDate(dynamic dateValue) {
+    if (dateValue == null) return null;
+    if (dateValue is Timestamp) return dateValue.toDate();
+    if (dateValue is DateTime) return dateValue;
+    if (dateValue is int) return DateTime.fromMicrosecondsSinceEpoch(dateValue);
+    if (dateValue is String) {
+      final asInt = int.tryParse(dateValue);
+      if (asInt != null) return DateTime.fromMicrosecondsSinceEpoch(asInt);
+      return DateTime.tryParse(dateValue);
+    }
+    return null;
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -29,8 +68,11 @@ class _OrderDetailsState extends State<OrderDetails> {
     super.initState();
   }
 
+
   @override
   Widget build(BuildContext context) {
+    final deliveryDate = parseDate(widget.mp?.deliveryDate);
+    final deliveryTime = parseDate(widget.mp?.deliveryTime);
     return Scaffold(
         backgroundColor: Color(0xffebebeb),
         appBar: AppBar(
@@ -137,7 +179,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                             ),
                             CustomTile(
                                 title: 'Total Cost',
-                                tail: '₹${widget.mp?.totalAmount}',
+                                tail: '₹${totalAmount.toStringAsFixed(2)}',
                                 titlestyle: const TextStyle(
                                     fontWeight: FontWeight.w500,
                                     color: Colors.grey,
@@ -148,7 +190,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                                     fontSize: 16)),
                             CustomTile(
                                 title: 'Delivery Charge',
-                                tail: '₹${widget.mp?.deliveryCharges}',
+                                tail: '₹${deliveryCharges.toStringAsFixed(2)}',
                                 titlestyle: const TextStyle(
                                     fontWeight: FontWeight.w500,
                                     color: Colors.grey,
@@ -160,7 +202,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                             CustomTile(
                                 title: 'Sub Total',
                                 tail:
-                                    '₹${widget.mp?.totalAmount + widget.mp?.deliveryCharges}',
+                                    '₹${(totalAmount + deliveryCharges).toStringAsFixed(2)}',
                                 titlestyle: const TextStyle(
                                     fontWeight: FontWeight.w500,
                                     color: Colors.grey,
@@ -172,7 +214,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                             CustomTile(
                                 title: 'Discount',
                                 tail:
-                                    '${((widget.mp?.discount / widget.mp?.totalAmount) * 100).floor()}% OFF',
+                                    '${totalAmount > 0 ? ((discount / totalAmount) * 100).floor() : 0}% OFF',
                                 titlestyle: const TextStyle(
                                     fontWeight: FontWeight.w500,
                                     color: Colors.grey,
@@ -183,7 +225,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                                     fontSize: 16)),
                             CustomTile(
                                 title: 'Total Saving',
-                                tail: '- ₹${widget.mp?.discount}',
+                                tail: '- ₹${discount.toStringAsFixed(2)}',
                                 titlestyle: const TextStyle(
                                     fontWeight: FontWeight.w500,
                                     color: Colors.grey,
@@ -220,7 +262,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                                     ],
                                   ),
                                   Text(
-                                    "₹${widget.mp?.discount}",
+                                    "₹${(totalAmount + deliveryCharges - discount).toStringAsFixed(2)}",
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 18),
@@ -256,16 +298,9 @@ class _OrderDetailsState extends State<OrderDetails> {
                                     style:
                                         TextStyle(fontWeight: FontWeight.w500)),
                                 subtitle: Text.rich(TextSpan(
-                                    text:
-                                        '${format.format(DateTime.fromMicrosecondsSinceEpoch(widget.mp?.deliveryDate))}   ',
+                                    text:deliveryDate != null ? format.format(deliveryDate) : '',
                                     style: TextStyle(),
-                                    children: [
-                                      TextSpan(
-                                        text: time.format(
-                                            DateTime.fromMicrosecondsSinceEpoch(
-                                                widget.mp?.deliveryTime)),
-                                      )
-                                    ])),
+                                    children: [TextSpan(text: deliveryTime != null ? '   ${time.format(deliveryTime)}' : '')],)),
                               ),
                               Padding(
                                 padding: const EdgeInsets.all(12.0),
