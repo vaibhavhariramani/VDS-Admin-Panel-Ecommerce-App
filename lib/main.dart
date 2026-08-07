@@ -14,6 +14,7 @@ import 'package:vdsadmin/home/splashscreen.dart';
 // import 'constant.dart';
 // import 'database/add_item_to_db.dart';
 import 'firebase_options.dart';
+import 'settings/store_settings_controller.dart';
 import 'theme_controller.dart';
 
 void main() async {
@@ -40,6 +41,7 @@ class _MyAppState extends State<MyApp> {
     _initCheck();
     configOneSignel();
     ThemeController.initialize();
+    StoreSettingsController.initialize();
   }
 
   void configOneSignel() {

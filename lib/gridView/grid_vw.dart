@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 // import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:google_fonts/google_fonts.dart';
+import 'package:vdsadmin/billing/bill.dart';
 import 'package:vdsadmin/gridView/gviewer.dart';
 import 'package:vdsadmin/home/loginpage.dart';
 import 'package:vdsadmin/models/data_provider.dart';
@@ -32,16 +33,45 @@ class _GridScreenState extends State<GridScreen> {
   late String url;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
+  int get _itemCount =>
+      widget.listOfProductsInBill.fold(0, (sum, p) => sum + p.count);
+
+  double get _total => widget.listOfProductsInBill
+      .fold(0, (sum, p) => sum + (p.price * p.count));
+
+  void _viewBill() {
+    if (widget.dataViewer) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => Bill(
+            products: widget.listOfProductsInBill,
+            addedfromDB: true,
+          ),
+        ),
+      );
+    } else {
+      Navigator.of(context).pop(widget.listOfProductsInBill);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final scaffoldBg =
+        isDark ? const Color(0xff17191c) : const Color(0xffF5F6F8);
+    final searchBarColor = isDark ? const Color(0xff23262b) : Colors.white;
+    final searchTextColor = isDark ? Colors.white : const Color(0xFF666666);
+
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: Colors.white10.withOpacity(0.95),
+      backgroundColor: scaffoldBg,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: const Color(0xffF3AB0D),
+        foregroundColor: Colors.white,
         elevation: 1,
         titleSpacing: 0,
-        title: const Text('grid view'),
+        title: const Text('Products'),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(45.0),
           child: Padding(
@@ -49,24 +79,22 @@ class _GridScreenState extends State<GridScreen> {
             child: Container(
               padding: const EdgeInsets.only(left: 8),
               height: 38,
-              // width: 0.75*MediaQuery.of(context).size.width,
               decoration: BoxDecoration(
                   borderRadius: const BorderRadius.all(Radius.circular(02)),
-                  border: Border.all(color: Colors.white),
-                  color: Colors.white),
+                  border: Border.all(color: searchBarColor),
+                  color: searchBarColor),
               child: TextField(
                 showCursor: true,
                 textAlign: TextAlign.left,
                 readOnly: true,
-                decoration: const InputDecoration(
-                  prefixIcon: Icon(
+                style: TextStyle(color: searchTextColor),
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(
                     Icons.search_rounded,
                     color: Color(0xffA0CD4A),
                   ),
                   border: InputBorder.none,
-                  hintStyle: TextStyle(
-                    color: Color(0xFF666666),
-                  ),
+                  hintStyle: TextStyle(color: searchTextColor),
                   hintText: "Search your products",
                 ),
                 onTap: () {
@@ -79,20 +107,11 @@ class _GridScreenState extends State<GridScreen> {
             ),
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.notifications_active,
-              color: Colors.white,
-              size: 30,
-            ),
-            onPressed: () {},
-          )
-        ],
       ),
       body: ListView(
         shrinkWrap: true,
         physics: const ScrollPhysics(),
+        padding: EdgeInsets.only(bottom: _itemCount > 0 ? 80 : 0),
         children: [
           const SizedBox(height: 5),
           StreamBuilder<QuerySnapshot>(
@@ -101,20 +120,15 @@ class _GridScreenState extends State<GridScreen> {
                 if (snap.hasData) {
                   return snap.data!.docs.isNotEmpty
                       ? GridView.builder(
-                          // itemExtent: 210,
                           gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount:
                                       MediaQuery.of(context).orientation ==
                                               Orientation.landscape
-                                          //     &&
-                                          // MediaQuery.of(context).size.width >
-                                          //     500
                                           ? 3
                                           : 2,
                                   crossAxisSpacing: 4,
                                   mainAxisSpacing: 4,
-                                  // childAspectRatio: (2 / 1),\
                                   mainAxisExtent: 336),
                           shrinkWrap: true,
                           scrollDirection: Axis.vertical,
@@ -126,6 +140,7 @@ class _GridScreenState extends State<GridScreen> {
                               navigatorDecider: widget.dataViewer,
                               listOfProductsInBilling:
                                   widget.listOfProductsInBill,
+                              onChanged: () => setState(() {}),
                             );
                           },
                         )
@@ -136,6 +151,43 @@ class _GridScreenState extends State<GridScreen> {
           const SizedBox(height: 20)
         ],
       ),
+      bottomNavigationBar: _itemCount > 0
+          ? Material(
+              color: const Color(0xff2E7D32),
+              child: InkWell(
+                onTap: _viewBill,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 20, vertical: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '$_itemCount item${_itemCount == 1 ? '' : 's'} · ₹${_total.toStringAsFixed(0)}',
+                        style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16),
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'View Bill',
+                            style: GoogleFonts.poppins(
+                                color: Colors.white, fontSize: 16),
+                          ),
+                          const SizedBox(width: 6),
+                          const Icon(Icons.arrow_forward,
+                              color: Colors.white, size: 18),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            )
+          : null,
     );
   }
 

@@ -19,6 +19,7 @@ import 'package:vdsadmin/models/firebase.service.dart';
 import 'package:vdsadmin/models/invoice.dart';
 import 'package:vdsadmin/models/product_data.dart';
 import 'package:vdsadmin/models/suppiler.dart';
+import 'package:vdsadmin/settings/store_settings_controller.dart';
 import 'package:vdsadmin/whatsappApi/wa.dart';
 import 'package:vdsadmin/widgets/raised_gradient_button.dart';
 
@@ -74,15 +75,15 @@ class BillState extends State<Bill> {
   void initState() {
     super.initState();
     if (widget.addedfromDB == true) {
-      mrptotal = widget.products != null
+      mrptotal = widget.products.isNotEmpty
           ? widget.products
-              .map((product) => product.mrp)
+              .map((product) => product.mrp * product.count)
               .toList()
               .reduce((value, element) => value + element)
           : 0;
-      total = widget.products != null
+      total = widget.products.isNotEmpty
           ? widget.products
-              .map((product) => product.price)
+              .map((product) => product.price * product.count)
               .toList()
               .reduce((value, element) => value + element)
           : 0;
@@ -584,24 +585,24 @@ class BillState extends State<Bill> {
                   },
                 );
 
-                // If the user made changes, update the list of products.
-                if (updatedListOfProducts != null) {
-                  setState(() {
-                    widget.products = updatedListOfProducts;
-                    mrptotal = widget.products != null
-                        ? widget.products
-                            .map((product) => product.mrp)
-                            .toList()
-                            .reduce((value, element) => value + element)
-                        : 0;
-                    total = widget.products != null
-                        ? widget.products
-                            .map((product) => product.price)
-                            .toList()
-                            .reduce((value, element) => value + element)
-                        : 0;
-                  });
-                }
+                // The dialog mutates widget.products in place regardless of how
+                // it's closed, so always refresh totals rather than only when a
+                // value is returned (e.g. View Bill vs. dismissing the dialog).
+                widget.products = updatedListOfProducts ?? widget.products;
+                setState(() {
+                  mrptotal = widget.products.isNotEmpty
+                      ? widget.products
+                          .map((product) => product.mrp * product.count)
+                          .toList()
+                          .reduce((value, element) => value + element)
+                      : 0;
+                  total = widget.products.isNotEmpty
+                      ? widget.products
+                          .map((product) => product.price * product.count)
+                          .toList()
+                          .reduce((value, element) => value + element)
+                      : 0;
+                });
               },
               child: const Text(
                 'Add From Db',
@@ -1793,9 +1794,9 @@ class BillState extends State<Bill> {
     final dueDate = date.add(const Duration(days: 7));
 
     final invoice = Invoice(
-      supplier: const Supplier(
-        name: 'Vishal Departmental Store',
-        address: 'A-126, Murlipura Scheme, Murlipura,Jaipur, Rajasthan',
+      supplier: Supplier(
+        name: StoreSettingsController.storeName.value,
+        address: StoreSettingsController.storeAddress.value,
         paymentInfo: ' VDS',
       ),
       customer: Customer(
@@ -1805,7 +1806,8 @@ class BillState extends State<Bill> {
       info: InvoiceInfo(
         date: date,
         dueDate: dueDate,
-        description: 'Thanks for shopping at Vishal Departmental Store',
+        description:
+            'Thanks for shopping at ${StoreSettingsController.storeName.value}',
         number:
             '${DateTime.now().year}${DateTime.now().month}${DateTime.now().day}-${DateTime.now().hour}${DateTime.now().minute}',
       ),

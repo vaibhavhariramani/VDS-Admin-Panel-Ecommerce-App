@@ -2,76 +2,111 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:vdsadmin/models/data_provider.dart';
 import 'package:vdsadmin/models/product_data.dart';
 import 'package:vdsadmin/search/product_details.dart';
-
-import '../billing/bill.dart';
 
 class HomeGridProductList extends StatefulWidget {
   final DocumentSnapshot snapshot;
   final bool navigatorDecider;
   List<ProductData> listOfProductsInBilling;
-  HomeGridProductList(
-      {Key? key,
-      required this.snapshot,
-      required this.navigatorDecider,
-      required this.listOfProductsInBilling})
-      : super(key: key);
+  final VoidCallback? onChanged;
+  HomeGridProductList({
+    Key? key,
+    required this.snapshot,
+    required this.navigatorDecider,
+    required this.listOfProductsInBilling,
+    this.onChanged,
+  }) : super(key: key);
   @override
   _HomeGridProductListState createState() => _HomeGridProductListState();
 }
 
 class _HomeGridProductListState extends State<HomeGridProductList> {
+  String get _barcode {
+    final data = widget.snapshot.data() as Map<String, dynamic>?;
+    return data?['barcode']?.toString() ?? widget.snapshot.id;
+  }
+
+  ProductData? get _existingEntry {
+    for (final p in widget.listOfProductsInBilling) {
+      if (p.barcode == _barcode) return p;
+    }
+    return null;
+  }
+
+  void _addOne() {
+    final existing = _existingEntry;
+    if (existing != null) {
+      setState(() => existing.count += 1);
+    } else {
+      setState(() {
+        widget.listOfProductsInBilling.add(ProductData(
+          barcode: _barcode,
+          image: '${widget.snapshot.get('image')}',
+          name: '${widget.snapshot.get('name')}',
+          mrp: double.parse(widget.snapshot.get('mrp').toString()),
+          price: double.parse(widget.snapshot.get('selling').toString()),
+          quantity: "quantity",
+          count: 1,
+          description: "description",
+          category: "category",
+        ));
+      });
+    }
+    widget.onChanged?.call();
+  }
+
+  void _removeOne() {
+    final existing = _existingEntry;
+    if (existing == null) return;
+    setState(() {
+      if (existing.count <= 1) {
+        widget.listOfProductsInBilling.remove(existing);
+      } else {
+        existing.count -= 1;
+      }
+    });
+    widget.onChanged?.call();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black;
+    final count = _existingEntry?.count ?? 0;
+
     return GestureDetector(
       child: SingleChildScrollView(
-        // child: Card(
-        //   elevation: 0,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            // SizedBox(
-            //   height: MediaQuery.of(context).size.height * 0.2,
-            //   width: MediaQuery.of(context).size.width * 0.23,
-            // decoration: BoxDecoration(
-            //     borderRadius: BorderRadius.circular(12),
-            //     color: Colors.white10.withOpacity(0.95)),
-            // child:
-            CachedNetworkImage(
-              height: 110,
-              width: 110,
-              imageUrl: widget.snapshot.get('image'),
-              // ),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: CachedNetworkImage(
+                height: 110,
+                width: 110,
+                imageUrl: widget.snapshot.get('image'),
+                fit: BoxFit.cover,
+              ),
             ),
             ListTile(
               title: Text(
                 '${widget.snapshot.get('name')}',
                 style: GoogleFonts.poppins(
-                    fontSize: 14, fontWeight: FontWeight.w500),
+                    fontSize: 14, fontWeight: FontWeight.w500, color: textColor),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
               subtitle: Text('Price for ${widget.snapshot.get('quantity')}',
                   style: GoogleFonts.poppins(
-                      fontSize: 14, fontWeight: FontWeight.normal),
+                      fontSize: 14,
+                      fontWeight: FontWeight.normal,
+                      color: isDark ? Colors.white60 : Colors.black54),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis),
             ),
-            // Container(
-            //   width: MediaQuery.of(context).size.width,
-            //   decoration: BoxDecoration(
-            //       border: Border.all(color: Colors.grey.shade300),
-            //       borderRadius: BorderRadius.circular(4)),
-            //   // padding: const EdgeInsets.all(6),
-            //   child: Text(
-            //     '${widget.snapshot.get('quantity')}',
-            //     style: GoogleFonts.poppins(),
-            //   ),
-            // ),
             Row(
               children: [
                 Padding(
@@ -112,91 +147,52 @@ class _HomeGridProductListState extends State<HomeGridProductList> {
                 ),
               ),
             ),
-            SizedBox(
-              width: 120,
-              child: StreamBuilder<DocumentSnapshot>(
-                  stream: dataProvider.cartCheck(widget.snapshot.id),
-                  builder: (context, snapshotData) {
-                    if (snapshotData.hasData) {
-                      return ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8)),
-                        ),
-                        onPressed: () {},
-                        child: Text('Edit',
-                            style: GoogleFonts.poppins(
-                                color: Colors.white, fontSize: 16)),
-                      );
-                    }
-                    return Row(
-                      children: [
-                        // ElevatedButton(
-                        //   child: Text('Edit',
-                        //       style: GoogleFonts.poppins(
-                        //           color: Colors.white, fontSize: 16)),
-                        //   style: ElevatedButton.styleFrom(
-                        //     backgroundColor: Colors.green,
-                        //     elevation: 0,
-                        //     shape: RoundedRectangleBorder(
-                        //         borderRadius: BorderRadius.circular(8)),
-                        //   ),
-                        //   onPressed: () {},
-                        // ),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xffCB0338),
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8)),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: count == 0
+                  ? ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xffCB0338),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8)),
+                      ),
+                      onPressed: _addOne,
+                      child: Text('Add',
+                          style: GoogleFonts.poppins(
+                              color: Colors.white, fontSize: 16)),
+                    )
+                  : Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xffCB0338),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          IconButton(
+                            padding: EdgeInsets.zero,
+                            icon: const Icon(Icons.remove, color: Colors.white),
+                            onPressed: _removeOne,
                           ),
-                          onPressed: () {
-                            final data = widget.snapshot.data()
-                                as Map<String, dynamic>?;
-                            final barcode =
-                                data?['barcode']?.toString() ??
-                                    widget.snapshot.id;
-                            widget.listOfProductsInBilling.add(ProductData(
-                                barcode: barcode,
-                                image: '${widget.snapshot.get('image')}',
-                                name: '${widget.snapshot.get('name')}',
-                                mrp: double.parse(
-                                    widget.snapshot.get('mrp').toString()),
-                                price: double.parse(
-                                    widget.snapshot.get('selling').toString()),
-                                quantity: "quantity",
-                                count: 1,
-                                description: "description",
-                                category: "category"));
-                            setState(() {});
-                            widget.navigatorDecider
-                                ? Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => Bill(
-                                        products:
-                                            widget.listOfProductsInBilling,
-                                        addedfromDB: true,
-                                      ),
-                                    ),
-                                  )
-                                : Navigator.of(context)
-                                    .pop(widget.listOfProductsInBilling);
-                            print(widget.snapshot.data);
-                          },
-                          child: Text('Add',
-                              style: GoogleFonts.poppins(
-                                  color: Colors.white, fontSize: 16)),
-                        ),
-                      ],
-                    );
-                  }),
+                          Text(
+                            '$count',
+                            style: GoogleFonts.poppins(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16),
+                          ),
+                          IconButton(
+                            padding: EdgeInsets.zero,
+                            icon: const Icon(Icons.add, color: Colors.white),
+                            onPressed: _addOne,
+                          ),
+                        ],
+                      ),
+                    ),
             ),
           ],
         ),
-        // ),
       ),
       onTap: () {
         Navigator.push(

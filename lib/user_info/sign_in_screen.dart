@@ -40,14 +40,14 @@ class _SignInScreenState extends State<SignInScreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    Text(
+                    const Text(
                       'FlutterFire',
                       style: TextStyle(
                         color: CustomColors.firebaseYellow,
                         fontSize: 40,
                       ),
                     ),
-                    Text(
+                    const Text(
                       'Authentication',
                       style: TextStyle(
                         color: CustomColors.firebaseOrange,
@@ -63,9 +63,9 @@ class _SignInScreenState extends State<SignInScreen> {
                   if (snapshot.hasError) {
                     return const Text('Error initializing Firebase');
                   } else if (snapshot.connectionState == ConnectionState.done) {
-                    return GoogleSignInButton();
+                    return const GoogleSignInButton();
                   }
-                  return CircularProgressIndicator(
+                  return const CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(
                       CustomColors.firebaseOrange,
                     ),

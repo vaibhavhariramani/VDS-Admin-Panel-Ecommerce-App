@@ -8,12 +8,12 @@ import 'package:vdsadmin/billing/bill.dart';
 import 'package:vdsadmin/category/category1.dart';
 import 'package:vdsadmin/category_wise/category.dart';
 import 'package:vdsadmin/database/add_item_to_db.dart';
-import 'package:vdsadmin/example.dart';
 import 'package:vdsadmin/gridView/grid_vw.dart';
 import 'package:vdsadmin/home/loginpage.dart';
 import 'package:vdsadmin/models/product_data.dart';
 import 'package:vdsadmin/notification/notifyhome.dart';
 import 'package:vdsadmin/orders/orders.dart';
+import 'package:vdsadmin/settings/settings_screen.dart';
 import 'package:vdsadmin/theme_controller.dart';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -97,25 +97,103 @@ class _DashboardState extends State<Dashboard> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final scaffoldBg = isDark ? const Color(0xff17191c) : const Color(0xffF5F6F8);
+    final appBarTextColor = isDark ? Colors.white : Colors.black87;
+
+    final cards = <_DashboardCardData>[
+      _DashboardCardData(
+        title: 'Add Items',
+        subtitle: 'Add to stock',
+        icon: Icons.add_box_outlined,
+        color: const Color(0xFFE44E4F),
+        onTap: () => Navigator.push(context,
+            MaterialPageRoute(builder: (_) => const ShopRegister())),
+      ),
+      _DashboardCardData(
+        title: 'Category',
+        subtitle: 'Manage category & sub-category',
+        icon: Icons.category_outlined,
+        color: const Color(0xFF6674F1),
+        onTap: () => Navigator.push(
+            context, MaterialPageRoute(builder: (_) => const Category1())),
+      ),
+      _DashboardCardData(
+        title: 'Orders',
+        subtitle: 'Online and offline',
+        icon: Icons.receipt_long_outlined,
+        color: const Color(0xFF08B499),
+        onTap: () => Navigator.push(
+            context, MaterialPageRoute(builder: (_) => const Orderspage())),
+      ),
+      _DashboardCardData(
+        title: 'Banners',
+        subtitle: 'Home screen banners',
+        icon: Icons.image_outlined,
+        color: const Color(0xFFE67E49),
+        onTap: () => Navigator.push(context,
+            MaterialPageRoute(builder: (_) => const BannerDisplay())),
+      ),
+      _DashboardCardData(
+        title: 'Notification',
+        subtitle: 'Send push notifications',
+        icon: Icons.notifications_outlined,
+        color: const Color(0xFF02D4F9),
+        onTap: () => Navigator.push(context,
+            MaterialPageRoute(builder: (_) => const Notificationpage())),
+      ),
+      _DashboardCardData(
+        title: 'Grid View',
+        subtitle: 'Browse products',
+        icon: Icons.grid_view_rounded,
+        color: const Color(0xFF3D5AFE),
+        onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => GridScreen(
+                dataViewer: true,
+                listOfProductsInBill: widget.MasterproductListForBilling,
+              ),
+            )),
+      ),
+      _DashboardCardData(
+        title: 'Category View',
+        subtitle: 'Products by category',
+        icon: Icons.dashboard_customize_outlined,
+        color: const Color(0xFFBA779A),
+        onTap: () => Navigator.push(
+            context, MaterialPageRoute(builder: (_) => const Category())),
+      ),
+      _DashboardCardData(
+        title: 'Profile & Settings',
+        subtitle: 'Account and store settings',
+        icon: Icons.settings_outlined,
+        color: const Color(0xFF546E7A),
+        onTap: () => Navigator.push(context,
+            MaterialPageRoute(builder: (_) => const SettingsScreen())),
+      ),
+    ];
+
     return Scaffold(
+      backgroundColor: scaffoldBg,
       appBar: AppBar(
-        title: const Column(
+        title: Column(
           children: [
             Text(
               'Vishal Departmental Store',
               style: TextStyle(
                   fontSize: 18.0,
                   fontWeight: FontWeight.w400,
-                  color: Colors.black87),
+                  color: appBarTextColor),
             ),
-            SizedBox(
+            const SizedBox(
               height: 5.0,
             ),
             Text(
               'Admin Panel',
               style: TextStyle(
                   fontSize: 20.0,
-                  color: Colors.black,
+                  color: appBarTextColor,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 2.0),
             ),
@@ -147,900 +225,265 @@ class _DashboardState extends State<Dashboard> {
           IconButton(icon: const Icon(Icons.logout), onPressed: _logOut)
         ],
       ),
-      body: Center(
-        child: Stack(
-          children: [
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 30.0),
-                child: Column(
-                  children: <Widget>[
-                    Image.asset('assets/images/imageDashboard.png'),
-                  ],
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.only(bottom: 90),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1100),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+                  child: Column(
+                    children: [
+                      _StartBillingHero(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => Bill(
+                              products: widget.MasterproductListForBilling,
+                              addedfromDB: false,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        spacing: 20,
+                        runSpacing: 20,
+                        children: [
+                          for (final card in cards)
+                            _DashboardCard(data: card, isDark: isDark),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-            SingleChildScrollView(
-              child: Column(
-                children: <Widget>[
-                  const SizedBox(
-                    height: 10.0,
-                  ),
-                  MaterialButton(
-                    child: Stack(
-                      children: <Widget>[
-                        Center(
-                          child: Container(
-                            height: 200.0,
-                            decoration: BoxDecoration(
-                                shape: BoxShape.rectangle,
-                                color: const Color(0xFF003D64),
-                                borderRadius: BorderRadius.circular(20.0),
-                                boxShadow: const <BoxShadow>[
-                                  BoxShadow(
-                                      color: Colors.black45,
-                                      offset: Offset(0.0, 10.0),
-                                      blurRadius: 10.0)
-                                ]),
-                            alignment: FractionalOffset.centerRight,
-                            child: const Image(
-                              image: AssetImage(
-                                'assets/images/1.png',
-                              ),
-                              height: 200,
-                              width: 190,
-                            ),
-                          ),
-                        ),
-                        // Container(),
+          ),
+          DraggableScrollableSheet(
+              initialChildSize: 0.09,
+              minChildSize: 0.09,
+              maxChildSize: 0.35,
+              builder:
+                  (BuildContext context, ScrollController scrollController) {
+                return Container(
+                  decoration: const BoxDecoration(
+                      color: Color(0xffF3AB0D),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(20),
+                        topRight: Radius.circular(20),
+                      )),
+                  child: SingleChildScrollView(
+                    controller: scrollController,
+                    child: Column(
+                      children: [
                         Padding(
-                          padding: const EdgeInsets.only(left: 10.0, top: 30.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              const Text(
-                                'Start Billing',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 24.0,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                              const SizedBox(
-                                height: 10.0,
-                              ),
-                              const SizedBox(
-                                height: 25.0,
-                              ),
-                              Container(
-                                height: 40.0,
-                                width: 150.0,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(30),
-                                  color: const Color(0xFF00578D),
-                                ),
-                                child: Center(
-                                  child: RichText(
-                                    text: const TextSpan(
-                                      text: 'Click Here',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                      ),
-                                      children: [
-                                        WidgetSpan(
-                                          child: Icon(
-                                            Icons.arrow_forward,
-                                            color: Colors.white,
-                                          ),
-                                          alignment:
-                                              PlaceholderAlignment.middle,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+                          padding: const EdgeInsets.all(15.0),
+                          child: Container(
+                            decoration: const BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(5),
+                                )),
+                            height: 10,
+                            width: 100,
                           ),
                         ),
+                        CircleAvatar(
+                          radius: 36.0,
+                          backgroundColor: Colors.white,
+                          child: Text(
+                            (fullname != null && fullname!.isNotEmpty
+                                    ? fullname![0]
+                                    : '?')
+                                .toUpperCase(),
+                            style: const TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xffF3AB0D)),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          "Hii, $fullname",
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Text(
+                          username ?? "",
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w300,
+                            color: Colors.white70,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        TextButton.icon(
+                          onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const SettingsScreen())),
+                          icon: const Icon(Icons.settings_outlined,
+                              color: Colors.white),
+                          label: const Text('Profile & Settings',
+                              style: TextStyle(color: Colors.white)),
+                        ),
+                        const SizedBox(height: 12),
                       ],
                     ),
-                    onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => Bill(
-                          products: widget.MasterproductListForBilling,
-                          addedfromDB: false,
-                        ),
-                      ),
-                    ),
                   ),
-                  const SizedBox(
-                    height: 25.0,
-                  ),
-                  Center(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        MaterialButton(
-                          child: Stack(
-                            children: <Widget>[
-                              Container(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.3,
-                                width: MediaQuery.of(context).size.width * 0.4,
-                                decoration: BoxDecoration(
-                                    shape: BoxShape.rectangle,
-                                    color: const Color(0xFFE44E4F),
-                                    borderRadius: BorderRadius.circular(20.0),
-                                    boxShadow: const <BoxShadow>[
-                                      BoxShadow(
-                                          color: Colors.black45,
-                                          offset: Offset(0.0, 10.0),
-                                          blurRadius: 10.0)
-                                    ]),
-                                child: Container(
-                                  alignment: FractionalOffset.bottomCenter,
-                                  child: Image.asset(
-                                    'assets/images/4.png',
-                                    height: MediaQuery.of(context).size.height *
-                                        0.3,
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.3,
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 10.0, top: 30.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    const Text(
-                                      'Add items',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 24.0,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      height: 10.0,
-                                    ),
-                                    Container(
-                                      height:
-                                          MediaQuery.of(context).size.height *
-                                              0.07,
-                                      width: MediaQuery.of(context).size.width *
-                                          0.3,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(30),
-                                        color: Colors.black26,
-                                      ),
-                                      child: Center(
-                                        child: Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: Padding(
-                                            padding: const EdgeInsets.only(
-                                                left: 8.0),
-                                            child: RichText(
-                                              text: const TextSpan(
-                                                text: 'to stock',
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                ),
-                                                children: [
-                                                  WidgetSpan(
-                                                    child: Icon(
-                                                      Icons.arrow_forward,
-                                                      color: Colors.white,
-                                                    ),
-                                                    alignment:
-                                                        PlaceholderAlignment
-                                                            .middle,
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const ShopRegister(),
-                            ),
-                          ),
-                        ),
+                );
+              })
+        ],
+      ),
+    );
+  }
+}
 
-                        // cards(
-                        //   colour: const Color(0xFFE44E4F),
-                        //   img: 'assets/images/4.png',
-                        //   width: MediaQuery.of(context).size.width * 0.4,
-                        //   height: MediaQuery.of(context).size.height * 0.4,
-                        //   title: 'Add items',
-                        //   subtitle: 'to stock',
-                        //   input: const ShopRegister(),
-                        // ),
-                        MaterialButton(
-                          child: Stack(
-                            children: <Widget>[
-                              Container(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.3,
-                                width: MediaQuery.of(context).size.width * 0.4,
-                                decoration: BoxDecoration(
-                                    shape: BoxShape.rectangle,
-                                    color: const Color(0xFF6674F1),
-                                    borderRadius: BorderRadius.circular(20.0),
-                                    boxShadow: const <BoxShadow>[
-                                      BoxShadow(
-                                          color: Colors.black45,
-                                          offset: Offset(0.0, 10.0),
-                                          blurRadius: 10.0)
-                                    ]),
-                                child: Container(
-                                  alignment: FractionalOffset.bottomCenter,
-                                  child: Image.asset(
-                                    'assets/images/5.png',
-                                    height: MediaQuery.of(context).size.height *
-                                        0.4,
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.3,
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 10.0, top: 30.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    RichText(
-                                      text: const TextSpan(
-                                        text: 'Category',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 22.0,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      height: 10.0,
-                                    ),
-                                    Container(
-                                      height:
-                                          MediaQuery.of(context).size.height *
-                                              0.07,
-                                      width: MediaQuery.of(context).size.width *
-                                          0.3,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(30),
-                                        color: Colors.black26,
-                                      ),
-                                      child: Center(
-                                        child: Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: Padding(
-                                            padding: const EdgeInsets.only(
-                                                left: 8.0),
-                                            child: RichText(
-                                              text: const TextSpan(
-                                                text: 'and sub-Category',
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                ),
-                                                children: [
-                                                  WidgetSpan(
-                                                    child: Icon(
-                                                      Icons.arrow_forward,
-                                                      color: Colors.white,
-                                                    ),
-                                                    alignment:
-                                                        PlaceholderAlignment
-                                                            .middle,
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const Category1(),
-                            ),
-                          ),
-                        ),
+class _DashboardCardData {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
 
-                        // cards(
-                        //   colour: const Color(0xFF6674F1),
-                        //   img: 'assets/images/5.png',
-                        //   width: MediaQuery.of(context).size.width * 0.4,
-                        //   height: MediaQuery.of(context).size.height * 0.4,
-                        //   title: ' Manage Category',
-                        //   subtitle: 'and sub-Category',
-                        //   input: Category1(),
-                        // ),
-                      ],
+  _DashboardCardData({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+}
+
+class _DashboardCard extends StatelessWidget {
+  final _DashboardCardData data;
+  final bool isDark;
+
+  const _DashboardCard({required this.data, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: data.color,
+      borderRadius: BorderRadius.circular(18),
+      elevation: isDark ? 0 : 2,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: data.onTap,
+        child: Container(
+          width: 230,
+          height: 150,
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.18),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(data.icon, color: Colors.white, size: 26),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    data.title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                  const SizedBox(
-                    height: 25.0,
-                  ),
-                  Center(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        MaterialButton(
-                          child: Stack(
-                            children: <Widget>[
-                              Container(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.3,
-                                width: MediaQuery.of(context).size.width * 0.4,
-                                decoration: BoxDecoration(
-                                    shape: BoxShape.rectangle,
-                                    color: const Color(0xFF08B499),
-                                    borderRadius: BorderRadius.circular(20.0),
-                                    boxShadow: const <BoxShadow>[
-                                      BoxShadow(
-                                          color: Colors.black45,
-                                          offset: Offset(0.0, 10.0),
-                                          blurRadius: 10.0)
-                                    ]),
-                                child: Container(
-                                  alignment: FractionalOffset.bottomCenter,
-                                  child: Image.asset(
-                                    'assets/images/orders.png',
-                                    height: MediaQuery.of(context).size.height *
-                                        0.3,
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.3,
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 10.0, top: 30.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    const Text(
-                                      'Orders',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 24.0,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      height: 10.0,
-                                    ),
-                                    Container(
-                                      height:
-                                          MediaQuery.of(context).size.height *
-                                              0.07,
-                                      width: MediaQuery.of(context).size.width *
-                                          0.3,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(30),
-                                        color: Colors.black26,
-                                      ),
-                                      child: Center(
-                                        child: Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: Padding(
-                                            padding: const EdgeInsets.only(
-                                                left: 8.0),
-                                            child: RichText(
-                                              text: const TextSpan(
-                                                text: 'Online and offline',
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                ),
-                                                children: [
-                                                  WidgetSpan(
-                                                    child: Icon(
-                                                      Icons.arrow_forward,
-                                                      color: Colors.white,
-                                                    ),
-                                                    alignment:
-                                                        PlaceholderAlignment
-                                                            .middle,
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const Orderspage(),
-                            ),
-                          ),
-                        ),
-                        MaterialButton(
-                          child: Stack(
-                            children: <Widget>[
-                              Container(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.3,
-                                width: MediaQuery.of(context).size.width * 0.4,
-                                decoration: BoxDecoration(
-                                    shape: BoxShape.rectangle,
-                                    color: const Color(0xFFE67E49),
-                                    borderRadius: BorderRadius.circular(20.0),
-                                    boxShadow: const <BoxShadow>[
-                                      BoxShadow(
-                                          color: Colors.black45,
-                                          offset: Offset(0.0, 10.0),
-                                          blurRadius: 10.0)
-                                    ]),
-                                child: Container(
-                                  alignment: FractionalOffset.bottomCenter,
-                                  child: Image.asset(
-                                    'assets/images/banner.png',
-                                    height: MediaQuery.of(context).size.height *
-                                        0.4,
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.3,
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 10.0, top: 30.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    RichText(
-                                      text: const TextSpan(
-                                        text: 'Banners',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 22.0,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      height: 10.0,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const BannerDisplay(),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 25.0,
-                  ),
-                  Center(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        MaterialButton(
-                          child: Stack(
-                            children: <Widget>[
-                              Container(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.3,
-                                width: MediaQuery.of(context).size.width * 0.4,
-                                decoration: BoxDecoration(
-                                    shape: BoxShape.rectangle,
-                                    color: const Color(0xFF02D4F9),
-                                    borderRadius: BorderRadius.circular(20.0),
-                                    boxShadow: const <BoxShadow>[
-                                      BoxShadow(
-                                          color: Colors.black45,
-                                          offset: Offset(0.0, 10.0),
-                                          blurRadius: 10.0)
-                                    ]),
-                                child: Container(
-                                  alignment: FractionalOffset.bottomCenter,
-                                  child: Image.asset(
-                                    'assets/images/8.png',
-                                    height: MediaQuery.of(context).size.height *
-                                        0.3,
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.3,
-                                  ),
-                                ),
-                              ),
-                              const Padding(
-                                padding: EdgeInsets.only(left: 10.0, top: 30.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Text(
-                                      'Notification',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 24.0,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      height: 10.0,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const Notificationpage(),
-                            ),
-                          ),
-                        ),
-                        MaterialButton(
-                          child: Stack(
-                            children: <Widget>[
-                              Container(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.3,
-                                width: MediaQuery.of(context).size.width * 0.4,
-                                decoration: BoxDecoration(
-                                    shape: BoxShape.rectangle,
-                                    color: const Color(0xFFBA779A),
-                                    borderRadius: BorderRadius.circular(20.0),
-                                    boxShadow: const <BoxShadow>[
-                                      BoxShadow(
-                                          color: Colors.black45,
-                                          offset: Offset(0.0, 10.0),
-                                          blurRadius: 10.0)
-                                    ]),
-                                child: Container(
-                                  alignment: FractionalOffset.bottomCenter,
-                                  child: Image.asset(
-                                    'assets/images/9.png',
-                                    height: MediaQuery.of(context).size.height *
-                                        0.4,
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.3,
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 10.0, top: 30.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    RichText(
-                                      text: const TextSpan(
-                                        text: 'Blank',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 22.0,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      height: 10.0,
-                                    ),
-                                    Container(
-                                      height:
-                                          MediaQuery.of(context).size.height *
-                                              0.07,
-                                      width: MediaQuery.of(context).size.width *
-                                          0.3,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(30),
-                                        color: Colors.black26,
-                                      ),
-                                      child: Center(
-                                        child: Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: Padding(
-                                            padding: const EdgeInsets.only(
-                                                left: 8.0),
-                                            child: RichText(
-                                              text: const TextSpan(
-                                                text: '',
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                ),
-                                                children: [
-                                                  WidgetSpan(
-                                                    child: Icon(
-                                                      Icons.arrow_forward,
-                                                      color: Colors.white,
-                                                    ),
-                                                    alignment:
-                                                        PlaceholderAlignment
-                                                            .middle,
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const Example(),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 25.0,
-                  ),
-                  Center(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        MaterialButton(
-                          child: Stack(
-                            children: <Widget>[
-                              Container(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.3,
-                                width: MediaQuery.of(context).size.width * 0.4,
-                                decoration: BoxDecoration(
-                                    shape: BoxShape.rectangle,
-                                    color: const Color(0xFF02D4F9),
-                                    borderRadius: BorderRadius.circular(20.0),
-                                    boxShadow: const <BoxShadow>[
-                                      BoxShadow(
-                                          color: Colors.black45,
-                                          offset: Offset(0.0, 10.0),
-                                          blurRadius: 10.0)
-                                    ]),
-                                child: Container(
-                                  alignment: FractionalOffset.bottomCenter,
-                                  child: Image.asset(
-                                    'assets/images/6.png',
-                                    height: MediaQuery.of(context).size.height *
-                                        0.3,
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.3,
-                                  ),
-                                ),
-                              ),
-                              const Padding(
-                                padding: EdgeInsets.only(left: 10.0, top: 30.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Text(
-                                      'Grid view',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 24.0,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      height: 10.0,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => GridScreen(
-                                dataViewer: true,
-                                listOfProductsInBill:
-                                    widget.MasterproductListForBilling,
-                              ),
-                            ),
-                          ),
-                        ),
-                        MaterialButton(
-                          child: Stack(
-                            children: <Widget>[
-                              Container(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.3,
-                                width: MediaQuery.of(context).size.width * 0.4,
-                                decoration: BoxDecoration(
-                                    shape: BoxShape.rectangle,
-                                    color: const Color(0xFFBA779A),
-                                    borderRadius: BorderRadius.circular(20.0),
-                                    boxShadow: const <BoxShadow>[
-                                      BoxShadow(
-                                          color: Colors.black45,
-                                          offset: Offset(0.0, 10.0),
-                                          blurRadius: 10.0)
-                                    ]),
-                                child: Container(
-                                  alignment: FractionalOffset.bottomCenter,
-                                  child: Image.asset(
-                                    'assets/images/7.png',
-                                    height: MediaQuery.of(context).size.height *
-                                        0.4,
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.3,
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 10.0, top: 30.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    RichText(
-                                      text: const TextSpan(
-                                        text: 'Category',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 22.0,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      height: 10.0,
-                                    ),
-                                    Container(
-                                      height:
-                                          MediaQuery.of(context).size.height *
-                                              0.07,
-                                      width: MediaQuery.of(context).size.width *
-                                          0.3,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(30),
-                                        color: Colors.black26,
-                                      ),
-                                      child: Center(
-                                        child: Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: Padding(
-                                            padding: const EdgeInsets.only(
-                                                left: 8.0),
-                                            child: RichText(
-                                              text: const TextSpan(
-                                                text: 'Products',
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                ),
-                                                children: [
-                                                  WidgetSpan(
-                                                    child: Icon(
-                                                      Icons.arrow_forward,
-                                                      color: Colors.white,
-                                                    ),
-                                                    alignment:
-                                                        PlaceholderAlignment
-                                                            .middle,
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const Category(),
-                            ),
-                          ),
-                        ),
-                      ],
+                  const SizedBox(height: 3),
+                  Text(
+                    data.subtitle,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.85),
+                      fontSize: 12.5,
                     ),
                   ),
                 ],
               ),
-            ),
-            DraggableScrollableSheet(
-                initialChildSize: 0.1,
-                minChildSize: 0.1,
-                maxChildSize: 0.4,
-                builder:
-                    (BuildContext context, ScrollController scrollController) {
-                  return Container(
-                    decoration: const BoxDecoration(
-                        color: Color(0xffF3AB0D),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(20),
-                          topRight: Radius.circular(20),
-                        )),
-                    child: SingleChildScrollView(
-                      controller: scrollController,
-                      child: Column(
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _StartBillingHero extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _StartBillingHero({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: const Color(0xFF003D64),
+      borderRadius: BorderRadius.circular(20),
+      elevation: 3,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: onTap,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(28),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Start Billing',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 26.0,
+                        fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Scan or add items to create a new bill',
+                    style: TextStyle(color: Colors.white.withOpacity(0.75)),
+                  ),
+                  const SizedBox(height: 20),
+                  Container(
+                    height: 42.0,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(30),
+                      color: const Color(0xFF00578D),
+                    ),
+                    child: const Center(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Padding(
-                            padding: const EdgeInsets.all(15.0),
-                            child: Container(
-                              decoration: const BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(5),
-                                  )),
-                              height: 10,
-                              width: 100,
-                            ),
-                          ),
-                          const Padding(
-                            padding: EdgeInsets.only(top: 10.0, bottom: 10.0),
-                            child: CircleAvatar(
-                              radius: 50.0,
-                              backgroundColor: Colors.grey,
-                              child: Image(
-                                image: AssetImage(
-                                  'assets/images/1.png',
-                                ),
-                                height: 200,
-                                width: 190,
-                              ),
-                            ),
-                          ),
-                          Text(
-                            "Hii, $fullname",
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          Text(
-                            username ?? "",
-                            style: const TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w300,
-                            ),
-                          ),
+                          Text('Click Here', style: TextStyle(color: Colors.white)),
+                          SizedBox(width: 6),
+                          Icon(Icons.arrow_forward, color: Colors.white, size: 18),
                         ],
                       ),
                     ),
-                  );
-                })
-          ],
+                  ),
+                ],
+              ),
+              Icon(Icons.point_of_sale_rounded,
+                  color: Colors.white.withOpacity(0.25), size: 96),
+            ],
+          ),
         ),
       ),
     );
