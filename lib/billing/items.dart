@@ -10,7 +10,7 @@ class SelectedWithPicture extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.all(2.0),
           child: FadeInImage.assetNetwork(
-            placeholder: 'images/10.png',
+            placeholder: 'assets/images/10.png',
             image: dataset["imageUrl"],
           ),
         ),

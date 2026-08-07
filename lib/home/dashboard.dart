@@ -14,6 +14,7 @@ import 'package:vdsadmin/home/loginpage.dart';
 import 'package:vdsadmin/models/product_data.dart';
 import 'package:vdsadmin/notification/notifyhome.dart';
 import 'package:vdsadmin/orders/orders.dart';
+import 'package:vdsadmin/theme_controller.dart';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 
@@ -83,7 +84,7 @@ class _DashboardState extends State<Dashboard> {
     // final status = await OneSignal.shared.getDeviceState();
     final status = OneSignal.User.toString();
     // final String? tokenId = status?.userId;
-    final String? tokenId = status;
+    final String tokenId = status;
     print('token ID is : $tokenId');
     try {
       reference.doc(username).update({
@@ -129,6 +130,20 @@ class _DashboardState extends State<Dashboard> {
               print(token);
             },
           ),
+          ValueListenableBuilder<ThemeMode>(
+            valueListenable: ThemeController.themeMode,
+            builder: (context, mode, _) {
+              return IconButton(
+                icon: Icon(
+                  mode == ThemeMode.dark ? Icons.light_mode : Icons.dark_mode,
+                ),
+                tooltip: mode == ThemeMode.dark
+                    ? 'Switch to light mode'
+                    : 'Switch to dark mode',
+                onPressed: ThemeController.toggle,
+              );
+            },
+          ),
           IconButton(icon: const Icon(Icons.logout), onPressed: _logOut)
         ],
       ),
@@ -140,7 +155,7 @@ class _DashboardState extends State<Dashboard> {
                 padding: const EdgeInsets.only(top: 30.0),
                 child: Column(
                   children: <Widget>[
-                    Image.asset('images/imageDashboard.png'),
+                    Image.asset('assets/images/imageDashboard.png'),
                   ],
                 ),
               ),
@@ -170,7 +185,7 @@ class _DashboardState extends State<Dashboard> {
                             alignment: FractionalOffset.centerRight,
                             child: const Image(
                               image: AssetImage(
-                                'images/1.png',
+                                'assets/images/1.png',
                               ),
                               height: 200,
                               width: 190,
@@ -266,7 +281,7 @@ class _DashboardState extends State<Dashboard> {
                                 child: Container(
                                   alignment: FractionalOffset.bottomCenter,
                                   child: Image.asset(
-                                    'images/4.png',
+                                    'assets/images/4.png',
                                     height: MediaQuery.of(context).size.height *
                                         0.3,
                                     width:
@@ -345,7 +360,7 @@ class _DashboardState extends State<Dashboard> {
 
                         // cards(
                         //   colour: const Color(0xFFE44E4F),
-                        //   img: 'images/4.png',
+                        //   img: 'assets/images/4.png',
                         //   width: MediaQuery.of(context).size.width * 0.4,
                         //   height: MediaQuery.of(context).size.height * 0.4,
                         //   title: 'Add items',
@@ -372,7 +387,7 @@ class _DashboardState extends State<Dashboard> {
                                 child: Container(
                                   alignment: FractionalOffset.bottomCenter,
                                   child: Image.asset(
-                                    'images/5.png',
+                                    'assets/images/5.png',
                                     height: MediaQuery.of(context).size.height *
                                         0.4,
                                     width:
@@ -453,7 +468,7 @@ class _DashboardState extends State<Dashboard> {
 
                         // cards(
                         //   colour: const Color(0xFF6674F1),
-                        //   img: 'images/5.png',
+                        //   img: 'assets/images/5.png',
                         //   width: MediaQuery.of(context).size.width * 0.4,
                         //   height: MediaQuery.of(context).size.height * 0.4,
                         //   title: ' Manage Category',
@@ -490,7 +505,7 @@ class _DashboardState extends State<Dashboard> {
                                 child: Container(
                                   alignment: FractionalOffset.bottomCenter,
                                   child: Image.asset(
-                                    'images/orders.png',
+                                    'assets/images/orders.png',
                                     height: MediaQuery.of(context).size.height *
                                         0.3,
                                     width:
@@ -586,7 +601,7 @@ class _DashboardState extends State<Dashboard> {
                                 child: Container(
                                   alignment: FractionalOffset.bottomCenter,
                                   child: Image.asset(
-                                    'images/banner.png',
+                                    'assets/images/banner.png',
                                     height: MediaQuery.of(context).size.height *
                                         0.4,
                                     width:
@@ -655,7 +670,7 @@ class _DashboardState extends State<Dashboard> {
                                 child: Container(
                                   alignment: FractionalOffset.bottomCenter,
                                   child: Image.asset(
-                                    'images/8.png',
+                                    'assets/images/8.png',
                                     height: MediaQuery.of(context).size.height *
                                         0.3,
                                     width:
@@ -711,7 +726,7 @@ class _DashboardState extends State<Dashboard> {
                                 child: Container(
                                   alignment: FractionalOffset.bottomCenter,
                                   child: Image.asset(
-                                    'images/9.png',
+                                    'assets/images/9.png',
                                     height: MediaQuery.of(context).size.height *
                                         0.4,
                                     width:
@@ -819,7 +834,7 @@ class _DashboardState extends State<Dashboard> {
                                 child: Container(
                                   alignment: FractionalOffset.bottomCenter,
                                   child: Image.asset(
-                                    'images/6.png',
+                                    'assets/images/6.png',
                                     height: MediaQuery.of(context).size.height *
                                         0.3,
                                     width:
@@ -879,7 +894,7 @@ class _DashboardState extends State<Dashboard> {
                                 child: Container(
                                   alignment: FractionalOffset.bottomCenter,
                                   child: Image.asset(
-                                    'images/7.png',
+                                    'assets/images/7.png',
                                     height: MediaQuery.of(context).size.height *
                                         0.4,
                                     width:
@@ -999,7 +1014,7 @@ class _DashboardState extends State<Dashboard> {
                               backgroundColor: Colors.grey,
                               child: Image(
                                 image: AssetImage(
-                                  'images/1.png',
+                                  'assets/images/1.png',
                                 ),
                                 height: 200,
                                 width: 190,

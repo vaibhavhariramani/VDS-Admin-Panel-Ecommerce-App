@@ -1,7 +1,6 @@
 // ignore_for_file: unnecessary_const
 
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 // import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
@@ -15,6 +14,7 @@ import 'package:vdsadmin/home/splashscreen.dart';
 // import 'constant.dart';
 // import 'database/add_item_to_db.dart';
 import 'firebase_options.dart';
+import 'theme_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,6 +39,7 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     _initCheck();
     configOneSignel();
+    ThemeController.initialize();
   }
 
   void configOneSignel() {
@@ -57,17 +58,26 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = ThemeData();
-    return MaterialApp(
-      // theme:
-      //     ThemeData(fontFamily: "Nunito", backgroundColor: Color(0xffF5F6F8)),
-
-      theme: theme.copyWith(
-        colorScheme:
-            theme.colorScheme.copyWith(secondary: const Color(0xffF5F6F8)),
-      ),
-      title: 'Admin Panel',
-      debugShowCheckedModeBanner: false,
-      home: SplashScreen(user),
+    final ThemeData darkTheme = ThemeData.dark();
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: ThemeController.themeMode,
+      builder: (context, mode, _) {
+        return MaterialApp(
+          theme: theme.copyWith(
+            colorScheme:
+                theme.colorScheme.copyWith(secondary: const Color(0xffF5F6F8)),
+          ),
+          darkTheme: darkTheme.copyWith(
+            colorScheme: darkTheme.colorScheme.copyWith(
+              secondary: const Color(0xff2A2E32),
+            ),
+          ),
+          themeMode: mode,
+          title: 'Admin Panel',
+          debugShowCheckedModeBanner: false,
+          home: SplashScreen(user),
+        );
+      },
     );
   }
 }

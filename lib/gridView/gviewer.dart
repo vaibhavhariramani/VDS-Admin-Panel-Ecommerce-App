@@ -26,13 +26,13 @@ class _HomeGridProductListState extends State<HomeGridProductList> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      child: Container(
-        height: MediaQuery.of(context).size.height * 0.5,
+      child: SingleChildScrollView(
         // child: Card(
         //   elevation: 0,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             // SizedBox(
             //   height: MediaQuery.of(context).size.height * 0.2,
@@ -42,8 +42,8 @@ class _HomeGridProductListState extends State<HomeGridProductList> {
             //     color: Colors.white10.withOpacity(0.95)),
             // child:
             CachedNetworkImage(
-              height: MediaQuery.of(context).size.height * 0.2,
-              width: MediaQuery.of(context).size.width * 0.2,
+              height: 110,
+              width: 110,
               imageUrl: widget.snapshot.get('image'),
               // ),
             ),
@@ -119,9 +119,6 @@ class _HomeGridProductListState extends State<HomeGridProductList> {
                   builder: (context, snapshotData) {
                     if (snapshotData.hasData) {
                       return ElevatedButton(
-                        child: Text('Edit',
-                            style: GoogleFonts.poppins(
-                                color: Colors.white, fontSize: 16)),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
                           elevation: 0,
@@ -129,6 +126,9 @@ class _HomeGridProductListState extends State<HomeGridProductList> {
                               borderRadius: BorderRadius.circular(8)),
                         ),
                         onPressed: () {},
+                        child: Text('Edit',
+                            style: GoogleFonts.poppins(
+                                color: Colors.white, fontSize: 16)),
                       );
                     }
                     return Row(
@@ -146,9 +146,6 @@ class _HomeGridProductListState extends State<HomeGridProductList> {
                         //   onPressed: () {},
                         // ),
                         ElevatedButton(
-                          child: Text('Add',
-                              style: GoogleFonts.poppins(
-                                  color: Colors.white, fontSize: 16)),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xffCB0338),
                             elevation: 0,
@@ -156,8 +153,13 @@ class _HomeGridProductListState extends State<HomeGridProductList> {
                                 borderRadius: BorderRadius.circular(8)),
                           ),
                           onPressed: () {
+                            final data = widget.snapshot.data()
+                                as Map<String, dynamic>?;
+                            final barcode =
+                                data?['barcode']?.toString() ??
+                                    widget.snapshot.id;
                             widget.listOfProductsInBilling.add(ProductData(
-                                barcode: '${widget.snapshot.get('barcode')}',
+                                barcode: barcode,
                                 image: '${widget.snapshot.get('image')}',
                                 name: '${widget.snapshot.get('name')}',
                                 mrp: double.parse(
@@ -184,6 +186,9 @@ class _HomeGridProductListState extends State<HomeGridProductList> {
                                     .pop(widget.listOfProductsInBilling);
                             print(widget.snapshot.data);
                           },
+                          child: Text('Add',
+                              style: GoogleFonts.poppins(
+                                  color: Colors.white, fontSize: 16)),
                         ),
                       ],
                     );

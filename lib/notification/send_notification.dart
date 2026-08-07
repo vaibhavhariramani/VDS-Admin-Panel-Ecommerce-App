@@ -147,10 +147,6 @@ class _NotifyAllState extends State<NotifyAll> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: RaisedGradientButton(
-                      child: const Text(
-                        'Send Notification',
-                        style: TextStyle(color: Colors.white),
-                      ),
                       gradient: const LinearGradient(
                         colors: <Color>[Color(0xffCB0338), Color(0xffFF5001)],
                       ),
@@ -175,6 +171,10 @@ class _NotifyAllState extends State<NotifyAll> {
                         Fluttertoast.showToast(msg: 'Sending notification');
                         Navigator.of(context).pop();
                       },
+                      child: const Text(
+                        'Send Notification',
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ),
 

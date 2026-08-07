@@ -44,7 +44,7 @@ class _SearchState extends State<Search> {
                   streamQuery = FirebaseFirestore.instance
                       .collection('Col-Name')
                       .where('fieldName', isGreaterThanOrEqualTo: searchKey)
-                      .where('fieldName', isLessThan: searchKey + 'z')
+                      .where('fieldName', isLessThan: '${searchKey}z')
                       .snapshots();
                 });
               },
@@ -67,7 +67,7 @@ class _SearchState extends State<Search> {
           stream: FirebaseFirestore.instance
               .collection('Products')
               .where('name', isGreaterThanOrEqualTo: value)
-              .where('name', isLessThan: value + 'Z')
+              .where('name', isLessThan: '${value}Z')
               .limit(20)
               .snapshots(),
           builder: (context, snapshot) {

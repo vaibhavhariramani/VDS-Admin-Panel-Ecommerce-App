@@ -342,15 +342,6 @@ class BillState extends State<Bill> {
                                               const SizedBox(height: 30),
                                               MaterialButton(
                                                 elevation: 0,
-                                                child: const Padding(
-                                                  padding: EdgeInsets.all(8.0),
-                                                  child: Text(
-                                                    'UPDATE',
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                                ),
                                                 onPressed: () {
                                                   InsertDatainFirebase().upload(
                                                       widget.products[index]
@@ -381,6 +372,15 @@ class BillState extends State<Bill> {
                                                   Navigator.of(context).pop();
                                                 },
                                                 color: Colors.green,
+                                                child: const Padding(
+                                                  padding: EdgeInsets.all(8.0),
+                                                  child: Text(
+                                                    'UPDATE',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
+                                                ),
                                               )
                                             ],
                                           ),
@@ -558,10 +558,6 @@ class BillState extends State<Bill> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Text(
-                'Add From Db',
-                style: TextStyle(color: Colors.white),
-              ),
               color: const Color(0xffCB0338),
               onPressed: () async {
                 final updatedListOfProducts =
@@ -607,6 +603,10 @@ class BillState extends State<Bill> {
                   });
                 }
               },
+              child: const Text(
+                'Add From Db',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ),
           const SizedBox(
@@ -616,14 +616,14 @@ class BillState extends State<Bill> {
               elevation: 0,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20)),
-              child: const Text(
-                'Add New',
-                style: TextStyle(color: Colors.white),
-              ),
               color: const Color(0xffCB0338),
               onPressed: () {
                 addNewItem();
-              }),
+              },
+              child: const Text(
+                'Add New',
+                style: TextStyle(color: Colors.white),
+              )),
           const SizedBox(
             width: 10,
           ),
@@ -697,8 +697,8 @@ class BillState extends State<Bill> {
                     ],
                   ),
                 )
-              : Expanded(
-                  // height: MediaQuery.of(context).size.height * 0.3,
+              : Padding(
+                  padding: const EdgeInsets.only(top: 40),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -858,6 +858,7 @@ class BillState extends State<Bill> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(80.0)),
                       padding: const EdgeInsets.all(0.0),
+                      color: Colors.white,
                       child: const Text(
                         "Clear",
                         textAlign: TextAlign.center,
@@ -866,7 +867,6 @@ class BillState extends State<Bill> {
                           color: Colors.green,
                         ),
                       ),
-                      color: Colors.white,
                     ),
                     const SizedBox(
                       width: 10,
@@ -880,6 +880,7 @@ class BillState extends State<Bill> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(80.0)),
                       padding: const EdgeInsets.all(0.0),
+                      color: Colors.white,
                       child: const Text(
                         "Checkout",
                         textAlign: TextAlign.center,
@@ -888,7 +889,6 @@ class BillState extends State<Bill> {
                           color: Colors.green,
                         ),
                       ),
-                      color: Colors.white,
                     ),
                   ],
                 ),
@@ -1244,25 +1244,31 @@ class BillState extends State<Bill> {
                         const SizedBox(height: 10),
                         MaterialButton(
                           elevation: 0,
-                          child: const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Text(
-                              'Checkout',
-                              style: TextStyle(
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
                           onPressed: () async {
                             print("got customer number ${contact.text}");
                             print("###############################");
                             final invoice1 = CreateInvoice(saman);
                             print("Datatype of Invoice generated $invoice1");
+                            String? billPdfUrl;
                             if (kIsWeb) {
                               isthisWeb = true;
                               print("ok going for web pdf invoice");
                               pdfFileWeb =
                                   await PdfInvoiceWebApi.generate(invoice1);
+                              try {
+                                final billRef = FirebaseStorage.instance
+                                    .ref()
+                                    .child(
+                                        'Bills/${DateTime.now().millisecondsSinceEpoch}.pdf');
+                                await billRef.putData(
+                                  pdfFileWeb,
+                                  SettableMetadata(
+                                      contentType: 'application/pdf'),
+                                );
+                                billPdfUrl = await billRef.getDownloadURL();
+                              } catch (e) {
+                                print('Failed to upload bill PDF: $e');
+                              }
                             } else {
                               pdfFileAndroid =
                                   await PdfInvoiceApi.generate(invoice1);
@@ -1302,6 +1308,8 @@ class BillState extends State<Bill> {
                                       builder: (context) => PdfViewerweb(
                                         number: contact.text,
                                         data: pdfFileWeb,
+                                        pdfUrl: billPdfUrl,
+                                        amount: total,
                                       ),
                                     ),
                                   )
@@ -1317,6 +1325,15 @@ class BillState extends State<Bill> {
                             // PdfApi.openFile(pdfFile);
                           },
                           color: Colors.green,
+                          child: const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text(
+                              'Checkout',
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
                         )
                       ],
                     ),
@@ -1456,15 +1473,6 @@ class BillState extends State<Bill> {
                         const SizedBox(height: 30),
                         MaterialButton(
                           elevation: 0,
-                          child: const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Text(
-                              'ADD',
-                              style: TextStyle(
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
                           onPressed: () {
                             addToList(
                                 newProductName.text,
@@ -1474,6 +1482,15 @@ class BillState extends State<Bill> {
                             Navigator.of(context).pop();
                           },
                           color: Colors.green,
+                          child: const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text(
+                              'ADD',
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
                         )
                       ],
                     ),
@@ -1696,10 +1713,6 @@ class BillState extends State<Bill> {
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: RaisedGradientButton(
-                                  child: const Text(
-                                    'Upload Image',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
                                   gradient: const LinearGradient(
                                     colors: <Color>[
                                       Color(0xffCB0338),
@@ -1714,6 +1727,10 @@ class BillState extends State<Bill> {
                                           _buildPopupDialog(context),
                                     );
                                   },
+                                  child: const Text(
+                                    'Upload Image',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
                                 ),
                               ),
                             ],
@@ -1721,15 +1738,6 @@ class BillState extends State<Bill> {
                         ),
                         MaterialButton(
                           elevation: 0,
-                          child: const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Text(
-                              'ADD TO DATABASE',
-                              style: TextStyle(
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
                           onPressed: () {
                             addToDatabase(
                               barcode,
@@ -1743,6 +1751,15 @@ class BillState extends State<Bill> {
                             Navigator.of(context).pop();
                           },
                           color: Colors.green,
+                          child: const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text(
+                              'ADD TO DATABASE',
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
                         )
                       ],
                     ),
@@ -2069,20 +2086,20 @@ class CustomTile extends StatelessWidget {
         children: [
           Expanded(
             child: Align(
+              alignment: Alignment.centerLeft,
               child: Text(
                 title,
                 style: titlestyle,
               ),
-              alignment: Alignment.centerLeft,
             ),
           ),
           Expanded(
             child: Align(
+              alignment: Alignment.centerRight,
               child: Text(
                 tail,
                 style: tailstyle,
               ),
-              alignment: Alignment.centerRight,
             ),
           )
         ],

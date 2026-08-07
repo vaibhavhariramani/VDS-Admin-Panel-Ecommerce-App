@@ -117,6 +117,9 @@ class _ProductDetailsState extends State<ProductDetails> {
                       child: Container(
                         padding: const EdgeInsets.all(4),
                         alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                            color: Colors.blue.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(4)),
                         child: Text(
                             widget.snapshot
                                     .get('category')
@@ -124,9 +127,6 @@ class _ProductDetailsState extends State<ProductDetails> {
                                     .first ??
                                 '',
                             style: GoogleFonts.poppins(color: Colors.blue)),
-                        decoration: BoxDecoration(
-                            color: Colors.blue.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(4)),
                       ),
                     )),
                 Expanded(
@@ -139,6 +139,9 @@ class _ProductDetailsState extends State<ProductDetails> {
                           ? Container(
                               padding: const EdgeInsets.all(4),
                               alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                  color: Colors.amber.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(4)),
                               child: Text(
                                   widget.snapshot
                                           .get('tags')
@@ -147,9 +150,6 @@ class _ProductDetailsState extends State<ProductDetails> {
                                       '',
                                   style:
                                       GoogleFonts.poppins(color: Colors.amber)),
-                              decoration: BoxDecoration(
-                                  color: Colors.amber.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(4)),
                             )
                           : Container(),
                     )),

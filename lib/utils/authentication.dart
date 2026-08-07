@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_sign_in/google_sign_in.dart';
@@ -17,23 +16,18 @@ class Authentication {
       backgroundColor: Colors.black,
       content: Text(
         content,
-        style: TextStyle(color: Colors.redAccent, letterSpacing: 0.5),
+        style: const TextStyle(color: Colors.redAccent, letterSpacing: 0.5),
       ),
     );
   }
 
-  static Future<FirebaseApp> initializeFirebase({
+  static Future<void> initializeFirebase({
     required BuildContext context,
   }) async {
-    FirebaseApp firebaseApp = await Firebase.initializeApp();
     SharedPreferences prefs = await SharedPreferences.getInstance();
     User? user = FirebaseAuth.instance.currentUser;
     List<ProductData> productList = [];
     FutureOr<bool> checkUser(User user) async {
-      if (user == null) {
-        return false;
-      }
-
       DocumentSnapshot userDoc = await FirebaseFirestore.instance
           .collection('Admins')
           .doc(user.uid)
@@ -75,8 +69,6 @@ class Authentication {
                     )));
       }
     }
-
-    return firebaseApp;
   }
 
   static FutureOr<User?> signInWithGoogle(

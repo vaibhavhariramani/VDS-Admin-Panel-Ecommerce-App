@@ -5,6 +5,8 @@ import '../utils/authentication.dart';
 import '../widgets/google_sign_in_button.dart';
 
 class SignInScreen extends StatefulWidget {
+  const SignInScreen({Key? key}) : super(key: key);
+
   @override
   _SignInScreenState createState() => _SignInScreenState();
 }
@@ -24,7 +26,7 @@ class _SignInScreenState extends State<SignInScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.max,
             children: [
-              Row(),
+              const Row(),
               Expanded(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -37,7 +39,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         height: 160,
                       ),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     Text(
                       'FlutterFire',
                       style: TextStyle(
@@ -59,7 +61,7 @@ class _SignInScreenState extends State<SignInScreen> {
                 future: Authentication.initializeFirebase(context: context),
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
-                    return Text('Error initializing Firebase');
+                    return const Text('Error initializing Firebase');
                   } else if (snapshot.connectionState == ConnectionState.done) {
                     return GoogleSignInButton();
                   }

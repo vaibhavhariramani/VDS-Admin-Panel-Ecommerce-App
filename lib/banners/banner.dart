@@ -64,17 +64,17 @@ class _BannerDisplayState extends State<BannerDisplay> {
                             elevation: 0,
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20)),
+                            color: Colors.green,
+                            onPressed: () {
+                              addBanner();
+                            },
                             child: const Padding(
                               padding: EdgeInsets.all(8.0),
                               child: Text(
                                 'Add New Banner',
                                 style: TextStyle(color: Colors.white),
                               ),
-                            ),
-                            color: Colors.green,
-                            onPressed: () {
-                              addBanner();
-                            }),
+                            )),
                       ),
                     ],
                   ),
@@ -217,15 +217,6 @@ class _BannerDisplayState extends State<BannerDisplay> {
                         const SizedBox(height: 30),
                         MaterialButton(
                           elevation: 0,
-                          child: const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Text(
-                              'ADD',
-                              style: TextStyle(
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
                           onPressed: () {
                             if (catogoryUrl != null) {
                               InsertDatainFirebase().uploadBanner(catogoryUrl);
@@ -242,6 +233,15 @@ class _BannerDisplayState extends State<BannerDisplay> {
                             }
                           },
                           color: Colors.green,
+                          child: const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text(
+                              'ADD',
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
                         )
                       ],
                     ),

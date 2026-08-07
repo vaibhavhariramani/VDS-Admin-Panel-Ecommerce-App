@@ -38,7 +38,7 @@ class _Category1State extends State<Category1> {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Text("Category",
+        title: const Text("Category",
             style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.w400,
@@ -48,17 +48,17 @@ class _Category1State extends State<Category1> {
               elevation: 0,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20)),
+              color: Colors.green,
+              onPressed: () {
+                addCategory();
+              },
               child: const Padding(
                 padding: EdgeInsets.all(8.0),
                 child: Text(
                   'Add New',
                   style: TextStyle(color: Colors.white),
                 ),
-              ),
-              color: Colors.green,
-              onPressed: () {
-                addCategory();
-              }),
+              )),
         ],
       ),
       backgroundColor: Colors.blueGrey,
@@ -111,7 +111,7 @@ class _Category1State extends State<Category1> {
                                   // print(
                                   //     "data that is getting passed here is : ${data[index]}");
                                   return CategoryCard(
-                                    data: data[index] as Map<String, dynamic>,
+                                    data: data[index],
                                   );
                                 }),
                           ),
@@ -266,15 +266,6 @@ class _Category1State extends State<Category1> {
                         const SizedBox(height: 30),
                         MaterialButton(
                           elevation: 0,
-                          child: const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Text(
-                              'ADD',
-                              style: TextStyle(
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
                           onPressed: () {
                             if (catogoryUrl != null && iconUrl != null) {
                               InsertDatainFirebase().uploadCategory(index.text,
@@ -292,6 +283,15 @@ class _Category1State extends State<Category1> {
                             }
                           },
                           color: Colors.green,
+                          child: const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text(
+                              'ADD',
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
                         )
                       ],
                     ),

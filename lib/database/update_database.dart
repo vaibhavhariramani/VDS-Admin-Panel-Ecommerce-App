@@ -235,14 +235,14 @@ class _UpdateDBState extends State<UpdateDB> {
                   //   ),
                   // ),
                   RaisedGradientButton(
-                    child: const Text(
-                      'Scan BarCode',
-                      style: TextStyle(color: Colors.white),
-                    ),
                     gradient: const LinearGradient(
                       colors: <Color>[Color(0xffCB0338), Color(0xffFF5001)],
                     ),
                     onPressed: () => scanBarcodeNormal(),
+                    child: const Text(
+                      'Scan BarCode',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                   const SizedBox(
                     height: 10.0,
@@ -270,10 +270,6 @@ class _UpdateDBState extends State<UpdateDB> {
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: RaisedGradientButton(
-                            child: const Text(
-                              'Upload Image',
-                              style: TextStyle(color: Colors.white),
-                            ),
                             gradient: const LinearGradient(
                               colors: <Color>[
                                 Color(0xffCB0338),
@@ -288,6 +284,10 @@ class _UpdateDBState extends State<UpdateDB> {
                                     _buildPopupDialog(context),
                               );
                             },
+                            child: const Text(
+                              'Upload Image',
+                              style: TextStyle(color: Colors.white),
+                            ),
                           ),
                         ),
                       ],
@@ -394,10 +394,6 @@ class _UpdateDBState extends State<UpdateDB> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: RaisedGradientButton(
-                      child: const Text(
-                        'Add to Database',
-                        style: TextStyle(color: Colors.white),
-                      ),
                       gradient: const LinearGradient(
                         colors: <Color>[Color(0xffCB0338), Color(0xffFF5001)],
                       ),
@@ -424,6 +420,10 @@ class _UpdateDBState extends State<UpdateDB> {
                         Dataseturl = null;
                         url = null;
                       },
+                      child: const Text(
+                        'Add to Database',
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ),
                 ],

@@ -83,6 +83,7 @@ upkeystore.jks
 .flutter-plugins
 .flutter-plugins-dependencies
 .dart_tool
-.firebase
+.firebase/
 .env
 plugins
+credentials.txt

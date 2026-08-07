@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../custom_colors.dart';
 
 class AppBarTitle extends StatelessWidget {
+  const AppBarTitle({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -13,7 +15,7 @@ class AppBarTitle extends StatelessWidget {
           'assets/firebase_logo.png',
           height: 20,
         ),
-        SizedBox(width: 8),
+        const SizedBox(width: 8),
         Text(
           'FlutterFire',
           style: TextStyle(

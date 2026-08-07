@@ -49,7 +49,7 @@ class Example extends StatelessWidget {
                   alignment: FractionalOffset.centerLeft,
                   child: const Image(
                     image: AssetImage(
-                      'images/doctor.png',
+                      'assets/images/doctor.png',
                     ),
                     height: 200,
                     width: 190,
@@ -132,7 +132,7 @@ class Example extends StatelessWidget {
                 children: <Widget>[
                   cards(
                     colour: const Color(0xFF087CC7),
-                    img: 'images/caugh (1).png',
+                    img: 'assets/images/caugh (1).png',
                     height: 120,
                     width: 150,
                     title: 'Symptoms &',
@@ -141,7 +141,7 @@ class Example extends StatelessWidget {
                   ),
                   cards(
                     colour: const Color(0xFFB3E0FF),
-                    img: 'images/headache.png',
+                    img: 'assets/images/headache.png',
                     height: 120,
                     width: 160,
                     title: ' Prevent ',
@@ -181,7 +181,7 @@ class Example extends StatelessWidget {
                   alignment: FractionalOffset.centerLeft,
                   child: const Image(
                     image: AssetImage(
-                      'images/Picture11.png',
+                      'assets/images/Picture11.png',
                     ),
                     height: 150,
                     width: 140,

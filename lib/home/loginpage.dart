@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -8,9 +7,9 @@ import 'package:vdsadmin/home/dashboard.dart';
 import 'package:vdsadmin/models/product_data.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../custom_colors.dart';
+import '../theme_controller.dart';
 import '../utils/authentication.dart';
 import '../widgets/google_sign_in_button.dart';
-import 'data_assisten.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -18,10 +17,6 @@ class Login extends StatefulWidget {
   @override
   _LoginState createState() => _LoginState();
   static Future<bool> checkUser(User user) async {
-    if (user == null) {
-      return false;
-    }
-
     DocumentSnapshot userDoc = await FirebaseFirestore.instance
         .collection('users')
         .doc(user.uid)
@@ -42,10 +37,12 @@ class _LoginState extends State<Login> {
   TextEditingController pass = TextEditingController();
   bool isLoading = false;
   List<ProductData> productList = [];
+  late final Future<void> _autoLoginCheck;
 
   @override
   void initState() {
     super.initState();
+    _autoLoginCheck = Authentication.initializeFirebase(context: context);
   }
 
   @override
@@ -97,6 +94,27 @@ class _LoginState extends State<Login> {
     }
 
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        actions: [
+          ValueListenableBuilder<ThemeMode>(
+            valueListenable: ThemeController.themeMode,
+            builder: (context, mode, _) {
+              return IconButton(
+                icon: Icon(
+                  mode == ThemeMode.dark ? Icons.light_mode : Icons.dark_mode,
+                ),
+                tooltip: mode == ThemeMode.dark
+                    ? 'Switch to light mode'
+                    : 'Switch to dark mode',
+                onPressed: ThemeController.toggle,
+              );
+            },
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
         child: SafeArea(
           child: Center(
@@ -117,7 +135,7 @@ class _LoginState extends State<Login> {
                       child: Opacity(
                         opacity: 0.5,
                         child: Image.asset(
-                          'images/imageLogin.png',
+                          'assets/images/imageLogin.png',
                           height: 500,
                         ),
                       ),
@@ -138,11 +156,11 @@ class _LoginState extends State<Login> {
                             ),
                           ),
                           form(
-                            'Enter Username',
-                            'Username',
+                            'Enter Email',
+                            'Email',
                             username,
                             const Icon(
-                              Icons.person_outline,
+                              Icons.email_outlined,
                             ),
                           ),
                           form(
@@ -176,6 +194,20 @@ class _LoginState extends State<Login> {
                             padding: const EdgeInsets.only(top: 20),
                             child: Center(
                               child: TextButton(
+                                style: ButtonStyle(
+                                  padding:
+                                      WidgetStateProperty.all<EdgeInsets>(
+                                          const EdgeInsets.all(10)),
+                                  backgroundColor:
+                                      WidgetStateProperty.all<Color>(
+                                          const Color(0xffF3AB0D)),
+                                  shape: WidgetStateProperty.all<
+                                          RoundedRectangleBorder>(
+                                      RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20.0),
+                                  )),
+                                ),
+                                onPressed: _login,
                                 child: Text(
                                   "Login".toUpperCase(),
                                   style: const TextStyle(
@@ -183,20 +215,6 @@ class _LoginState extends State<Login> {
                                       color: Colors.white,
                                       fontWeight: FontWeight.w600),
                                 ),
-                                style: ButtonStyle(
-                                  padding:
-                                      MaterialStateProperty.all<EdgeInsets>(
-                                          const EdgeInsets.all(10)),
-                                  backgroundColor:
-                                      MaterialStateProperty.all<Color>(
-                                          const Color(0xffF3AB0D)),
-                                  shape: MaterialStateProperty.all<
-                                          RoundedRectangleBorder>(
-                                      RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20.0),
-                                  )),
-                                ),
-                                onPressed: _login,
                               ),
                             ),
                           ),
@@ -204,12 +222,12 @@ class _LoginState extends State<Login> {
                       ),
                     ),
                   ]),
-                  Center(child: Text('OR')),
+                  const Center(child: Text('OR')),
                   FutureBuilder(
-                    future: Authentication.initializeFirebase(context: context),
+                    future: _autoLoginCheck,
                     builder: (context, snapshot) {
                       if (snapshot.hasError) {
-                        return Text('Error initializing Firebase');
+                        return const Text('Error initializing Firebase');
                       } else if (snapshot.connectionState ==
                           ConnectionState.done) {
                         return GoogleSignInButton();
@@ -231,10 +249,6 @@ class _LoginState extends State<Login> {
   }
 
   FutureOr<bool> checkUser(User user) async {
-    if (user == null) {
-      return false;
-    }
-
     DocumentSnapshot userDoc = await FirebaseFirestore.instance
         .collection('Admins')
         .doc(user.uid)
@@ -252,61 +266,67 @@ class _LoginState extends State<Login> {
   }
 
   FutureOr<void> _login() async {
-    if (username.text.isNotEmpty && pass.text.isNotEmpty) {
-      setState(() {
-        isLoading = true;
-      });
+    if (username.text.isEmpty || pass.text.isEmpty) {
+      return;
+    }
+    setState(() {
+      isLoading = true;
+    });
 
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      Future.delayed(const Duration(seconds: 1), () async {
-        if (username.text.contains("@")) {
-          try {
-            String? email = username.text;
-            String? password = pass.text;
-            final authResult = await FirebaseAuth.instance
-                .signInWithEmailAndPassword(email: email, password: password);
-            User user = authResult.user!;
-            print(user);
-            bool isAdmin = await checkUser(user);
-            if (isAdmin) {
-              String? fullname = user.displayName;
-              String? username = user.displayName;
-              prefs.setString('email', email);
-              prefs.setBool('user', true);
-              prefs.setString('username', username!);
-              prefs.setString('fullname', fullname!);
-              Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => Dashboard(
-                            MasterproductListForBilling: productList,
-                          )));
-            }
-          } catch (e) {
-            print(e.toString());
-            return null;
-          }
-        } else {
-          for (int id = 0; id < dataAssisten.length; id++) {
-            if (username.text == dataAssisten[id]["UserName"] &&
-                pass.text == dataAssisten[id]["PassWord"]) {
-              String? fullname;
-              String? username;
-              fullname = dataAssisten[id]["FullName"] as String?;
-              username = dataAssisten[id]["UserName"] as String?;
-              prefs.setBool('user', true);
-              prefs.setString('username', username!);
-              prefs.setString('fullname', fullname!);
-              Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => Dashboard(
-                            MasterproductListForBilling: productList,
-                          )));
-            }
-          }
+    final String email = username.text.trim();
+    final String password = pass.text;
+
+    try {
+      final authResult = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
+      User user = authResult.user!;
+      bool isAdmin = await checkUser(user);
+      if (isAdmin) {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        String fullname = user.displayName ?? email;
+        prefs.setString('email', email);
+        prefs.setBool('user', true);
+        prefs.setString('username', email);
+        prefs.setString('fullname', fullname);
+        if (!mounted) return;
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (context) => Dashboard(
+                      MasterproductListForBilling: productList,
+                    )));
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('This account is not authorized as an employee.'),
+            ),
+          );
         }
-      });
+      }
+    } on FirebaseAuthException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                e.message ?? 'Login failed. Check your email and password.'),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Login failed. Check your email and password.'),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
 }

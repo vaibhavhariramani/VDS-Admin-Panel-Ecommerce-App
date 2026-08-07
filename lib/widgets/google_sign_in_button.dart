@@ -11,6 +11,8 @@ import '../user_info/user_info_screen.dart';
 import '../utils/authentication.dart';
 
 class GoogleSignInButton extends StatefulWidget {
+  const GoogleSignInButton({Key? key}) : super(key: key);
+
   @override
   _GoogleSignInButtonState createState() => _GoogleSignInButtonState();
 }
@@ -37,19 +39,19 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
     // SharedPreferences prefs = await SharedPreferences.getInstance();
     List<ProductData> productList = [];
     if (_prefs == null) {
-      return CircularProgressIndicator();
+      return const CircularProgressIndicator();
     }
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: _isSigningIn
-          ? CircularProgressIndicator(
+          ? const CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
             )
           : OutlinedButton(
               style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all(Colors.white),
-                shape: MaterialStateProperty.all(
+                backgroundColor: WidgetStateProperty.all(Colors.white),
+                shape: WidgetStateProperty.all(
                   RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(40),
                   ),
@@ -62,7 +64,7 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
                 });
                 User? user =
                     await Authentication.signInWithGoogle(context: context);
-                print("got user authrnticated ${user}");
+                print("got user authrnticated $user");
                 setState(() {
                   _isSigningIn = false;
                 });
@@ -76,7 +78,7 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
                   //   ),
                   // );
                   bool isAdmin = await checkUser(user);
-                  print("User have Admin Access ${isAdmin}");
+                  print("User have Admin Access $isAdmin");
                   if (isAdmin) {
                     
                     String? fullname = user.displayName;
@@ -98,8 +100,8 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
                   }
                 }
               },
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+              child: const Padding(
+                padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -109,7 +111,7 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
                       height: 35.0,
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(left: 10),
+                      padding: EdgeInsets.only(left: 10),
                       child: Text(
                         'Sign in with Google',
                         style: TextStyle(

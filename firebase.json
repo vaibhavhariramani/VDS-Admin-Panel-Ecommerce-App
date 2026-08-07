@@ -1,14 +1,14 @@
 {
   "hosting": {
     "site": "vishal-store-admin",
-    "source": ".",
+    "public": "build/web",
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
-    ],
-    "frameworksBackend": {
-      "region": "asia-east1"
-    }
+    ]
+  },
+  "functions": {
+    "source": "functions"
   }
 }

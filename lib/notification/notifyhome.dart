@@ -42,7 +42,7 @@ class _NotificationpageState extends State<Notificationpage> {
                       child: Container(
                         alignment: FractionalOffset.bottomCenter,
                         child: Image.asset(
-                          'images/2.png',
+                          'assets/images/2.png',
                           height: MediaQuery.of(context).size.height * 0.4,
                           width: MediaQuery.of(context).size.width * 0.3,
                         ),
@@ -92,7 +92,7 @@ class _NotificationpageState extends State<Notificationpage> {
                       child: Container(
                         alignment: FractionalOffset.bottomCenter,
                         child: Image.asset(
-                          'images/3.png',
+                          'assets/images/3.png',
                           height: MediaQuery.of(context).size.height * 0.4,
                           width: MediaQuery.of(context).size.width * 0.3,
                         ),

@@ -468,20 +468,20 @@ class CustomTile extends StatelessWidget {
         children: [
           Expanded(
             child: Align(
+              alignment: Alignment.centerLeft,
               child: Text(
                 title,
                 style: titlestyle,
               ),
-              alignment: Alignment.centerLeft,
             ),
           ),
           Expanded(
             child: Align(
+              alignment: Alignment.centerRight,
               child: Text(
                 tail,
                 style: tailstyle,
               ),
-              alignment: Alignment.centerRight,
             ),
           )
         ],
