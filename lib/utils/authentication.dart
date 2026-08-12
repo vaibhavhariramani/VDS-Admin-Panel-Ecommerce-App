@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../home/dashboard.dart';
 import '../models/product_data.dart';
 import 'admin_check.dart';
+import 'role_controller.dart';
 
 class Authentication {
   static SnackBar customSnackBar({required String content}) {
@@ -35,7 +36,8 @@ class Authentication {
       //     ),
       //   ),
       // );
-      bool isAdmin = await isAdminUser(user);
+      await RoleController.refresh(user);
+      bool isAdmin = RoleController.role.value != UserRole.none;
       if (isAdmin) {
         String? fullname = user.displayName;
         String? username = user.displayName;

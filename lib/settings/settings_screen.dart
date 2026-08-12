@@ -3,8 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../staff/manage_staff_screen.dart';
 import '../theme/app_theme.dart';
 import '../theme_controller.dart';
+import '../utils/role_controller.dart';
 import 'store_settings_controller.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -227,6 +229,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ],
               ),
+              if (RoleController.isSuperAdmin) ...[
+                const SizedBox(height: 20),
+                _SectionCard(
+                  color: cardColor,
+                  title: 'Staff access',
+                  icon: Icons.badge_outlined,
+                  children: [
+                    Text(
+                      'Grant or revoke admin panel access for employees and other super admins.',
+                      style: TextStyle(color: mutedText, fontSize: 13),
+                    ),
+                    const SizedBox(height: 16),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: PillButton(
+                        label: 'Manage Staff',
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ManageStaffScreen(),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
               const SizedBox(height: 24),
             ],
           ),

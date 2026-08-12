@@ -8,6 +8,7 @@ import '../home/dashboard.dart';
 import '../models/product_data.dart';
 import '../utils/authentication.dart';
 import '../utils/admin_check.dart';
+import '../utils/role_controller.dart';
 
 class GoogleSignInButton extends StatefulWidget {
   const GoogleSignInButton({Key? key}) : super(key: key);
@@ -76,7 +77,8 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
                   //     ),
                   //   ),
                   // );
-                  bool isAdmin = await checkUser(user);
+                  await RoleController.refresh(user);
+                  bool isAdmin = RoleController.role.value != UserRole.none;
                   print("User have Admin Access $isAdmin");
                   if (isAdmin) {
                     
@@ -126,6 +128,4 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
             ),
     );
   }
-  
-  Future<bool> checkUser(User user) => isAdminUser(user);
 }

@@ -10,6 +10,7 @@ import '../custom_colors.dart';
 import '../theme_controller.dart';
 import '../utils/authentication.dart';
 import '../utils/admin_check.dart';
+import '../utils/role_controller.dart';
 import '../widgets/google_sign_in_button.dart';
 
 class Login extends StatefulWidget {
@@ -249,8 +250,6 @@ class _LoginState extends State<Login> {
     );
   }
 
-  FutureOr<bool> checkUser(User user) => isAdminUser(user);
-
   FutureOr<void> _login() async {
     if (username.text.isEmpty || pass.text.isEmpty) {
       return;
@@ -266,7 +265,8 @@ class _LoginState extends State<Login> {
       final authResult = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
       User user = authResult.user!;
-      bool isAdmin = await checkUser(user);
+      await RoleController.refresh(user);
+      bool isAdmin = RoleController.role.value != UserRole.none;
       if (isAdmin) {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         String fullname = user.displayName ?? email;

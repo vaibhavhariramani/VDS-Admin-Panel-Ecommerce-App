@@ -1,5 +1,6 @@
 import 'dart:io' as android;
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:cached_network_image/cached_network_image.dart';
@@ -11,6 +12,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:vdsadmin/billing/invoice_requests/invoice_request_api.dart';
 import 'package:vdsadmin/gridView/grid_vw.dart';
 import 'package:vdsadmin/invoice/pdf_invoice_api.dart';
 import 'package:vdsadmin/loyalty/club_card_api.dart';
@@ -21,6 +23,7 @@ import 'package:vdsadmin/models/invoice.dart';
 import 'package:vdsadmin/models/product_data.dart';
 import 'package:vdsadmin/models/suppiler.dart';
 import 'package:vdsadmin/settings/store_settings_controller.dart';
+import 'package:vdsadmin/utils/role_controller.dart';
 import 'package:vdsadmin/whatsappApi/wa.dart';
 import 'package:vdsadmin/widgets/raised_gradient_button.dart';
 
@@ -32,8 +35,18 @@ import '../invoice/pdf_invoice_api_web.dart';
 class Bill extends StatefulWidget {
   List<ProductData> products;
   bool addedfromDB;
-  Bill({Key? key, required this.products, required this.addedfromDB})
-      : super(key: key);
+  // Set when a super admin opens this screen to review a pending employee
+  // invoice request (see lib/billing/invoice_requests) instead of starting
+  // a fresh bill. A successful checkout then marks that request approved.
+  final String? reviewingRequestId;
+  final String? initialCustomerPhone;
+  Bill({
+    Key? key,
+    required this.products,
+    required this.addedfromDB,
+    this.reviewingRequestId,
+    this.initialCustomerPhone,
+  }) : super(key: key);
 
   @override
   BillState createState() => BillState();
@@ -81,6 +94,9 @@ class BillState extends State<Bill> {
   void initState() {
     super.initState();
     _posReferenceId = 'POS-${DateTime.now().millisecondsSinceEpoch}';
+    if (widget.initialCustomerPhone != null) {
+      contact.text = widget.initialCustomerPhone!;
+    }
     if (widget.addedfromDB == true) {
       mrptotal = widget.products.isNotEmpty
           ? widget.products
@@ -1014,10 +1030,12 @@ class BillState extends State<Bill> {
                           borderRadius: BorderRadius.circular(80.0)),
                       padding: const EdgeInsets.all(0.0),
                       color: Colors.white,
-                      child: const Text(
-                        "Checkout",
+                      child: Text(
+                        RoleController.isSuperAdmin
+                            ? "Checkout"
+                            : "Submit for Approval",
                         textAlign: TextAlign.center,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Colors.green,
                         ),
@@ -1275,6 +1293,11 @@ class BillState extends State<Bill> {
   void Checkout(
       {required List<ProductData> saman, pdfFileAndroid, pdfFileWeb}) {
     bool isthisWeb = false;
+    // Captured before showDialog, since `context` is shadowed by the
+    // dialog's own builder params below - this one still points at the
+    // Bill screen itself, needed to pop back to Dashboard on submission.
+    final billScreenContext = context;
+    final isSuperAdmin = RoleController.isSuperAdmin;
     form(String title, String hint, TextEditingController controller, Icon ic) {
       return Padding(
         padding: const EdgeInsets.all(4.0),
@@ -1336,11 +1359,14 @@ class BillState extends State<Bill> {
                     padding: const EdgeInsets.all(6.0),
                     child: ListView(
                       children: [
-                        const Center(
+                        Center(
                           child: Padding(
-                              padding: EdgeInsets.all(15),
-                              child: Text("Checkout",
-                                  style: TextStyle(
+                              padding: const EdgeInsets.all(15),
+                              child: Text(
+                                  isSuperAdmin
+                                      ? "Checkout"
+                                      : "Submit for Approval",
+                                  style: const TextStyle(
                                       fontSize: 40,
                                       fontWeight: FontWeight.w400,
                                       color: Colors.white))),
@@ -1378,6 +1404,31 @@ class BillState extends State<Bill> {
                         MaterialButton(
                           elevation: 0,
                           onPressed: () async {
+                            if (!isSuperAdmin) {
+                              final requester =
+                                  FirebaseAuth.instance.currentUser;
+                              if (requester == null) return;
+                              try {
+                                await InvoiceRequestApi.submit(
+                                  user: requester,
+                                  products: widget.products,
+                                  mrptotal: (mrptotal as num).toDouble(),
+                                  total: (total as num).toDouble(),
+                                  customerPhone: contact.text,
+                                );
+                                Navigator.pop(context); // close this dialog
+                                Navigator.pop(
+                                    billScreenContext); // leave Bill screen
+                                Fluttertoast.showToast(
+                                    msg:
+                                        'Submitted for approval. A super admin will review it shortly.');
+                              } catch (e) {
+                                Navigator.pop(context);
+                                Fluttertoast.showToast(
+                                    msg: 'Failed to submit: $e');
+                              }
+                              return;
+                            }
                             print("got customer number ${contact.text}");
                             print("###############################");
                             final invoice1 = CreateInvoice(saman);
@@ -1432,6 +1483,17 @@ class BillState extends State<Bill> {
                                 'status': 'Order Complete',
                               });
                               _items(reference.id);
+                              if (widget.reviewingRequestId != null) {
+                                final reviewer =
+                                    FirebaseAuth.instance.currentUser;
+                                if (reviewer != null) {
+                                  InvoiceRequestApi.markApproved(
+                                    requestId: widget.reviewingRequestId!,
+                                    reviewer: reviewer,
+                                    approvedOrderId: reference.id,
+                                  );
+                                }
+                              }
                             } catch (e) {
                               Navigator.pop(context);
                             }
@@ -1458,11 +1520,11 @@ class BillState extends State<Bill> {
                             // PdfApi.openFile(pdfFile);
                           },
                           color: Colors.green,
-                          child: const Padding(
-                            padding: EdgeInsets.all(8.0),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
                             child: Text(
-                              'Checkout',
-                              style: TextStyle(
+                              isSuperAdmin ? 'Checkout' : 'Submit for Approval',
+                              style: const TextStyle(
                                 color: Colors.white,
                               ),
                             ),

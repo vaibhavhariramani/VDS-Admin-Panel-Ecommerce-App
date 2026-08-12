@@ -5,6 +5,7 @@ import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vdsadmin/banners/banner.dart';
 import 'package:vdsadmin/billing/bill.dart';
+import 'package:vdsadmin/billing/invoice_requests/invoice_requests_screen.dart';
 import 'package:vdsadmin/category/category1.dart';
 import 'package:vdsadmin/category_wise/category.dart';
 import 'package:vdsadmin/customers/customer_list_screen.dart';
@@ -17,6 +18,7 @@ import 'package:vdsadmin/orders/orders.dart';
 import 'package:vdsadmin/settings/settings_screen.dart';
 import 'package:vdsadmin/theme/app_theme.dart';
 import 'package:vdsadmin/theme_controller.dart';
+import 'package:vdsadmin/utils/role_controller.dart';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 
@@ -171,6 +173,16 @@ class _DashboardState extends State<Dashboard> {
         color: AppColors.primaryDark,
         onTap: () => Navigator.push(context,
             MaterialPageRoute(builder: (_) => const CustomerListScreen())),
+      ),
+      _DashboardCardData(
+        title: 'Invoice Requests',
+        subtitle: RoleController.isSuperAdmin
+            ? 'Review employee bills'
+            : 'Track your submitted bills',
+        icon: Icons.receipt_long_outlined,
+        color: AppColors.accentTeal,
+        onTap: () => Navigator.push(context,
+            MaterialPageRoute(builder: (_) => const InvoiceRequestsScreen())),
       ),
       _DashboardCardData(
         title: 'Profile & Settings',

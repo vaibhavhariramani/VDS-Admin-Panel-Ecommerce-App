@@ -18,6 +18,79 @@ function normalizeIndianPhone(raw) {
   return digits;
 }
 
+const VALID_ROLES = ["superadmin", "employee", "none"];
+
+/**
+ * Grants or revokes admin-panel access for a staff account by email.
+ * Super-admin only. Sets the `admin`/`staff` custom claim the Firestore
+ * rules and this app's login gate both check, and mirrors the change into
+ * a `Staff/{uid}` Firestore doc (written via the Admin SDK, so it bypasses
+ * client rules) so the Manage Staff screen has something to list without
+ * needing to enumerate the whole Firebase Auth user base.
+ */
+exports.setStaffRole = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "Login required.");
+  }
+  if (request.auth.token.admin !== true) {
+    throw new HttpsError(
+      "permission-denied",
+      "Only super admins can manage staff access."
+    );
+  }
+
+  const { email, role } = request.data || {};
+  if (!email || typeof email !== "string") {
+    throw new HttpsError("invalid-argument", "email is required.");
+  }
+  if (!VALID_ROLES.includes(role)) {
+    throw new HttpsError(
+      "invalid-argument",
+      `role must be one of: ${VALID_ROLES.join(", ")}.`
+    );
+  }
+
+  let userRecord;
+  try {
+    userRecord = await admin.auth().getUserByEmail(email);
+  } catch (e) {
+    throw new HttpsError(
+      "not-found",
+      `No account found for ${email}. They need to sign in at least ` +
+        "once (e.g. via Google sign-in) before access can be granted."
+    );
+  }
+
+  const claims =
+    role === "superadmin"
+      ? { admin: true }
+      : role === "employee"
+        ? { staff: true }
+        : {};
+  await admin.auth().setCustomUserClaims(userRecord.uid, claims);
+
+  const staffDoc = admin.firestore().collection("Staff").doc(userRecord.uid);
+  if (role === "none") {
+    await staffDoc.delete();
+  } else {
+    await staffDoc.set({
+      email: userRecord.email || email,
+      displayName: userRecord.displayName || null,
+      role,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedBy: request.auth.uid,
+    });
+  }
+
+  logger.info("Staff role updated", {
+    email,
+    uid: userRecord.uid,
+    role,
+    by: request.auth.uid,
+  });
+  return { uid: userRecord.uid, role };
+});
+
 exports.sendWhatsAppBill = onCall(
   { secrets: [WHATSAPP_ACCESS_TOKEN, WHATSAPP_PHONE_NUMBER_ID] },
   async (request) => {
