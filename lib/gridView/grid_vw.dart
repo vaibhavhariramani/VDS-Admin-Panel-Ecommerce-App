@@ -16,6 +16,7 @@ import 'package:vdsadmin/home/loginpage.dart';
 import 'package:vdsadmin/models/data_provider.dart';
 import 'package:vdsadmin/models/product_data.dart';
 import 'package:vdsadmin/search/search.dart';
+import 'package:vdsadmin/theme/app_theme.dart';
 
 class GridScreen extends StatefulWidget {
   final bool dataViewer;
@@ -57,17 +58,15 @@ class _GridScreenState extends State<GridScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final scaffoldBg =
-        isDark ? const Color(0xff17191c) : const Color(0xffF5F6F8);
-    final searchBarColor = isDark ? const Color(0xff23262b) : Colors.white;
-    final searchTextColor = isDark ? Colors.white : const Color(0xFF666666);
+    final isDark = isDarkMode(context);
+    final searchBarColor = appSurface(context);
+    final searchTextColor = isDark ? Colors.white : AppColors.shade50;
 
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: scaffoldBg,
+      backgroundColor: appCanvas(context),
       appBar: AppBar(
-        backgroundColor: const Color(0xffF3AB0D),
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 1,
         titleSpacing: 0,
@@ -153,7 +152,7 @@ class _GridScreenState extends State<GridScreen> {
       ),
       bottomNavigationBar: _itemCount > 0
           ? Material(
-              color: const Color(0xff2E7D32),
+              color: AppColors.primaryDark,
               child: InkWell(
                 onTap: _viewBill,
                 child: Padding(

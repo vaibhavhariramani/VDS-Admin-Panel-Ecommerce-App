@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:vdsadmin/models/data_provider.dart';
 import 'package:vdsadmin/orders/order_details.dart';
+import 'package:vdsadmin/theme/app_theme.dart';
 
 class Orders2 extends StatefulWidget {
   const Orders2({Key? key}) : super(key: key);
@@ -22,18 +23,18 @@ class _Orders2State extends State<Orders2> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final surfaceColor = isDark ? const Color(0xff23262b) : Colors.white;
-    final borderColor = isDark ? Colors.white24 : Colors.black26;
-    final textColor = isDark ? Colors.white : Colors.black;
-    final mutedTextColor = isDark ? Colors.white60 : Colors.black54;
+    final isDark = isDarkMode(context);
+    final surfaceColor = appSurface(context);
+    final borderColor = appHairline(context);
+    final textColor = isDark ? Colors.white : AppColors.ink;
+    final mutedTextColor = isDark ? Colors.white60 : AppColors.shade50;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xff17191c) : const Color(0xffF5F6F8),
+      backgroundColor: appCanvas(context),
       appBar: AppBar(
         elevation: 0,
         title: const Text('Order Onlines'),
-        backgroundColor: const Color(0xffF3AB0D),
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
       body: ListView(
@@ -144,17 +145,19 @@ class _Orders2State extends State<Orders2> {
                           itemCount: snapshot.data!.docs.length,
                           itemBuilder: (context, index) {
                             final data = snapshot.data!.docs[index];
-                            final name = (data.data() as Map<String, dynamic>)
-                                        .containsKey('name') &&
-                                    data['name'] != null &&
-                                    data['name'].toString().isNotEmpty
-                                ? data['name'].toString()
-                                : 'Customer';
-                            final address = (data.data()
-                                            as Map<String, dynamic>)
-                                        .containsKey('address') &&
-                                    data['address'] != null
-                                ? data['address'].toString()
+                            final fields = data.data() as Map<String, dynamic>;
+                            // 'customerName' is the person's name; 'name' is
+                            // actually an address label (e.g. "Home"), kept
+                            // only as a fallback for older records.
+                            final name = fields['customerName'] != null &&
+                                    fields['customerName'].toString().isNotEmpty
+                                ? fields['customerName'].toString()
+                                : (fields['name'] != null &&
+                                        fields['name'].toString().isNotEmpty
+                                    ? fields['name'].toString()
+                                    : 'Customer');
+                            final address = fields['address'] != null
+                                ? fields['address'].toString()
                                 : '';
                             return GestureDetector(
                               child: Card(

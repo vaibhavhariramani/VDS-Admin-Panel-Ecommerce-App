@@ -1,14 +1,13 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../home/dashboard.dart';
 import '../models/product_data.dart';
-import '../user_info/user_info_screen.dart';
 import '../utils/authentication.dart';
+import '../utils/admin_check.dart';
 
 class GoogleSignInButton extends StatefulWidget {
   const GoogleSignInButton({Key? key}) : super(key: key);
@@ -128,25 +127,5 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
     );
   }
   
-  checkUser(User user) async {
-    // ignore: unnecessary_null_comparison
-    if (user == null) {
-      return false;
-    }
-    print("Fetching User records for ${user.uid}");
-
-    DocumentSnapshot userDoc = await FirebaseFirestore.instance
-        .collection('Admins')
-        .doc(user.uid)
-        .get();
-    
-    if (userDoc.exists) {
-      Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
-      print(userData);
-      bool isAdmin = userData['isAdmin'] ?? false;
-      return isAdmin;
-    } else {
-      return false;
-    }
-  }
+  Future<bool> checkUser(User user) => isAdminUser(user);
 }

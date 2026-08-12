@@ -9,6 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../custom_colors.dart';
 import '../theme_controller.dart';
 import '../utils/authentication.dart';
+import '../utils/admin_check.dart';
 import '../widgets/google_sign_in_button.dart';
 
 class Login extends StatefulWidget {
@@ -248,22 +249,7 @@ class _LoginState extends State<Login> {
     );
   }
 
-  FutureOr<bool> checkUser(User user) async {
-    DocumentSnapshot userDoc = await FirebaseFirestore.instance
-        .collection('Admins')
-        .doc(user.uid)
-        .get();
-    print("fetched user details from Admins");
-    print(userDoc);
-    if (userDoc.exists) {
-      Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
-      print("Users admin status is : |${userData['isAdmin']}");
-      bool isAdmin = userData['isAdmin'] ?? false;
-      return isAdmin;
-    } else {
-      return false;
-    }
-  }
+  FutureOr<bool> checkUser(User user) => isAdminUser(user);
 
   FutureOr<void> _login() async {
     if (username.text.isEmpty || pass.text.isEmpty) {

@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../theme/app_theme.dart';
 import '../theme_controller.dart';
 import 'store_settings_controller.dart';
 
@@ -95,14 +96,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardColor = isDark ? const Color(0xff23262b) : Colors.white;
-    final mutedText = isDark ? Colors.white60 : Colors.black54;
+    final isDark = isDarkMode(context);
+    final cardColor = appSurface(context);
+    final mutedText = isDark ? Colors.white60 : AppColors.shade50;
 
     return Scaffold(
+      backgroundColor: appCanvas(context),
       appBar: AppBar(
         title: const Text('Profile & Settings'),
-        backgroundColor: const Color(0xffF3AB0D),
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
       body: Center(
@@ -119,7 +121,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   CircleAvatar(
                     radius: 36,
                     backgroundColor:
-                        isDark ? Colors.white12 : const Color(0xffF3AB0D),
+                        isDark ? Colors.white12 : AppColors.primary,
                     child: Text(
                       (_nameController.text.isNotEmpty
                               ? _nameController.text[0]
@@ -144,16 +146,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const SizedBox(height: 16),
                   Align(
                     alignment: Alignment.centerRight,
-                    child: FilledButton(
-                      onPressed: _savingProfile ? null : _saveProfile,
-                      child: _savingProfile
-                          ? const SizedBox(
+                    child: _savingProfile
+                        ? const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: SizedBox(
                               height: 16,
                               width: 16,
                               child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Text('Save profile'),
-                    ),
+                            ),
+                          )
+                        : PillButton(
+                            label: 'Save profile',
+                            onPressed: _saveProfile,
+                          ),
                   ),
                 ],
               ),
@@ -206,16 +211,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const SizedBox(height: 16),
                   Align(
                     alignment: Alignment.centerRight,
-                    child: FilledButton(
-                      onPressed: _savingStore ? null : _saveStoreSettings,
-                      child: _savingStore
-                          ? const SizedBox(
+                    child: _savingStore
+                        ? const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: SizedBox(
                               height: 16,
                               width: 16,
                               child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Text('Save store details'),
-                    ),
+                            ),
+                          )
+                        : PillButton(
+                            label: 'Save store details',
+                            onPressed: _saveStoreSettings,
+                          ),
                   ),
                 ],
               ),
@@ -243,28 +251,15 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(
-              color: Colors.black12, blurRadius: 8, offset: Offset(0, 3)),
-        ],
-      ),
+    return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, size: 20),
+              Icon(icon, size: 20, color: AppColors.primaryDark),
               const SizedBox(width: 8),
-              Text(
-                title,
-                style: const TextStyle(
-                    fontSize: 16, fontWeight: FontWeight.w600),
-              ),
+              Text(title, style: AppText.heading(context).copyWith(fontSize: 16)),
             ],
           ),
           const SizedBox(height: 16),

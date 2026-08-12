@@ -101,7 +101,8 @@ class _OrderDetailsState extends State<OrderDetails> {
                             ListTile(
                               leading: const CircleAvatar(
                                   child: Icon(Icons.person_outline)),
-                              title: Text('${widget.mp['name']}',
+                              title: Text(
+                                  '${(widget.mp['customerName'] != null && widget.mp['customerName'].toString().isNotEmpty) ? widget.mp['customerName'] : (widget.mp['name'] ?? 'Customer')}',
                                   style:
                                       const TextStyle(fontWeight: FontWeight.w500)),
                               subtitle: Text(

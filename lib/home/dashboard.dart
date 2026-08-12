@@ -7,6 +7,7 @@ import 'package:vdsadmin/banners/banner.dart';
 import 'package:vdsadmin/billing/bill.dart';
 import 'package:vdsadmin/category/category1.dart';
 import 'package:vdsadmin/category_wise/category.dart';
+import 'package:vdsadmin/customers/customer_list_screen.dart';
 import 'package:vdsadmin/database/add_item_to_db.dart';
 import 'package:vdsadmin/gridView/grid_vw.dart';
 import 'package:vdsadmin/home/loginpage.dart';
@@ -14,6 +15,7 @@ import 'package:vdsadmin/models/product_data.dart';
 import 'package:vdsadmin/notification/notifyhome.dart';
 import 'package:vdsadmin/orders/orders.dart';
 import 'package:vdsadmin/settings/settings_screen.dart';
+import 'package:vdsadmin/theme/app_theme.dart';
 import 'package:vdsadmin/theme_controller.dart';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -97,16 +99,14 @@ class _DashboardState extends State<Dashboard> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final scaffoldBg = isDark ? const Color(0xff17191c) : const Color(0xffF5F6F8);
-    final appBarTextColor = isDark ? Colors.white : Colors.black87;
+    final dark = isDarkMode(context);
 
     final cards = <_DashboardCardData>[
       _DashboardCardData(
         title: 'Add Items',
         subtitle: 'Add to stock',
         icon: Icons.add_box_outlined,
-        color: const Color(0xFFE44E4F),
+        color: AppColors.accentRed,
         onTap: () => Navigator.push(context,
             MaterialPageRoute(builder: (_) => const ShopRegister())),
       ),
@@ -114,7 +114,7 @@ class _DashboardState extends State<Dashboard> {
         title: 'Category',
         subtitle: 'Manage category & sub-category',
         icon: Icons.category_outlined,
-        color: const Color(0xFF6674F1),
+        color: AppColors.accentBlue,
         onTap: () => Navigator.push(
             context, MaterialPageRoute(builder: (_) => const Category1())),
       ),
@@ -122,7 +122,7 @@ class _DashboardState extends State<Dashboard> {
         title: 'Orders',
         subtitle: 'Online and offline',
         icon: Icons.receipt_long_outlined,
-        color: const Color(0xFF08B499),
+        color: AppColors.accentTeal,
         onTap: () => Navigator.push(
             context, MaterialPageRoute(builder: (_) => const Orderspage())),
       ),
@@ -130,7 +130,7 @@ class _DashboardState extends State<Dashboard> {
         title: 'Banners',
         subtitle: 'Home screen banners',
         icon: Icons.image_outlined,
-        color: const Color(0xFFE67E49),
+        color: AppColors.accentAmber,
         onTap: () => Navigator.push(context,
             MaterialPageRoute(builder: (_) => const BannerDisplay())),
       ),
@@ -138,7 +138,7 @@ class _DashboardState extends State<Dashboard> {
         title: 'Notification',
         subtitle: 'Send push notifications',
         icon: Icons.notifications_outlined,
-        color: const Color(0xFF02D4F9),
+        color: AppColors.accentCyan,
         onTap: () => Navigator.push(context,
             MaterialPageRoute(builder: (_) => const Notificationpage())),
       ),
@@ -146,7 +146,7 @@ class _DashboardState extends State<Dashboard> {
         title: 'Grid View',
         subtitle: 'Browse products',
         icon: Icons.grid_view_rounded,
-        color: const Color(0xFF3D5AFE),
+        color: AppColors.accentIndigo,
         onTap: () => Navigator.push(
             context,
             MaterialPageRoute(
@@ -160,46 +160,56 @@ class _DashboardState extends State<Dashboard> {
         title: 'Category View',
         subtitle: 'Products by category',
         icon: Icons.dashboard_customize_outlined,
-        color: const Color(0xFFBA779A),
+        color: AppColors.accentPink,
         onTap: () => Navigator.push(
             context, MaterialPageRoute(builder: (_) => const Category())),
+      ),
+      _DashboardCardData(
+        title: 'Customer Base',
+        subtitle: 'Search customers & order history',
+        icon: Icons.people_alt_outlined,
+        color: AppColors.primaryDark,
+        onTap: () => Navigator.push(context,
+            MaterialPageRoute(builder: (_) => const CustomerListScreen())),
       ),
       _DashboardCardData(
         title: 'Profile & Settings',
         subtitle: 'Account and store settings',
         icon: Icons.settings_outlined,
-        color: const Color(0xFF546E7A),
+        color: AppColors.accentSlate,
         onTap: () => Navigator.push(context,
             MaterialPageRoute(builder: (_) => const SettingsScreen())),
       ),
     ];
 
     return Scaffold(
-      backgroundColor: scaffoldBg,
+      backgroundColor: appCanvas(context),
       appBar: AppBar(
-        title: Column(
+        title: const Column(
           children: [
             Text(
               'Vishal Departmental Store',
               style: TextStyle(
                   fontSize: 18.0,
                   fontWeight: FontWeight.w400,
-                  color: appBarTextColor),
+                  color: Colors.white),
             ),
-            const SizedBox(
+            SizedBox(
               height: 5.0,
             ),
             Text(
               'Admin Panel',
               style: TextStyle(
                   fontSize: 20.0,
-                  color: appBarTextColor,
+                  color: Colors.white,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 2.0),
             ),
           ],
         ),
-        backgroundColor: const Color(0xffF3AB0D),
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        elevation: 0,
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.get_app),
@@ -254,7 +264,7 @@ class _DashboardState extends State<Dashboard> {
                         runSpacing: 20,
                         children: [
                           for (final card in cards)
-                            _DashboardCard(data: card, isDark: isDark),
+                            _DashboardCard(data: card, dark: dark),
                         ],
                       ),
                     ],
@@ -270,11 +280,11 @@ class _DashboardState extends State<Dashboard> {
               builder:
                   (BuildContext context, ScrollController scrollController) {
                 return Container(
-                  decoration: const BoxDecoration(
-                      color: Color(0xffF3AB0D),
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(20),
-                        topRight: Radius.circular(20),
+                  decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(AppRadius.xl),
+                        topRight: Radius.circular(AppRadius.xl),
                       )),
                   child: SingleChildScrollView(
                     controller: scrollController,
@@ -303,7 +313,7 @@ class _DashboardState extends State<Dashboard> {
                             style: const TextStyle(
                                 fontSize: 28,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xffF3AB0D)),
+                                color: AppColors.primaryDark),
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -364,60 +374,47 @@ class _DashboardCardData {
 
 class _DashboardCard extends StatelessWidget {
   final _DashboardCardData data;
-  final bool isDark;
+  final bool dark;
 
-  const _DashboardCard({required this.data, required this.isDark});
+  const _DashboardCard({required this.data, required this.dark});
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: data.color,
-      borderRadius: BorderRadius.circular(18),
-      elevation: isDark ? 0 : 2,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(18),
+    return SizedBox(
+      width: 230,
+      height: 150,
+      child: AppCard(
+        padding: const EdgeInsets.all(18),
         onTap: data.onTap,
-        child: Container(
-          width: 230,
-          height: 150,
-          padding: const EdgeInsets.all(18),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.18),
-                  borderRadius: BorderRadius.circular(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: data.color.withOpacity(dark ? 0.24 : 0.12),
+                borderRadius: BorderRadius.circular(AppRadius.sm),
+              ),
+              child: Icon(data.icon, color: data.color, size: 24),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  data.title,
+                  style: AppText.bodyStrong(context).copyWith(fontSize: 16),
                 ),
-                child: Icon(data.icon, color: Colors.white, size: 26),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    data.title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    data.subtitle,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.85),
-                      fontSize: 12.5,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+                const SizedBox(height: 3),
+                Text(
+                  data.subtitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppText.caption(context),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -432,11 +429,10 @@ class _StartBillingHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: const Color(0xFF003D64),
-      borderRadius: BorderRadius.circular(20),
-      elevation: 3,
+      color: AppColors.primary,
+      borderRadius: BorderRadius.circular(AppRadius.xl),
       child: InkWell(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppRadius.xl),
         onTap: onTap,
         child: Container(
           width: double.infinity,
@@ -447,36 +443,24 @@ class _StartBillingHero extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Start Billing',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 26.0,
-                        fontWeight: FontWeight.w700),
+                    style: AppText.display(context, color: Colors.white)
+                        .copyWith(fontSize: 28, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     'Scan or add items to create a new bill',
-                    style: TextStyle(color: Colors.white.withOpacity(0.75)),
+                    style: AppText.body(context,
+                        color: Colors.white.withOpacity(0.85)),
                   ),
                   const SizedBox(height: 20),
-                  Container(
-                    height: 42.0,
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(30),
-                      color: const Color(0xFF00578D),
-                    ),
-                    child: const Center(
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text('Click Here', style: TextStyle(color: Colors.white)),
-                          SizedBox(width: 6),
-                          Icon(Icons.arrow_forward, color: Colors.white, size: 18),
-                        ],
-                      ),
-                    ),
+                  PillButton(
+                    label: 'Click Here',
+                    icon: Icons.arrow_forward,
+                    onPressed: onTap,
+                    filled: true,
+                    color: Colors.white,
                   ),
                 ],
               ),

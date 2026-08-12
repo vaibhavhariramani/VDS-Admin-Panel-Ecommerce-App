@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:vdsadmin/models/product_data.dart';
 import 'package:vdsadmin/search/product_details.dart';
+import 'package:vdsadmin/theme/app_theme.dart';
 
 class HomeGridProductList extends StatefulWidget {
   final DocumentSnapshot snapshot;
@@ -137,7 +138,7 @@ class _HomeGridProductListState extends State<HomeGridProductList> {
                 width: MediaQuery.of(context).size.width,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(AppRadius.pill),
                     color: Colors.green.withOpacity(0.2)),
                 padding: const EdgeInsets.all(2),
                 child: Text(
@@ -152,10 +153,10 @@ class _HomeGridProductListState extends State<HomeGridProductList> {
               child: count == 0
                   ? ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xffCB0338),
+                        backgroundColor: AppColors.primary,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8)),
+                            borderRadius: BorderRadius.circular(AppRadius.pill)),
                       ),
                       onPressed: _addOne,
                       child: Text('Add',
@@ -164,8 +165,8 @@ class _HomeGridProductListState extends State<HomeGridProductList> {
                     )
                   : Container(
                       decoration: BoxDecoration(
-                        color: const Color(0xffCB0338),
-                        borderRadius: BorderRadius.circular(8),
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(AppRadius.pill),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,

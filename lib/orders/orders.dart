@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:vdsadmin/orders/offlineorders2.dart';
 import 'package:vdsadmin/orders/onlineorders2.dart';
+import 'package:vdsadmin/theme/app_theme.dart';
 
 class Orderspage extends StatelessWidget {
   const Orderspage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xff17191c) : const Color(0xffF5F6F8),
+      backgroundColor: appCanvas(context),
       appBar: AppBar(
         title: const Text('Orders'),
-        backgroundColor: const Color(0xffF3AB0D),
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
       body: Center(
@@ -28,7 +27,7 @@ class Orderspage extends StatelessWidget {
                   title: 'Online Orders',
                   subtitle: 'Orders placed by customers on the app',
                   icon: Icons.shopping_bag_outlined,
-                  color: const Color(0xFFE44E4F),
+                  color: AppColors.accentRed,
                   onTap: () => Navigator.push(context,
                       MaterialPageRoute(builder: (_) => const Orders2())),
                 ),
@@ -37,7 +36,7 @@ class Orderspage extends StatelessWidget {
                   title: 'Offline Orders',
                   subtitle: 'Walk-in bills created in-store',
                   icon: Icons.storefront_outlined,
-                  color: const Color(0xFF6674F1),
+                  color: AppColors.accentBlue,
                   onTap: () => Navigator.push(context,
                       MaterialPageRoute(builder: (_) => const OfflineOrders2())),
                 ),
@@ -73,56 +72,42 @@ class _OrderTypeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: color,
-      borderRadius: BorderRadius.circular(20),
-      elevation: 2,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
+    return SizedBox(
+      height: 220,
+      child: AppCard(
+        padding: const EdgeInsets.all(24),
         onTap: onTap,
-        child: Container(
-          height: 220,
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.18),
-                  borderRadius: BorderRadius.circular(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.withOpacity(isDarkMode(context) ? 0.24 : 0.12),
+                borderRadius: BorderRadius.circular(AppRadius.sm),
+              ),
+              child: Icon(icon, color: color, size: 28),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: AppText.heading(context)),
+                const SizedBox(height: 6),
+                Text(subtitle, style: AppText.caption(context)),
+                const SizedBox(height: 14),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('View orders',
+                        style: AppText.bodyStrong(context, color: color)),
+                    const SizedBox(width: 6),
+                    Icon(Icons.arrow_forward, color: color, size: 16),
+                  ],
                 ),
-                child: Icon(icon, color: Colors.white, size: 30),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    subtitle,
-                    style: TextStyle(color: Colors.white.withOpacity(0.85)),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Text('View orders', style: TextStyle(color: Colors.white)),
-                      SizedBox(width: 6),
-                      Icon(Icons.arrow_forward, color: Colors.white, size: 16),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
+              ],
+            ),
+          ],
         ),
       ),
     );

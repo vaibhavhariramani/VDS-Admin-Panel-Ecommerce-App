@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -9,6 +8,7 @@ import 'package:google_sign_in_platform_interface/google_sign_in_platform_interf
 import 'package:shared_preferences/shared_preferences.dart';
 import '../home/dashboard.dart';
 import '../models/product_data.dart';
+import 'admin_check.dart';
 
 class Authentication {
   static SnackBar customSnackBar({required String content}) {
@@ -27,23 +27,6 @@ class Authentication {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     User? user = FirebaseAuth.instance.currentUser;
     List<ProductData> productList = [];
-    FutureOr<bool> checkUser(User user) async {
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('Admins')
-          .doc(user.uid)
-          .get();
-      print("fetched user details from Admins");
-      print(userDoc);
-      if (userDoc.exists) {
-        Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
-        print("Users admin status is : |${userData['isAdmin']}");
-        bool isAdmin = userData['isAdmin'] ?? false;
-        return isAdmin;
-      } else {
-        return false;
-      }
-    }
-
     if (user != null) {
       // Navigator.of(context).pushReplacement(
       //   MaterialPageRoute(
@@ -52,7 +35,7 @@ class Authentication {
       //     ),
       //   ),
       // );
-      bool isAdmin = await checkUser(user);
+      bool isAdmin = await isAdminUser(user);
       if (isAdmin) {
         String? fullname = user.displayName;
         String? username = user.displayName;
