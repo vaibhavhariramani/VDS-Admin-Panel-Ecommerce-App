@@ -13,6 +13,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:vdsadmin/gridView/grid_vw.dart';
 import 'package:vdsadmin/invoice/pdf_invoice_api.dart';
+import 'package:vdsadmin/loyalty/club_card_api.dart';
 import 'package:vdsadmin/models/customer.dart';
 import 'package:vdsadmin/models/data_provider.dart';
 import 'package:vdsadmin/models/firebase.service.dart';
@@ -71,9 +72,15 @@ class BillState extends State<Bill> {
   String? scanBarcode;
   ScrollController controller = ScrollController();
   Map? data;
+
+  // Stable per this billing session so a retried awardPoints call (e.g.
+  // after a dropped connection) is a safe no-op instead of double-awarding.
+  late final String _posReferenceId;
+
   @override
   void initState() {
     super.initState();
+    _posReferenceId = 'POS-${DateTime.now().millisecondsSinceEpoch}';
     if (widget.addedfromDB == true) {
       mrptotal = widget.products.isNotEmpty
           ? widget.products
@@ -108,8 +115,129 @@ class BillState extends State<Bill> {
 
     setState(() {
       scanBarcode = barcodeScanRes;
-      Fetcher(barcodeScanRes);
     });
+    if (isClubCardId(barcodeScanRes)) {
+      await _handleClubCardScan(barcodeScanRes);
+    } else {
+      await Fetcher(barcodeScanRes);
+    }
+  }
+
+  /// A scanned code that looks like a loyalty card (see
+  /// lib/loyalty/club_card_api.dart) is handled here instead of the normal
+  /// Products lookup: look the card up, then let staff award points for the
+  /// current bill total via the `awardPoints` Cloud Function.
+  Future<void> _handleClubCardScan(String cardId) async {
+    final doc = await FirebaseFirestore.instance
+        .collection('ClubCards')
+        .doc(cardId)
+        .get();
+    if (!mounted) return;
+
+    if (!doc.exists) {
+      Fluttertoast.showToast(msg: 'Loyalty card not found: $cardId');
+      return;
+    }
+
+    final data = doc.data() as Map<String, dynamic>;
+    final points = (data['points'] as num?) ?? 0;
+    final convertedPoints = (data['convertedPoints'] as num?) ?? 0;
+    final availablePoints = points - convertedPoints;
+    final defaultAmount = (total as num).round();
+    final amountController =
+        TextEditingController(text: defaultAmount > 0 ? '$defaultAmount' : '');
+
+    await showDialog(
+      context: context,
+      builder: (dialogContext) {
+        bool isSubmitting = false;
+        String? error;
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('Loyalty Card Scanned'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Card: $cardId'),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Available points: ${availablePoints.toStringAsFixed(0)} '
+                    '(₹${(availablePoints / 100).toStringAsFixed(2)})',
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: amountController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Purchase amount (₹) to award points on',
+                    ),
+                  ),
+                  if (error != null) ...[
+                    const SizedBox(height: 8),
+                    Text(error!, style: const TextStyle(color: Colors.red)),
+                  ],
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isSubmitting
+                      ? null
+                      : () => Navigator.pop(dialogContext),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: isSubmitting
+                      ? null
+                      : () async {
+                          final amount =
+                              int.tryParse(amountController.text.trim());
+                          if (amount == null || amount <= 0) {
+                            setDialogState(
+                                () => error = 'Enter a valid amount.');
+                            return;
+                          }
+                          setDialogState(() {
+                            isSubmitting = true;
+                            error = null;
+                          });
+                          try {
+                            final result = await ClubCardApi.awardPoints(
+                              cardId: cardId,
+                              amount: amount,
+                              referenceId: _posReferenceId,
+                            );
+                            if (!mounted) return;
+                            Navigator.pop(dialogContext);
+                            final alreadyProcessed =
+                                result['alreadyProcessed'] == true;
+                            Fluttertoast.showToast(
+                              msg: alreadyProcessed
+                                  ? 'Points for this bill were already awarded to this card.'
+                                  : 'Awarded $amount points to $cardId.',
+                            );
+                          } catch (e) {
+                            setDialogState(() {
+                              isSubmitting = false;
+                              error = e.toString();
+                            });
+                          }
+                        },
+                  child: isSubmitting
+                      ? const SizedBox(
+                          height: 16,
+                          width: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Award points'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   Widget _buildProductItem(BuildContext context, int index) {
@@ -745,6 +873,10 @@ class BillState extends State<Bill> {
                 onBarcodeScanned: (barcode) {
                   if (!visible) return;
                   print(barcode);
+                  if (isClubCardId(barcode)) {
+                    _handleClubCardScan(barcode);
+                    return;
+                  }
                   FirebaseFirestore.instance
                       .collection("Products")
                       .doc(barcode)
