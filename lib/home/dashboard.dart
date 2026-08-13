@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vdsadmin/attendance/attendance_screen.dart';
 import 'package:vdsadmin/banners/banner.dart';
 import 'package:vdsadmin/billing/bill.dart';
 import 'package:vdsadmin/billing/invoice_requests/invoice_requests_screen.dart';
@@ -183,6 +184,16 @@ class _DashboardState extends State<Dashboard> {
         color: AppColors.accentTeal,
         onTap: () => Navigator.push(context,
             MaterialPageRoute(builder: (_) => const InvoiceRequestsScreen())),
+      ),
+      _DashboardCardData(
+        title: 'Attendance',
+        subtitle: RoleController.isSuperAdmin
+            ? 'Review hours & approve shifts'
+            : 'Clock in / clock out',
+        icon: Icons.access_time_outlined,
+        color: AppColors.accentCyan,
+        onTap: () => Navigator.push(context,
+            MaterialPageRoute(builder: (_) => const AttendanceScreen())),
       ),
       _DashboardCardData(
         title: 'Profile & Settings',
