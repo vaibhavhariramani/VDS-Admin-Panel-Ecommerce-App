@@ -1,193 +1,309 @@
-import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
-import 'package:vdsadmin/models/data_provider.dart';
 
-final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
-CollectionReference adminTokenRef =
-    FirebaseFirestore.instance.collection('Users');
+import '../customers/customer_list_screen.dart';
+import '../theme/app_theme.dart';
+import 'notification_api.dart';
 
+/// Looks up the OneSignal subscription id the shopping app registered for
+/// this customer's phone number, if any (see Users/{phone}.onesignalTokenID
+/// - written by the customer-facing app, not this admin panel).
+Future<String?> _lookupOneSignalToken(String phoneKey) async {
+  if (phoneKey.isEmpty) return null;
+  final doc = await FirebaseFirestore.instance
+      .collection('Users')
+      .doc('+91$phoneKey')
+      .get();
+  if (!doc.exists) return null;
+  final token = doc.data()?['onesignalTokenID']?.toString();
+  return (token != null && token.isNotEmpty) ? token : null;
+}
+
+/// Pick one or more customers from the customer database and send them a
+/// push notification (see notifyhome.dart's "Send Individual" tile).
 class UserViewer extends StatefulWidget {
   const UserViewer({Key? key}) : super(key: key);
 
   @override
-  _UserViewerState createState() => _UserViewerState();
+  State<UserViewer> createState() => _UserViewerState();
 }
 
 class _UserViewerState extends State<UserViewer> {
-  final _auth = FirebaseAuth.instance;
-  @override
-  void initState() {
-    super.initState();
+  String _query = '';
+  final Set<String> _selected = {};
+  Map<String, CustomerSummary> _byPhoneKey = {};
+
+  void _toggle(CustomerSummary customer) {
+    setState(() {
+      if (_selected.contains(customer.phoneKey)) {
+        _selected.remove(customer.phoneKey);
+      } else {
+        _selected.add(customer.phoneKey);
+      }
+    });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
-    double height = MediaQuery.of(context).size.height;
-    return Scaffold(
-        body: Padding(
-      padding:
-          const EdgeInsets.only(top: 40.0, right: 20.0, left: 20, bottom: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 20.0),
-            child: Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'All Users',
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Expanded(
-                      flex: 3,
-                      child: StreamBuilder<QuerySnapshot>(
-                          stream: dataProvider.User(),
-                          builder: (BuildContext context,
-                              AsyncSnapshot<QuerySnapshot> snapshot) {
-                            if (!snapshot.hasData) {
-                              return const CircularProgressIndicator();
-                            }
-                            List<DocumentSnapshot> userList = [];
-                            snapshot.data!.docs.map((e) {
-                              userList.add(e);
-                            }).toList();
+  Future<void> _openComposeDialog() async {
+    final titleController = TextEditingController();
+    final messageController = TextEditingController();
+    final selectedCustomers =
+        _selected.map((k) => _byPhoneKey[k]).whereType<CustomerSummary>().toList();
 
-                            print(userList[0]);
-
-                            return ListView.builder(
-                              itemCount: userList.length,
-                              itemBuilder: (context, pos) {
-                                return Notify(
-                                  jobTitle: userList[pos]["name"],
-                                  colorBg: Colors.grey,
-                                  colorText: Colors.white,
-                                  userId: userList[pos]["uid"],
-                                  jobDesc: userList[pos]["phone"],
-                                  tokenId: userList[pos]["onesignalTokenID"],
-                                );
-                              },
-                            );
-                          }))
-                ],
+    await showDialog(
+      context: context,
+      builder: (dialogContext) {
+        bool sending = false;
+        String? error;
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Text('Notify ${selectedCustomers.length} customer'
+                  '${selectedCustomers.length == 1 ? '' : 's'}'),
+              content: SizedBox(
+                width: 380,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextField(
+                      controller: titleController,
+                      decoration: const InputDecoration(
+                        labelText: 'Title',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: messageController,
+                      maxLines: 3,
+                      decoration: const InputDecoration(
+                        labelText: 'Message',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    if (error != null) ...[
+                      const SizedBox(height: 8),
+                      Text(error!, style: const TextStyle(color: Colors.red)),
+                    ],
+                  ],
+                ),
               ),
-            ),
-          )
-        ],
-      ),
-    ));
-  }
-}
-
-class Notify extends StatefulWidget {
-  const Notify(
-      {Key? key,
-      required this.jobTitle,
-      required this.jobDesc,
-      required this.userId,
-      required this.colorBg,
-      required this.colorText,
-      required this.tokenId})
-      : super(key: key);
-
-  final String jobTitle;
-  final String jobDesc;
-  final String userId;
-  final String tokenId;
-  final Color colorBg;
-  final Color colorText;
-
-  @override
-  _NotifyState createState() => _NotifyState();
-}
-
-class _NotifyState extends State<Notify> {
-  Future<Response> sendNotification(
-      List<String> tokenIdList, String contents, String heading) async {
-    return await post(
-      Uri.parse('https://onesignal.com/api/v1/notifications'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
+              actions: [
+                TextButton(
+                  onPressed:
+                      sending ? null : () => Navigator.pop(dialogContext),
+                  child: const Text('Cancel'),
+                ),
+                PillButton(
+                  label: sending ? 'Sending…' : 'Send',
+                  onPressed: sending
+                      ? null
+                      : () async {
+                          final title = titleController.text.trim();
+                          final message = messageController.text.trim();
+                          if (title.isEmpty || message.isEmpty) {
+                            setDialogState(
+                                () => error = 'Enter a title and a message.');
+                            return;
+                          }
+                          setDialogState(() {
+                            sending = true;
+                            error = null;
+                          });
+                          try {
+                            final tokens = <String>[];
+                            for (final c in selectedCustomers) {
+                              final t = await _lookupOneSignalToken(c.phoneKey);
+                              if (t != null) tokens.add(t);
+                            }
+                            if (tokens.isEmpty) {
+                              setDialogState(() {
+                                sending = false;
+                                error =
+                                    'None of the selected customers have notifications enabled on their device.';
+                              });
+                              return;
+                            }
+                            await NotificationApi.send(
+                              title: title,
+                              message: message,
+                              playerIds: tokens,
+                              audienceUids: selectedCustomers
+                                  .map((c) => c.uid)
+                                  .where((u) => u.isNotEmpty)
+                                  .toList(),
+                            );
+                            if (dialogContext.mounted) {
+                              Navigator.pop(dialogContext);
+                            }
+                            if (mounted) {
+                              final skipped =
+                                  selectedCustomers.length - tokens.length;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(skipped == 0
+                                      ? 'Sent to ${tokens.length} customer${tokens.length == 1 ? '' : 's'}.'
+                                      : 'Sent to ${tokens.length} customer${tokens.length == 1 ? '' : 's'} ($skipped had no device on file).'),
+                                ),
+                              );
+                              setState(() => _selected.clear());
+                            }
+                          } catch (e) {
+                            setDialogState(() {
+                              sending = false;
+                              error = e.toString();
+                            });
+                          }
+                        },
+                ),
+              ],
+            );
+          },
+        );
       },
-      body: jsonEncode(<String, dynamic>{
-        "app_id":
-            'd43fa4f9-2fa5-48a3-a184-49636c9d96c5', //kAppId is the App Id that one get from the OneSignal When the application is registered.
-
-        "include_player_ids":
-            tokenIdList, //tokenIdList Is the List of All the Token Id to to Whom notification must be sent.
-
-        // android_accent_color reprsent the color of the heading text in the notifiction
-        "android_accent_color": "FF9976D2",
-
-        "small_icon": "ic_stat_onesignal_default",
-
-        "large_icon":
-            "https://www.filepicker.io/api/file/zPloHSmnQsix82nlj9Aj?filename=name.jpg",
-
-        "headings": {"en": heading},
-
-        "contents": {"en": contents},
-      }),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Container(
-        padding: const EdgeInsets.only(left: 16, right: 8, top: 25, bottom: 10),
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                offset: const Offset(3.0, 3.0),
-                color: Colors.grey.shade500.withOpacity(0.1),
-                blurRadius: 6.0,
-                spreadRadius: 2.0,
-              ),
-            ]),
-        child:
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.jobTitle,
-              ),
-              const SizedBox(
-                height: 8,
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(widget.jobDesc),
-                ],
-              ),
-            ],
-          ),
-          GestureDetector(
-            onTap: () =>
-                sendNotification([widget.tokenId], "Testing 123", "Sanjay"),
-            child: Container(
-              width: 70,
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                  color: Colors.green, borderRadius: BorderRadius.circular(8)),
-              child: const Text("Send"),
-            ),
-          ),
-        ]),
+    final dark = isDarkMode(context);
+    return Scaffold(
+      backgroundColor: appCanvas(context),
+      appBar: AppBar(
+        title: const Text('Send Individual'),
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
       ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance.collection('Orders').snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          var customers = buildCustomerSummaries(snapshot.data!.docs);
+          _byPhoneKey = {for (final c in customers) c.phoneKey: c};
+          if (_query.trim().isNotEmpty) {
+            final q = _query.trim().toLowerCase();
+            customers = customers
+                .where((c) =>
+                    c.name.toLowerCase().contains(q) || c.phone.contains(q))
+                .toList();
+          }
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1100),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextField(
+                      onChanged: (v) => setState(() => _query = v),
+                      style: AppText.body(context),
+                      decoration: InputDecoration(
+                        hintText: 'Search by name or phone',
+                        hintStyle:
+                            AppText.body(context, color: AppColors.shade50),
+                        prefixIcon: const Icon(Icons.search),
+                        filled: true,
+                        fillColor: appSurface(context),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                          borderSide: BorderSide(color: appHairline(context)),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Expanded(
+                      child: customers.isEmpty
+                          ? Center(
+                              child: Text('No customers found',
+                                  style: AppText.body(context,
+                                      color: AppColors.shade50)))
+                          : GridView.builder(
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 3,
+                                mainAxisExtent: 140,
+                                crossAxisSpacing: 16,
+                                mainAxisSpacing: 16,
+                              ),
+                              itemCount: customers.length,
+                              itemBuilder: (context, index) {
+                                final c = customers[index];
+                                final selected =
+                                    _selected.contains(c.phoneKey);
+                                return AppCard(
+                                  padding: const EdgeInsets.all(16),
+                                  onTap: () => _toggle(c),
+                                  child: Row(
+                                    children: [
+                                      Checkbox(
+                                        value: selected,
+                                        activeColor: AppColors.primary,
+                                        onChanged: (_) => _toggle(c),
+                                      ),
+                                      CircleAvatar(
+                                        radius: 22,
+                                        backgroundColor: dark
+                                            ? Colors.white12
+                                            : AppColors.orangeTint10,
+                                        child: Text(
+                                          c.name.isNotEmpty
+                                              ? c.name[0].toUpperCase()
+                                              : '?',
+                                          style: TextStyle(
+                                              color: AppColors.primaryDark,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(c.name,
+                                                maxLines: 1,
+                                                overflow:
+                                                    TextOverflow.ellipsis,
+                                                style: AppText.bodyStrong(
+                                                    context)),
+                                            const SizedBox(height: 2),
+                                            Text(c.phone,
+                                                style: AppText.caption(
+                                                    context)),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+      bottomNavigationBar: _selected.isEmpty
+          ? null
+          : SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: PillButton(
+                  label:
+                      'Compose message (${_selected.length} selected)',
+                  icon: Icons.send_outlined,
+                  onPressed: _openComposeDialog,
+                ),
+              ),
+            ),
     );
   }
 }

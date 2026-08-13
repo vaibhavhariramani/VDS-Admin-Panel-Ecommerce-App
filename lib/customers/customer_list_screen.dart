@@ -9,6 +9,7 @@ class CustomerSummary {
   final String name;
   final String phone;
   final String address;
+  final String uid;
   final num totalSpent;
   final List<Map<String, dynamic>> orders;
 
@@ -17,6 +18,7 @@ class CustomerSummary {
     required this.name,
     required this.phone,
     required this.address,
+    required this.uid,
     required this.totalSpent,
     required this.orders,
   });
@@ -24,10 +26,70 @@ class CustomerSummary {
   int get orderCount => orders.length;
 }
 
+/// Available (spendable) loyalty points for [uid], or null if they have no
+/// ClubCards/{cardId} doc yet (see lib/loyalty/club_card_api.dart - a card's
+/// doc id is the printed/QR value, but it carries a `uid` field pointing
+/// back to the owning customer, which is what this looks up by).
+Future<num?> fetchLoyaltyPoints(String uid) async {
+  if (uid.isEmpty) return null;
+  final snap = await FirebaseFirestore.instance
+      .collection('ClubCards')
+      .where('uid', isEqualTo: uid)
+      .limit(1)
+      .get();
+  if (snap.docs.isEmpty) return null;
+  final data = snap.docs.first.data();
+  final points = (data['points'] as num?) ?? 0;
+  final converted = (data['convertedPoints'] as num?) ?? 0;
+  return points - converted;
+}
+
 String normalizePhone(String? raw) {
   if (raw == null) return '';
   final digits = raw.replaceAll(RegExp(r'\D'), '');
   return digits.length > 10 ? digits.substring(digits.length - 10) : digits;
+}
+
+/// Aggregates raw Orders docs into one CustomerSummary per customer,
+/// grouped by normalized phone. Shared by CustomerListScreen and the
+/// Notification page's "Send Individual" screen.
+List<CustomerSummary> buildCustomerSummaries(List<QueryDocumentSnapshot> docs) {
+  final byPhone = <String, List<Map<String, dynamic>>>{};
+  for (final doc in docs) {
+    final data = doc.data() as Map<String, dynamic>;
+    data['id'] = data['id'] ?? doc.id;
+    final key = normalizePhone(data['phone']?.toString());
+    if (key.isEmpty) continue;
+    byPhone.putIfAbsent(key, () => []).add(data);
+  }
+
+  final customers = <CustomerSummary>[];
+  byPhone.forEach((key, orders) {
+    orders.sort((a, b) =>
+        ((b['booking'] ?? 0) as num).compareTo((a['booking'] ?? 0) as num));
+    final latest = orders.first;
+    final name = (latest['customerName'] != null &&
+            latest['customerName'].toString().isNotEmpty)
+        ? latest['customerName'].toString()
+        : (latest['name']?.toString().isNotEmpty == true
+            ? latest['name'].toString()
+            : 'Customer');
+    final totalSpent =
+        orders.fold<num>(0, (sum, o) => sum + ((o['total'] ?? 0) as num));
+    customers.add(CustomerSummary(
+      phoneKey: key,
+      name: name,
+      phone: latest['phone']?.toString() ?? key,
+      address: latest['address']?.toString() ?? '',
+      uid: latest['user']?.toString() ?? '',
+      totalSpent: totalSpent,
+      orders: orders,
+    ));
+  });
+
+  customers.sort(
+      (a, b) => b.orders.first['booking'].compareTo(a.orders.first['booking']));
+  return customers;
 }
 
 class CustomerListScreen extends StatefulWidget {
@@ -39,43 +101,11 @@ class CustomerListScreen extends StatefulWidget {
 
 class _CustomerListScreenState extends State<CustomerListScreen> {
   String _query = '';
+  final Map<String, Future<num?>> _loyaltyCache = {};
 
-  List<CustomerSummary> _buildCustomers(List<QueryDocumentSnapshot> docs) {
-    final byPhone = <String, List<Map<String, dynamic>>>{};
-    for (final doc in docs) {
-      final data = doc.data() as Map<String, dynamic>;
-      data['id'] = data['id'] ?? doc.id;
-      final key = normalizePhone(data['phone']?.toString());
-      if (key.isEmpty) continue;
-      byPhone.putIfAbsent(key, () => []).add(data);
-    }
-
-    final customers = <CustomerSummary>[];
-    byPhone.forEach((key, orders) {
-      orders.sort((a, b) =>
-          ((b['booking'] ?? 0) as num).compareTo((a['booking'] ?? 0) as num));
-      final latest = orders.first;
-      final name = (latest['customerName'] != null &&
-              latest['customerName'].toString().isNotEmpty)
-          ? latest['customerName'].toString()
-          : (latest['name']?.toString().isNotEmpty == true
-              ? latest['name'].toString()
-              : 'Customer');
-      final totalSpent = orders.fold<num>(
-          0, (sum, o) => sum + ((o['total'] ?? 0) as num));
-      customers.add(CustomerSummary(
-        phoneKey: key,
-        name: name,
-        phone: latest['phone']?.toString() ?? key,
-        address: latest['address']?.toString() ?? '',
-        totalSpent: totalSpent,
-        orders: orders,
-      ));
-    });
-
-    customers.sort((a, b) => b.orders.first['booking']
-        .compareTo(a.orders.first['booking']));
-    return customers;
+  Future<num?> _loyaltyPointsFor(String uid) {
+    if (uid.isEmpty) return Future.value(null);
+    return _loyaltyCache.putIfAbsent(uid, () => fetchLoyaltyPoints(uid));
   }
 
   @override
@@ -94,7 +124,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
-          var customers = _buildCustomers(snapshot.data!.docs);
+          var customers = buildCustomerSummaries(snapshot.data!.docs);
           if (_query.trim().isNotEmpty) {
             final q = _query.trim().toLowerCase();
             customers = customers
@@ -192,7 +222,11 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
                                                 style: AppText.caption(
                                                     context)),
                                             const SizedBox(height: 6),
-                                            Container(
+                                            Wrap(
+                                              spacing: 6,
+                                              runSpacing: 4,
+                                              children: [
+                                              Container(
                                               padding: const EdgeInsets
                                                   .symmetric(
                                                   horizontal: 8, vertical: 3),
@@ -211,6 +245,48 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
                                                     color:
                                                         AppColors.primaryDark),
                                               ),
+                                              ),
+                                              FutureBuilder<num?>(
+                                                future: _loyaltyPointsFor(c.uid),
+                                                builder: (context, snap) {
+                                                  final points = snap.data;
+                                                  if (points == null) {
+                                                    return const SizedBox.shrink();
+                                                  }
+                                                  return Container(
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                        horizontal: 8, vertical: 3),
+                                                    decoration: BoxDecoration(
+                                                      color: dark
+                                                          ? Colors.white12
+                                                          : AppColors.accentAmber
+                                                              .withOpacity(0.15),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              AppRadius.pill),
+                                                    ),
+                                                    child: Row(
+                                                      mainAxisSize: MainAxisSize.min,
+                                                      children: [
+                                                        const Icon(Icons.star,
+                                                            size: 12,
+                                                            color: AppColors
+                                                                .accentAmber),
+                                                        const SizedBox(width: 3),
+                                                        Text(
+                                                          '${points.toStringAsFixed(0)} pts',
+                                                          style: AppText.caption(
+                                                              context,
+                                                              color: AppColors
+                                                                  .accentAmber),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  );
+                                                },
+                                              ),
+                                              ],
                                             ),
                                           ],
                                         ),

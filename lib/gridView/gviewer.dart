@@ -83,13 +83,15 @@ class _HomeGridProductListState extends State<HomeGridProductList> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: CachedNetworkImage(
-                height: 110,
-                width: 110,
-                imageUrl: widget.snapshot.get('image'),
-                fit: BoxFit.cover,
+            Center(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: CachedNetworkImage(
+                  height: 110,
+                  width: 110,
+                  imageUrl: widget.snapshot.get('image'),
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
             ListTile(

@@ -1,114 +1,67 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:vdsadmin/models/firebase.service.dart';
+import 'package:vdsadmin/theme/app_theme.dart';
 
-class BannerCard extends StatefulWidget {
+class BannerCard extends StatelessWidget {
   final Map<String, dynamic> data;
   final String id;
   const BannerCard({Key? key, required this.data, required this.id})
       : super(key: key);
 
-  @override
-  _BannerCardState createState() => _BannerCardState();
-}
-
-class _BannerCardState extends State<BannerCard> {
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        CachedNetworkImage(
-          imageUrl: widget.data['image'],
-          height: MediaQuery.of(context).size.height * 0.1,
-          width: MediaQuery.of(context).size.width * 0.5,
-          fit: BoxFit.fill,
-        ),
-        IconButton(
-          icon: const Icon(Icons.delete_outline_rounded),
-          onPressed: () {
-            deleteBanner(widget.id);
-          },
-        ),
-      ],
+  void _confirmDelete(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Delete this banner?'),
+        content: const Text('This can\'t be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              InsertDatainFirebase().DeleteBanner(id);
+              Navigator.pop(dialogContext);
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
     );
   }
 
-  deleteBanner(String name) {
-    showDialog(
-        context: context,
-        builder: (
-          context,
-        ) {
-          return Dialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15.0),
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        AppCard(
+          padding: EdgeInsets.zero,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            child: SizedBox.expand(
+              child: CachedNetworkImage(
+                imageUrl: (data['image'] ?? '').toString(),
+                fit: BoxFit.cover,
               ),
-              child: StatefulBuilder(
-                  builder: (BuildContext context, StateSetter setState) {
-                return SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.5,
-                  width: MediaQuery.of(context).size.width * 0.5,
-                  child: Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const SizedBox(height: 8),
-                        Center(
-                          child: Padding(
-                              padding: const EdgeInsets.all(10),
-                              child: Text(
-                                  "Are you sure do you want to delete $name",
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                      fontSize: 36,
-                                      fontWeight: FontWeight.w400,
-                                      color: Colors.black87))),
-                        ),
-                        const SizedBox(height: 30),
-                        Center(
-                          child: Container(
-                            padding: const EdgeInsets.only(left: 6, right: 6),
-                            margin: const EdgeInsets.all(6),
-                            width: MediaQuery.of(context).size.width * 0.2,
-                            height: 40,
-                            decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.secondary,
-                                gradient: const LinearGradient(colors: [
-                                  Color.fromRGBO(116, 116, 191, 1.0),
-                                  Color.fromRGBO(52, 138, 199, 1.0)
-                                ]),
-                                borderRadius: BorderRadius.circular(6),
-                                border: Border.all(
-                                    color: Colors.transparent, width: 0)),
-                            child: Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                  highlightColor:
-                                      Theme.of(context).highlightColor,
-                                  splashColor: Theme.of(context).splashColor,
-                                  child: const Center(
-                                    child: Text(
-                                      "delete",
-                                      style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w300),
-                                    ),
-                                  ),
-                                  onTap: () {
-                                    InsertDatainFirebase().DeleteBanner(name);
-                                    Navigator.of(context).pop();
-                                  }),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }));
-        });
+            ),
+          ),
+        ),
+        Positioned(
+          top: 6,
+          right: 6,
+          child: Material(
+            color: Colors.black.withOpacity(0.55),
+            shape: const CircleBorder(),
+            child: IconButton(
+              icon: const Icon(Icons.delete_outline_rounded,
+                  color: Colors.white, size: 20),
+              onPressed: () => _confirmDelete(context),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

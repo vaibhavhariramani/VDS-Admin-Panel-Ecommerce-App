@@ -89,11 +89,18 @@ class _ProductDetailsState extends State<ProductDetails> {
       body: ListView(
         children: [
           const SizedBox(height: 30),
-          CachedNetworkImage(
-              placeholder: (context, url) => const CircularProgressIndicator(),
-              imageUrl: widget.snapshot.get('image'),
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.width * 0.7),
+          Center(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: CachedNetworkImage(
+                  placeholder: (context, url) =>
+                      const CircularProgressIndicator(),
+                  imageUrl: widget.snapshot.get('image'),
+                  fit: BoxFit.contain,
+                  width: 280,
+                  height: 280),
+            ),
+          ),
           const SizedBox(height: 20),
           ListTile(
             title: Text(

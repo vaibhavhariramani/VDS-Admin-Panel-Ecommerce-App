@@ -82,6 +82,24 @@ class CustomerDetailScreen extends StatelessWidget {
                       value: '₹${customer.totalSpent}',
                     ),
                   ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: FutureBuilder<num?>(
+                      future: fetchLoyaltyPoints(customer.uid),
+                      builder: (context, snapshot) {
+                        final points = snapshot.data;
+                        return _StatCard(
+                          label: 'Loyalty points',
+                          value: points == null
+                              ? (snapshot.connectionState ==
+                                      ConnectionState.waiting
+                                  ? '…'
+                                  : '—')
+                              : points.toStringAsFixed(0),
+                        );
+                      },
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 20),

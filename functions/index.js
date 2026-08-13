@@ -8,6 +8,14 @@ admin.initializeApp();
 const WHATSAPP_ACCESS_TOKEN = defineSecret("WHATSAPP_ACCESS_TOKEN");
 const WHATSAPP_PHONE_NUMBER_ID = defineSecret("WHATSAPP_PHONE_NUMBER_ID");
 
+// Not a secret - OneSignal app ids are meant to be embedded client-side and
+// only identify which app's notifications this is (same id already lived
+// in the old client-side code this replaces). The REST API key below is
+// the actual secret - it authorizes *sending* notifications, so unlike the
+// app id it must never reach the client bundle.
+const ONESIGNAL_APP_ID = "33203d1b-0c1a-4445-9698-a59d1e19a2da";
+const ONESIGNAL_REST_API_KEY = defineSecret("ONESIGNAL_REST_API_KEY");
+
 const TEMPLATE_NAME = "bill_ready";
 const TEMPLATE_LANGUAGE = "en";
 
@@ -90,6 +98,105 @@ exports.setStaffRole = onCall(async (request) => {
   });
   return { uid: userRecord.uid, role };
 });
+
+/**
+ * Sends a push notification via OneSignal, and separately records it in
+ * Firestore for the customer-facing app's in-app bell/popup to read (see
+ * CUSTOMER_NOTIFICATIONS.md for that contract - this repo doesn't own that
+ * app's UI, only this data). Super-admin only. Runs server-side (unlike
+ * the old client code this replaces) because the OneSignal REST API key
+ * has to stay off the client - anyone who can read the Flutter web
+ * bundle's source can read a client-embedded secret.
+ *
+ * request.data:
+ *   title: string (required)
+ *   message: string (required)
+ *   playerIds: string[] (optional) - specific OneSignal subscription ids
+ *     to push to ("Send Individual"); omitted/empty pushes to every
+ *     subscribed device ("Send All").
+ *   audienceUids: string[] (optional) - customer Firebase uids this
+ *     notification is *for*, recorded on the Firestore doc so the
+ *     customer app can query its own bell feed. Independent of playerIds
+ *     (a customer can be targeted here with no push token on file yet,
+ *     and should still see it next time they open the app).
+ */
+exports.sendPushNotification = onCall(
+  { secrets: [ONESIGNAL_REST_API_KEY] },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Login required.");
+    }
+    if (request.auth.token.admin !== true) {
+      throw new HttpsError(
+        "permission-denied",
+        "Only super admins can send notifications."
+      );
+    }
+
+    const { title, message, playerIds, audienceUids } = request.data || {};
+    if (!title || !message) {
+      throw new HttpsError(
+        "invalid-argument",
+        "title and message are required."
+      );
+    }
+
+    const payload = {
+      app_id: ONESIGNAL_APP_ID,
+      headings: { en: title },
+      contents: { en: message },
+    };
+    if (Array.isArray(playerIds) && playerIds.length > 0) {
+      payload.include_player_ids = playerIds;
+    } else {
+      payload.included_segments = ["All"];
+    }
+
+    const res = await fetch("https://onesignal.com/api/v1/notifications", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        // OneSignal's newer os_v2_app_... restricted API keys use the
+        // "Key" auth scheme (legacy unprefixed REST keys used "Basic").
+        Authorization: `Key ${ONESIGNAL_REST_API_KEY.value()}`,
+      },
+      body: JSON.stringify(payload),
+    });
+    const resJson = await res.json();
+    if (!res.ok || (resJson.errors && resJson.errors.length > 0)) {
+      logger.error("OneSignal send failed", resJson);
+      throw new HttpsError(
+        "internal",
+        Array.isArray(resJson.errors)
+          ? resJson.errors.join(", ")
+          : "Failed to send notification."
+      );
+    }
+
+    const hasAudience = Array.isArray(audienceUids) && audienceUids.length > 0;
+    const notificationDoc = await admin.firestore().collection("Notifications").add({
+      title,
+      message,
+      audience: hasAudience ? "individual" : "all",
+      audienceUids: hasAudience ? audienceUids : [],
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      sentBy: request.auth.uid,
+    });
+
+    logger.info("Push notification sent", {
+      id: resJson.id,
+      recipients: resJson.recipients,
+      notificationDocId: notificationDoc.id,
+      by: request.auth.uid,
+    });
+    return {
+      success: true,
+      id: resJson.id,
+      recipients: resJson.recipients,
+      notificationDocId: notificationDoc.id,
+    };
+  }
+);
 
 exports.sendWhatsAppBill = onCall(
   { secrets: [WHATSAPP_ACCESS_TOKEN, WHATSAPP_PHONE_NUMBER_ID] },

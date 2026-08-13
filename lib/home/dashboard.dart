@@ -20,6 +20,7 @@ import 'package:vdsadmin/settings/settings_screen.dart';
 import 'package:vdsadmin/theme/app_theme.dart';
 import 'package:vdsadmin/theme_controller.dart';
 import 'package:vdsadmin/utils/role_controller.dart';
+import 'package:vdsadmin/widgets/admin_notification_bell.dart';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 
@@ -234,6 +235,7 @@ class _DashboardState extends State<Dashboard> {
         foregroundColor: Colors.white,
         elevation: 0,
         actions: <Widget>[
+          const DashboardNotificationBell(),
           IconButton(
             icon: const Icon(Icons.get_app),
             onPressed: () {

@@ -25,6 +25,7 @@ import 'package:vdsadmin/models/suppiler.dart';
 import 'package:vdsadmin/settings/store_settings_controller.dart';
 import 'package:vdsadmin/utils/role_controller.dart';
 import 'package:vdsadmin/whatsappApi/wa.dart';
+import 'package:vdsadmin/widgets/admin_notification_bell.dart';
 import 'package:vdsadmin/widgets/raised_gradient_button.dart';
 
 import 'package:visibility_detector/visibility_detector.dart';
@@ -697,6 +698,7 @@ class BillState extends State<Bill> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
+          const BillingNotificationBell(),
           Flexible(
             child: MaterialButton(
               elevation: 0,

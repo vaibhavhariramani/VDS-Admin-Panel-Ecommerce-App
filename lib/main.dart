@@ -45,7 +45,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void configOneSignel() {
-    OneSignal.initialize('d43fa4f9-2fa5-48a3-a184-49636c9d96c5');
+    OneSignal.initialize('33203d1b-0c1a-4445-9698-a59d1e19a2da');
   }
 
   void _initCheck() async {

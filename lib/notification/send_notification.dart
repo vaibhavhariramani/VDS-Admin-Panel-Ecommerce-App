@@ -1,236 +1,124 @@
-import 'dart:convert';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:http/http.dart';
-import 'package:vdsadmin/widgets/raised_gradient_button.dart';
 
+import '../theme/app_theme.dart';
+import 'notification_api.dart';
+
+/// Broadcasts a push notification to every subscribed device (Android app
+/// via FCM through OneSignal; web customers with notifications enabled see
+/// it via their browser). See CLIENT_NOTIFICATIONS.md for what the
+/// customer-facing app still needs to build for the in-app bell/popup half
+/// of this - this screen only triggers the OneSignal push.
 class NotifyAll extends StatefulWidget {
   const NotifyAll({Key? key}) : super(key: key);
 
   @override
-  _NotifyAllState createState() => _NotifyAllState();
+  State<NotifyAll> createState() => _NotifyAllState();
 }
 
 class _NotifyAllState extends State<NotifyAll> {
-  TextEditingController name = TextEditingController();
-  TextEditingController description = TextEditingController();
+  final _titleController = TextEditingController();
+  final _messageController = TextEditingController();
+  bool _sending = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _messageController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _send() async {
+    final title = _titleController.text.trim();
+    final message = _messageController.text.trim();
+    if (title.isEmpty || message.isEmpty) {
+      setState(() => _error = 'Enter a title and a message.');
+      return;
+    }
+    setState(() {
+      _sending = true;
+      _error = null;
+    });
+    try {
+      final result = await NotificationApi.send(title: title, message: message);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content:
+                Text('Sent to ${result['recipients'] ?? 'all'} device(s).')),
+      );
+      _titleController.clear();
+      _messageController.clear();
+    } catch (e) {
+      setState(() => _error = e.toString());
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    var wid = MediaQuery.of(context).size.width;
-    var hg = MediaQuery.of(context).size.height;
-
-    form(String title, String hint, TextEditingController controller, Icon ic) {
-      return Padding(
-        padding: const EdgeInsets.all(4.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 25,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Container(
-              padding: const EdgeInsets.only(left: 8),
-              decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.all(Radius.circular(8)),
-                  border: Border.all(color: Colors.white)),
-              child: TextField(
-                controller: controller,
-                showCursor: true,
-                textAlign: TextAlign.left,
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  hintStyle: const TextStyle(
-                    color: Colors.white,
-                  ),
-                  hintText: hint,
-                  prefixIcon: ic,
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    form2(
-        String title, String hint, TextEditingController controller, Icon ic) {
-      return Padding(
-        padding: const EdgeInsets.all(4.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 25,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Container(
-              height: MediaQuery.of(context).size.height * 0.2,
-              padding: const EdgeInsets.only(left: 8),
-              decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.all(Radius.circular(8)),
-                  border: Border.all(color: Colors.white)),
-              child: TextField(
-                maxLines: null,
-                controller: controller,
-                showCursor: true,
-                textAlign: TextAlign.left,
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  hintStyle: const TextStyle(
-                    color: Colors.white,
-                  ),
-                  hintText: hint,
-                  prefixIcon: ic,
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
     return Scaffold(
+      backgroundColor: appCanvas(context),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+        title: const Text('Send to Everyone'),
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
       ),
-      backgroundColor: Colors.blueGrey,
-      body: Container(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(18.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(
-                    height: 10.0,
-                  ),
-                  form(
-                    'Enter Title of notification',
-                    'Title',
-                    name,
-                    const Icon(
-                      Icons.card_giftcard_sharp,
-                      color: Colors.white,
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 560),
+          child: ListView(
+            padding: const EdgeInsets.all(20),
+            children: [
+              AppCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Notify all customers',
+                        style: AppText.heading(context)),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Delivered as a push notification to every device with notifications enabled.',
+                      style: AppText.caption(context),
                     ),
-                  ),
-                  form2(
-                    'Enter Content',
-                    'Message',
-                    description,
-                    const Icon(
-                      Icons.description,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: RaisedGradientButton(
-                      gradient: const LinearGradient(
-                        colors: <Color>[Color(0xffCB0338), Color(0xffFF5001)],
-                      ),
-                      onPressed: () {
-                        List<String> id = [];
-                        FirebaseFirestore.instance
-                            .collection('Users')
-                            .get()
-                            .then((QuerySnapshot querySnapshot) {
-                          for (var doc in querySnapshot.docs) {
-                            print(doc["city"]);
-                            if (doc["onesignalTokenID"] != "") {
-                              id.add(doc["onesignalTokenID"]);
-                              sendNotification([doc["onesignalTokenID"]],
-                                  name.text, description.text);
-                              print(' id is : ${doc["onesignalTokenID"]}');
-                            }
-                          }
-                        });
-                        // sendNotification(id, name.text, description.text);
-
-                        Fluttertoast.showToast(msg: 'Sending notification');
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text(
-                        'Send Notification',
-                        style: TextStyle(color: Colors.white),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: _titleController,
+                      decoration: const InputDecoration(
+                        labelText: 'Title',
+                        border: OutlineInputBorder(),
                       ),
                     ),
-                  ),
-
-                  // Center(
-                  //   child: GestureDetector(
-                  //     onTap: () {
-                  //       sendNotification(
-                  //           ['80577527-848c-4985-84cb-01f895bac1eb'],
-                  //           name.text,
-                  //           description.text);
-                  //     },
-                  //     child: Container(
-                  //       width: 70,
-                  //       padding: EdgeInsets.all(10),
-                  //       decoration: BoxDecoration(
-                  //           color: Colors.green,
-                  //           borderRadius: BorderRadius.circular(8)),
-                  //       child: Text("Send"),
-                  //     ),
-                  //   ),
-                  // ),
-                ],
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _messageController,
+                      maxLines: 3,
+                      decoration: const InputDecoration(
+                        labelText: 'Message',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    if (_error != null) ...[
+                      const SizedBox(height: 8),
+                      Text(_error!, style: const TextStyle(color: Colors.red)),
+                    ],
+                    const SizedBox(height: 16),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: PillButton(
+                        label: _sending ? 'Sending…' : 'Send to Everyone',
+                        icon: Icons.campaign_outlined,
+                        onPressed: _sending ? null : _send,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),
-    );
-  }
-
-  Future<Response> sendNotification(
-      List<String> tokenIdList, String heading, String contents) async {
-    return await post(
-      Uri.parse('https://onesignal.com/api/v1/notifications'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, dynamic>{
-        "app_id":
-            'd43fa4f9-2fa5-48a3-a184-49636c9d96c5', //kAppId is the App Id that one get from the OneSignal When the application is registered.
-
-        "include_player_ids":
-            tokenIdList, //tokenIdList Is the List of All the Token Id to to Whom notification must be sent.
-
-        // android_accent_color reprsent the color of the heading text in the notifiction
-        "android_accent_color": "FF9976D2",
-
-        "small_icon": "ic_stat_onesignal_default",
-
-        "large_icon":
-            "https://firebasestorage.googleapis.com/v0/b/ecommerce-26b18.appspot.com/o/vishal-departmental-store--murlipura-jaipur-gift-shops-1ntp73w.jpg?alt=media&token=80bb5211-1f89-4075-a289-2aa238bdf51a",
-
-        "headings": {"en": heading},
-
-        "contents": {"en": contents},
-      }),
     );
   }
 }
