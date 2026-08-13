@@ -87,3 +87,8 @@ upkeystore.jks
 .env
 plugins
 credentials.txt
+
+# Internal reference/handoff docs - not meant for the public repo history
+CUSTOMER_NOTIFICATIONS.md
+DESIGN-shopify.md
+CLUBCARD_INTEGRATION.md
