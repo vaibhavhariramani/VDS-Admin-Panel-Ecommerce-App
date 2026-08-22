@@ -59,13 +59,20 @@ class OnlineOrderstableView extends GetResponsiveView<OrdersController> {
                               : controller.OnlineordersData.length < 10
                                   ? controller.OnlineordersData.length
                                   : 10,
-                          columns: const [
-                            DataColumn(label: Text('Name')),
-                            DataColumn(label: Text('Date Of order')),
-                            DataColumn(label: Text('contact')),
-                            DataColumn(label: Text('Status')),
-                            DataColumn(label: Text('Delivery Boy')),
-                            DataColumn(label: Text('ACTIONS')),
+                          sortColumnIndex: controller.sortColumnIndex.value,
+                          sortAscending: controller.sortAscending.value,
+                          columns: [
+                            const DataColumn(label: Text('Name')),
+                            DataColumn(
+                              label: const Text('Date Of order'),
+                              onSort: (columnIndex, ascending) =>
+                                  controller.sortOnlineOrdersByDate(
+                                      ascending: ascending),
+                            ),
+                            const DataColumn(label: Text('contact')),
+                            const DataColumn(label: Text('Status')),
+                            const DataColumn(label: Text('Delivery Boy')),
+                            const DataColumn(label: Text('ACTIONS')),
                           ],
                           columnSpacing: 20,
                           source: DataSourceOrders(

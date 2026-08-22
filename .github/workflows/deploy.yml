@@ -1,0 +1,49 @@
+name: Build and deploy admin panel
+
+# getx-architecture deploys to local-bazaar-admin-panel.web.app
+# (project vaibhav-s-ecommerce-app). new-changes and old-api deploy to
+# vishal-store-admin.web.app (project ecommerce-26b18). This same file must
+# exist on all three branches for their respective pushes to trigger a run.
+on:
+  push:
+    branches:
+      - getx-architecture
+      - new-changes
+      - old-api
+  workflow_dispatch: {}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.29.2'
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build web release
+        run: flutter build web --release
+
+      - name: Deploy to local-bazaar-admin-panel (getx-architecture)
+        if: github.ref_name == 'getx-architecture'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_LOCAL_BAZAAR_ADMIN }}'
+          projectId: vaibhav-s-ecommerce-app
+          target: local-bazaar-admin
+          channelId: live
+
+      - name: Deploy to vishal-store-admin (new-changes / old-api)
+        if: github.ref_name == 'new-changes' || github.ref_name == 'old-api'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_VISHAL_STORE_ADMIN }}'
+          projectId: ecommerce-26b18
+          channelId: live
