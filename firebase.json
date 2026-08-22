@@ -13,6 +13,7 @@
     "source": "functions"
   },
   "hosting": {
+    "site": "vishal-store-admin",
     "public": "build/web",
     "ignore": [
       "firebase.json",

@@ -1,0 +1,31 @@
+name: Deploy production (vishal-store-admin)
+
+# Fires on new-changes or old-api - both deploy live to
+# vishal-store-admin.web.app (project ecommerce-26b18). This same file must
+# exist on both branches for either branch's push to trigger a run.
+on:
+  push:
+    branches:
+      - new-changes
+      - old-api
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.29.2"
+          channel: "stable"
+
+      - run: flutter pub get
+      - run: flutter build web --release
+
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: "${{ secrets.GITHUB_TOKEN }}"
+          firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_VISHAL_STORE_ADMIN }}"
+          projectId: ecommerce-26b18
+          channelId: live
