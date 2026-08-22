@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../../../models/Shop.dart';
 import '../../controllers/shop_listing_controller.dart';
+import '../widgets/shop_branding_dialog.dart';
 
 class ShopDetailsCard extends GetResponsiveView<ShopListingController> {
   final Rx<Shop> shopItem;
@@ -19,12 +20,39 @@ class ShopDetailsCard extends GetResponsiveView<ShopListingController> {
                 ? CrossAxisAlignment.center
                 : CrossAxisAlignment.start,
             children: [
-              Text(shopItem.value.name!,
-                  textScaleFactor: Get.textScaleFactor,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                      fontSize: 36, fontWeight: FontWeight.w600)),
+              Row(
+                mainAxisAlignment: context.isPhone
+                    ? MainAxisAlignment.center
+                    : MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    child: Text(shopItem.value.name!,
+                        textScaleFactor: Get.textScaleFactor,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            fontSize: 36, fontWeight: FontWeight.w600)),
+                  ),
+                  TextButton.icon(
+                    onPressed: () {
+                      Get.dialog(
+                        AlertDialog(
+                          content: SizedBox(
+                            width: Get.width * 0.4,
+                            height: Get.height * 0.8,
+                            child: ShopBrandingDialog(
+                              shop: shopItem.value,
+                              onSaved: () => controller.onInit(),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.edit_outlined, size: 18),
+                    label: const Text('Edit Branding'),
+                  ),
+                ],
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,

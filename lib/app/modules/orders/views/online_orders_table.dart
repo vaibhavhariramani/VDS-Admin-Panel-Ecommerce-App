@@ -32,6 +32,8 @@ class OnlineOrderstableView extends GetResponsiveView<OrdersController> {
                 !deletionStatusController2.isVisible.value,
             sliver: UsersHeader(
               title: 'Online Orders',
+              showBackButton: true,
+              onPressBackButton: () => controller.showOnlineOrdersTable(false),
               onCreateNew: () {
                 controller.isInviting.toggle();
                 print("Create");

@@ -4,6 +4,7 @@ import 'package:iconly/iconly.dart';
 import '../../../../widgets/utils/padding_wrapper.dart';
 import '../../../../widgets/utils/shimmer_helper.dart';
 import '../../components/products_header.dart';
+import '../../components/product_create_dialog.dart';
 import '../controllers/scheduled_products_controller.dart';
 import 'package:flutter_dashboard/flutter_dashboard.dart';
 
@@ -40,11 +41,49 @@ class ScheduledProductsView
           SliverVisibility(
             visible: !controller.isLoading.value &&
                 controller.scheduledProducts.isNotEmpty,
+            sliver: PaddingWrapper(
+              isSliverItem: true,
+              horizontalPadding: screen.isDesktop ? 40 : 10,
+              topPadding: 10,
+              child: SliverToBoxAdapter(
+                child: TextField(
+                  onChanged: (String value) => controller.searchQuery.value = value,
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.search),
+                    hintText: 'Search by name, barcode, or category',
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SliverVisibility(
+            visible: !controller.isLoading.value,
             sliver: ProductsHeader(
               title: "Scheduled Products",
               subTitle: "Products Scheduled",
-              totalCount: controller.scheduledProducts.length,
+              totalCount: controller.visibleScheduledProducts.length,
               actions: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Get.dialog(
+                      AlertDialog(
+                        content: SizedBox(
+                          width: Get.width * 0.4,
+                          height: Get.height * 0.8,
+                          child: ProductCreateDialog(
+                            shopId: controller.shopId.value,
+                            onCreated: () => controller.onInit(),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.add, size: 18),
+                  label: const Text('Add Product'),
+                ),
+                const SizedBox(width: 10),
                 DropdownButtonHideUnderline(
                   child: DropdownButton2(
                     // dropdownWidth: 150,
@@ -169,27 +208,42 @@ class ScheduledProductsView
               ],
             ),
           ),
-          SliverVisibility(
-              visible: !controller.isLoading.value,
-              sliver: SliverToBoxAdapter(
-                    child: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(40),
-                        child: Text('No scheduled products found.'),
-                      ),
-                    ),
-                  ), // your existing header + grid
-            ),
+          // "No scheduled products at all" — previously shown unconditionally
+          // whenever loading finished, so it rendered above the grid even
+          // when there were scheduled products.
           SliverVisibility(
             visible: !controller.isLoading.value &&
-                controller.scheduledProducts.isNotEmpty,
+                controller.scheduledProducts.isEmpty,
+            sliver: const SliverToBoxAdapter(
+              child: Center(
+                child: Padding(
+                  padding: EdgeInsets.all(40),
+                  child: Text('No scheduled products found.'),
+                ),
+              ),
+            ),
+          ),
+          SliverVisibility(
+            visible: !controller.isLoading.value &&
+                controller.scheduledProducts.isNotEmpty &&
+                controller.visibleScheduledProducts.isEmpty,
+            sliver: const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 60),
+                child: Center(child: Text('No products match your search.')),
+              ),
+            ),
+          ),
+          SliverVisibility(
+            visible: !controller.isLoading.value &&
+                controller.visibleScheduledProducts.isNotEmpty,
             sliver: PaddingWrapper(
               isSliverItem: true,
               topPadding: 5,
               horizontalPadding: screen.isDesktop ? 40 : 10,
               child: FlutterDashboardListView.grid(
                 isSliverItem: true,
-                childCount: controller.scheduledProducts.length,
+                childCount: controller.visibleScheduledProducts.length,
                 mainAxisSpacing: 20,
                 crossAxisSpacing: 20,
                 gridDelegate: !screen.isDesktop
@@ -223,7 +277,7 @@ class ScheduledProductsView
                           ),
                 buildItem: (BuildContext context, int index) {
                   return ScheduledProductCard(
-                    productItem: controller.scheduledProducts[index],
+                    productItem: controller.visibleScheduledProducts[index],
                   );
                 },
                 listType: FlutterDashboardListType.Grid,

@@ -18,7 +18,7 @@ class ShopImageCard extends StatelessWidget {
           height: 210,
           decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
           child: CachedNetworkImage(
-            imageUrl: shopItem.value.img_token![0],
+            imageUrl: shopItem.value.img_token ?? '',
             progressIndicatorBuilder: (context, url, progress) => Center(
               child: CircularProgressIndicator(
                 color: Theme.of(context).indicatorColor,

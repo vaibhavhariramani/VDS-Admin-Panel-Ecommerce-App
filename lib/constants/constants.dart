@@ -23,11 +23,14 @@ RegExp numberFormatterRegex = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
 
 String Function(Match) get formatNumberCount => (Match match) => '${match[1]},';
 
-const String apiKey = "da2-zyxxvpic2nhlfetdsnk4vznvhi";
-
-const String graphqlEndpoint =
-    "https://xiz7sjryubbtzcvgimxy7tcuem.appsync-api.eu-west-1.amazonaws.com/graphql";
-
 Color kPrimaryColor = Color.fromARGB(255, 129, 255, 118);
+
+/// The single place to change the public storefront domain per
+/// environment. A published shop's URL is `$storefrontBaseUrl/{shopId}` —
+/// the Client App (hosted at local-bazaar-shop.web.app) routes directly by
+/// a shop's own Firestore doc id, e.g. `.../#/store/4N6v2VdoJ4RmyWJ57ADG`.
+/// There's no separate code-to-shop lookup today; a vanity/custom code is
+/// a possible later feature, not the current mechanism.
+const String storefrontBaseUrl = 'https://local-bazaar-shop.web.app/#/store';
 
 enum Option { step1, step2 }

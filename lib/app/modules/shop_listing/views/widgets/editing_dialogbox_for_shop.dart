@@ -61,7 +61,7 @@ class EditBox extends GetResponsiveView<ShopListingController> {
                     borderRadius: BorderRadius.circular(5),
                   ),
                   child: CachedNetworkImage(
-                    imageUrl: controller.shopdetails.value.img_token![0],
+                    imageUrl: controller.shopdetails.value.img_token ?? '',
                     fit: BoxFit.cover,
                   ),
                 ),

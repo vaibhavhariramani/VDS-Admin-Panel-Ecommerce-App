@@ -17,6 +17,8 @@ import '../../../../widgets/components/table_datasrc_bundle.dart';
 import '../../../../widgets/components/table_datasrc_productBundle.dart';
 import '../../../../widgets/utils/padding_wrapper.dart';
 import '../../components/image_viewer_for_product.dart';
+import '../../scheduled_products/views/scheduled_products_view.dart';
+import '../../published_products/views/published_products_view.dart';
 import '../controllers/products_listing_controller.dart';
 
 // DateTime startDate = DateTime(2000);
@@ -54,17 +56,17 @@ class ProductsListingView extends GetResponsiveView<ProductsListingController> {
         horizontalPadding: screen.isDesktop ? 60 : 20,
         child: FlutterDashboardListView.grid(
           isSliverItem: true,
-          childCount: 2,
+          childCount: 4,
           mainAxisSpacing: screen.isPhone ? 20 : 50,
           crossAxisSpacing: screen.isPhone ? 20 : 50,
           gridDelegate: !screen.isPhone
               ? FlutterDashboardGridDelegates.columns_2(
                   width: screen.width,
-                  length: 2,
+                  length: 4,
                 )
               : FlutterDashboardGridDelegates.columns_1(
                   width: screen.width,
-                  length: 2,
+                  length: 4,
                 ),
           buildItem: (BuildContext context, int index) {
             return _cardItems()[index];
@@ -2534,6 +2536,30 @@ class ProductsListingView extends GetResponsiveView<ProductsListingController> {
         onPressed: () {
           controller.showBulkProductUploadForm(true);
         },
+      ),
+      _buildCard(
+        text: 'Scheduled Products',
+        onPressed: () => Navigator.push(
+          screen.context,
+          MaterialPageRoute(
+            builder: (context) => Scaffold(
+              appBar: AppBar(title: const Text('Scheduled Products')),
+              body: ScheduledProductsView(),
+            ),
+          ),
+        ),
+      ),
+      _buildCard(
+        text: 'Published Products',
+        onPressed: () => Navigator.push(
+          screen.context,
+          MaterialPageRoute(
+            builder: (context) => Scaffold(
+              appBar: AppBar(title: const Text('Published Products')),
+              body: PublishedProductsView(),
+            ),
+          ),
+        ),
       ),
     ];
   }

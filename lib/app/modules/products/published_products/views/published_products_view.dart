@@ -6,6 +6,7 @@ import 'package:iconly/iconly.dart';
 import '../../../../widgets/utils/padding_wrapper.dart';
 import '../../../../widgets/utils/shimmer_helper.dart';
 import '../../components/products_header.dart';
+import '../../components/product_create_dialog.dart';
 import '../controllers/published_products_controller.dart';
 import 'published_card.dart';
 
@@ -39,11 +40,49 @@ class PublishedProductsView
           SliverVisibility(
             visible: !controller.isLoading.value &&
                 controller.publishedProducts.isNotEmpty,
+            sliver: PaddingWrapper(
+              isSliverItem: true,
+              horizontalPadding: screen.isDesktop ? 40 : 10,
+              topPadding: 10,
+              child: SliverToBoxAdapter(
+                child: TextField(
+                  onChanged: (String value) => controller.searchQuery.value = value,
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.search),
+                    hintText: 'Search by name, barcode, or category',
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SliverVisibility(
+            visible: !controller.isLoading.value,
             sliver: ProductsHeader(
               title: 'Published Products',
               subTitle: "Products Published",
-              totalCount: controller.publishedProducts.length,
+              totalCount: controller.visiblePublishedProducts.length,
               actions: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Get.dialog(
+                      AlertDialog(
+                        content: SizedBox(
+                          width: Get.width * 0.4,
+                          height: Get.height * 0.8,
+                          child: ProductCreateDialog(
+                            shopId: controller.shopId.value,
+                            onCreated: () => controller.onInit(),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.add, size: 18),
+                  label: const Text('Add Product'),
+                ),
+                const SizedBox(width: 10),
                 DropdownButtonHideUnderline(
                   child: DropdownButton2(
                     // dropdownWidth: 150,
@@ -162,14 +201,25 @@ class PublishedProductsView
           ),
           SliverVisibility(
             visible: !controller.isLoading.value &&
-                controller.publishedProducts.isNotEmpty,
+                controller.publishedProducts.isNotEmpty &&
+                controller.visiblePublishedProducts.isEmpty,
+            sliver: const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 60),
+                child: Center(child: Text('No products match your search.')),
+              ),
+            ),
+          ),
+          SliverVisibility(
+            visible: !controller.isLoading.value &&
+                controller.visiblePublishedProducts.isNotEmpty,
             sliver: PaddingWrapper(
               isSliverItem: true,
               topPadding: 5,
               horizontalPadding: screen.isDesktop ? 40 : 10,
               child: FlutterDashboardListView.grid(
                 isSliverItem: true,
-                childCount: controller.publishedProducts.length,
+                childCount: controller.visiblePublishedProducts.length,
                 mainAxisSpacing: 20,
                 crossAxisSpacing: 20,
                 gridDelegate: !screen.isDesktop
@@ -204,24 +254,27 @@ class PublishedProductsView
                 buildItem: (BuildContext context, int index) {
                   return PublishedProductCard(
                     isPublishedListItem: true,
-                    productItem: controller.publishedProducts[index],
+                    productItem: controller.visiblePublishedProducts[index],
                   );
                 },
                 listType: FlutterDashboardListType.Grid,
               ),
             ),
           ),
+          // Previously shown unconditionally whenever loading finished, so
+          // it rendered above the grid even when there were products.
           SliverVisibility(
-              visible: !controller.isLoading.value,
-              sliver: SliverToBoxAdapter(
-                    child: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(40),
-                        child: Text('No published products found.'),
-                      ),
-                    ),
-                  ), // your existing header + grid
-            )
+            visible: !controller.isLoading.value &&
+                controller.publishedProducts.isEmpty,
+            sliver: const SliverToBoxAdapter(
+              child: Center(
+                child: Padding(
+                  padding: EdgeInsets.all(40),
+                  child: Text('No published products found.'),
+                ),
+              ),
+            ),
+          )
         ],
       ),
     );

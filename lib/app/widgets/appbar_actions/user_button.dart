@@ -1,13 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dashboard/flutter_dashboard.dart';
 import 'package:iconly/iconly.dart';
 
-import '../../../models/UserType.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/data_service.dart';
+import 'update_profile_dialog.dart';
 
 class AppBarUserButton extends GetResponsiveView {
   AppBarUserButton({Key? key}) : super(key: key);
@@ -283,10 +282,7 @@ class AppBarUserButton extends GetResponsiveView {
                               text: '\n',
                             ),
                             TextSpan(
-                              text: EnumToString.convertToString(
-                                  _authService.user.value?.user_type ??
-                                      UserType.ADMIN),
-                              // '${_authService.user.value?.user_type ?? ""}',
+                              text: _authService.user.value?.roleLabel ?? '',
                               style:
                                   DefaultTextStyle.of(context).style.copyWith(
                                         fontFamily:
@@ -347,6 +343,14 @@ class AppBarUserButton extends GetResponsiveView {
         ),
         items: [
           DropdownMenuItem<String>(
+            value: "Update Profile".tr,
+            child: Text(
+              "Update Profile".tr,
+              textScaleFactor: Get.textScaleFactor,
+              style: DefaultTextStyle.of(context).style,
+            ),
+          ),
+          DropdownMenuItem<String>(
             value: "Logout".tr,
             child: Text(
               "Logout".tr,
@@ -356,9 +360,16 @@ class AppBarUserButton extends GetResponsiveView {
           ),
         ],
         onChanged: (String? value) async {
-          // print(value);
-          if ((value ?? '') == "Logout".tr) {
-            print('Logout');
+          if ((value ?? '') == "Update Profile".tr) {
+            Get.dialog(
+              AlertDialog(
+                content: SizedBox(
+                  width: Get.width * 0.4,
+                  child: const UpdateProfileDialog(),
+                ),
+              ),
+            );
+          } else if ((value ?? '') == "Logout".tr) {
             FlutterDashboardController.to.isScreenLoading(true);
             await DataService.to.CreateLogs(action: "User Logged out");
             await AuthService.to.logout();

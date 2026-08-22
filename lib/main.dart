@@ -6,6 +6,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:url_strategy/url_strategy.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'app/routes/app_pages.dart';
+import 'app/widgets/appbar_actions/go_to_live_store_button.dart';
 import 'app/widgets/appbar_actions/notification_button.dart';
 import 'app/widgets/appbar_actions/user_button.dart';
 import 'app/widgets/drawer_header.dart';
@@ -15,6 +16,7 @@ import 'services/auth_service.dart';
 import 'services/create_data.dart';
 import 'services/data_service.dart';
 import 'services/fetch_data.dart';
+import 'services/storefront_service.dart';
 import 'services/update_data.dart';
 import 'themes/app_theme.dart';
 part './configurations/app_configs.dart';
@@ -50,6 +52,7 @@ class RootApp extends AppConfig {
       appBarOptions: AppConfig.rootAppBarOptions,
       overrideActions: [
         NotificationButton(),
+        const GoToLiveStoreButton(),
         AppBarUserButton(),
       ],
       rootControllers: [
@@ -58,6 +61,7 @@ class RootApp extends AppConfig {
         Get.lazyPut(() => FetchService(), fenix: true),
         Get.lazyPut(() => CreateService(), fenix: true),
         Get.lazyPut(() => UpdateService(), fenix: true),
+        Get.lazyPut(() => StorefrontService(), fenix: true),
       ],
       rootPages: AppPages.rootPages,
       dashboardMiddlewares: [

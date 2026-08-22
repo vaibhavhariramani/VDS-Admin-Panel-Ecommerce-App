@@ -22,6 +22,19 @@ class _OnlineOrdersState extends State<OnlineOrders> {
   DateFormat format = DateFormat.yMMMMd('en_US');
   DateFormat time = DateFormat.jm();
 
+  /// `dateOfOrder` is consistently a Firestore Timestamp; `booking` is not
+  /// (int epoch-micros on older orders, Timestamp on newer ones), so it's
+  /// only used as a last resort here.
+  DateTime? _orderDate(QueryDocumentSnapshot doc) {
+    final Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    final dynamic dateOfOrder = data['dateOfOrder'];
+    if (dateOfOrder is Timestamp) return dateOfOrder.toDate();
+    final dynamic booking = data['booking'];
+    if (booking is Timestamp) return booking.toDate();
+    if (booking is int) return DateTime.fromMicrosecondsSinceEpoch(booking);
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -125,12 +138,32 @@ class _OnlineOrdersState extends State<OnlineOrders> {
                   FetchService.to.OnlineOrders(search: search, filter: pincode),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  return snapshot.data!.docs.length > 0
+                  // `booking` is stored inconsistently across documents (an
+                  // int epoch-micros value on older orders, a Firestore
+                  // Timestamp on newer ones), so ordering/formatting by it
+                  // directly is unreliable and `DateTime.fromMicrosecondsSinceEpoch`
+                  // outright crashes when it's a Timestamp. `dateOfOrder` is
+                  // consistently a Timestamp, so sort/display use that
+                  // (falling back to `booking` only if `dateOfOrder` is
+                  // missing), client-side — sorting here also avoids
+                  // depending on a Firestore composite index for `booking`.
+                  final List<QueryDocumentSnapshot> docs =
+                      snapshot.data!.docs.toList()
+                        ..sort((a, b) {
+                          final DateTime? da = _orderDate(a);
+                          final DateTime? db = _orderDate(b);
+                          if (da == null && db == null) return 0;
+                          if (da == null) return 1;
+                          if (db == null) return -1;
+                          return db.compareTo(da);
+                        });
+                  return docs.length > 0
                       ? ListView.builder(
                           shrinkWrap: true,
                           physics: BouncingScrollPhysics(),
-                          itemCount: snapshot.data!.docs.length,
+                          itemCount: docs.length,
                           itemBuilder: (context, index) {
+                            final DateTime? orderDate = _orderDate(docs[index]);
                             return GestureDetector(
                               child: Card(
                                   child: Row(
@@ -160,8 +193,7 @@ class _OnlineOrdersState extends State<OnlineOrders> {
                                             child: CachedNetworkImage(
                                               placeholder: (context, url) =>
                                                   CircularProgressIndicator(),
-                                              imageUrl: snapshot
-                                                  .data!.docs[index]['image'],
+                                              imageUrl: docs[index]['image'],
                                               fit: BoxFit.contain,
                                             ),
                                           ),
@@ -174,21 +206,22 @@ class _OnlineOrdersState extends State<OnlineOrders> {
                                               title: Text.rich(
                                                   TextSpan(text: '', children: [
                                                 TextSpan(
-                                                    text: snapshot.data!
-                                                        .docs[index]['booking']
+                                                    text: docs[index]['booking']
                                                         .toString(),
                                                     style: GoogleFonts.poppins(
                                                         fontWeight:
                                                             FontWeight.bold))
                                               ])),
                                               subtitle: Text.rich(TextSpan(
-                                                  text:
-                                                      '${format.format(DateTime.fromMicrosecondsSinceEpoch(snapshot.data!.docs[index]['booking']))}   ',
+                                                  text: orderDate != null
+                                                      ? '${format.format(orderDate)}   '
+                                                      : '',
                                                   style: GoogleFonts.poppins(),
                                                   children: [
                                                     TextSpan(
-                                                      text:
-                                                          '${time.format(DateTime.fromMicrosecondsSinceEpoch(snapshot.data!.docs[index]['booking']))}',
+                                                      text: orderDate != null
+                                                          ? '${time.format(orderDate)}'
+                                                          : '',
                                                     )
                                                   ])),
                                             ),
@@ -203,7 +236,7 @@ class _OnlineOrdersState extends State<OnlineOrders> {
                                                       left: 8,
                                                     ),
                                                     child: Text(
-                                                      '₹${snapshot.data!.docs[index]['total']}',
+                                                      '₹${docs[index]['total']}',
                                                       style:
                                                           GoogleFonts.poppins(
                                                               fontSize: 18,
@@ -221,7 +254,7 @@ class _OnlineOrdersState extends State<OnlineOrders> {
                                                     child: Container(
                                                         decoration:
                                                             BoxDecoration(
-                                                                color: snapshot.data!.docs[index]
+                                                                color: docs[index]
                                                                             [
                                                                             'status'] ==
                                                                         'Order Placed'
@@ -229,7 +262,7 @@ class _OnlineOrdersState extends State<OnlineOrders> {
                                                                         .blue
                                                                         .withOpacity(
                                                                             0.1)
-                                                                    : snapshot.data!.docs[index]['status'] ==
+                                                                    : docs[index]['status'] ==
                                                                             'Order Progress'
                                                                         ? Colors
                                                                             .amber
@@ -243,17 +276,17 @@ class _OnlineOrdersState extends State<OnlineOrders> {
                                                                             8)),
                                                         padding: EdgeInsets.all(4),
                                                         child: Text(
-                                                          '${snapshot.data!.docs[index]['status']}',
+                                                          '${docs[index]['status']}',
                                                           style: GoogleFonts
                                                               .poppins(
                                                                   fontSize: 14,
-                                                                  color: snapshot.data!.docs[index]
+                                                                  color: docs[index]
                                                                               [
                                                                               'status'] ==
                                                                           'Order Placed'
                                                                       ? Colors
                                                                           .blue
-                                                                      : snapshot.data!.docs[index]['status'] ==
+                                                                      : docs[index]['status'] ==
                                                                               'Order Progress'
                                                                           ? Colors
                                                                               .amber
@@ -272,7 +305,7 @@ class _OnlineOrdersState extends State<OnlineOrders> {
                                   ])),
                               onTap: () {
                                 Map<String, dynamic> mp =
-                                    snapshot.data!.docs[index].data()
+                                    docs[index].data()
                                         as Map<String, dynamic>;
                                 Orders orderDetails = Orders.fromJson(mp);
                                 Navigator.push(

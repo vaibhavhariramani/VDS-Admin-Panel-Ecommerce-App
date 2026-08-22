@@ -66,20 +66,16 @@ class LoginController extends GetxController {
   final RxBool isLogingIn = true.obs;
   final RxBool isCreatingNewPassword = false.obs;
 
-  void _checkUserAndNavigate() async {
-    await Future.delayed(400.milliseconds, () {
-      String? afterLoginRoute;
-      // print(Get.rootDelegate.parameters);
-      if (Get.rootDelegate.parameters.containsKey('then')) {
-        afterLoginRoute = Get.rootDelegate.parameters['then']!;
-      }
-      // print(afterLoginRoute);
-      if (afterLoginRoute != null) {
-        Get.rootDelegate.toNamed(afterLoginRoute);
-      } else {
-        Get.rootDelegate.toNamed(DashboardRoutes.DASHBOARD);
-      }
-    });
+  void _checkUserAndNavigate() {
+    String? afterLoginRoute;
+    if (Get.rootDelegate.parameters.containsKey('then')) {
+      afterLoginRoute = Get.rootDelegate.parameters['then']!;
+    }
+    if (afterLoginRoute != null) {
+      Get.rootDelegate.toNamed(afterLoginRoute);
+    } else {
+      Get.rootDelegate.toNamed(DashboardRoutes.DASHBOARD);
+    }
   }
 
   Future<void> handleLogin() async {

@@ -1,41 +1,22 @@
-import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get/get.dart';
 
-import 'package:http/http.dart' as http;
-
-import '../models/AcitivityLog.dart';
+import '../models/Bill.dart';
 import '../models/Orders.dart';
 import '../models/Product.dart';
 import '../models/Shop.dart';
+import '../models/UserType.dart';
 import '../models/Users.dart';
 import 'auth_service.dart';
-import 'data_service.dart';
 
 class FetchService extends GetxService {
   static FetchService get to => Get.find<FetchService>();
   final storageref = FirebaseStorage.instance;
-  final Rx<Users?> amplifyUser = Rx<Users?>(null);
   final FirebaseFirestore Collection = FirebaseFirestore.instance;
-
-  // GraphQLClient? client;
-  int invitedUserCount = 0;
-  @override
-  void onInit() {
-    _getGqlClient();
-    super.onInit();
-  }
-
-  _getGqlClient() async {
-    // client = await GqlHelper.getClient();
-    // _startProductSubscriptions();
-  }
 
   Future<List<Product>> fetchAllProductsByShop(String? shopId) async {
     List<Product> _products = [];
-    // String? shopId = await fetchShopId();
     print("Fetching Products Data according to Shop Id: $shopId");
     print(AuthService.to.isAuthenticated);
     if (AuthService.to.isAuthenticated) {
@@ -55,7 +36,6 @@ class FetchService extends GetxService {
           print("length of products: ${_products.length}");
           print("printing products: ${_products}");
         }
-        // Get.log(_products.toString() + 'response');
         print("checking Refreshed Value:  ");
         for (var item in _products) {
           print('$item \n\n');
@@ -84,7 +64,6 @@ class FetchService extends GetxService {
         print("No shop found for the user.");
         return null;
       }
-      // Extract the shopId from the query result
       String shopId = querySnapshot.docs.first.id;
       print("Fetched ShopId: $shopId");
       return shopId;
@@ -94,304 +73,112 @@ class FetchService extends GetxService {
     }
   }
 
+  Future<Shop?> fetchShopById(String shopId) async {
+    try {
+      final DocumentSnapshot<Object?> snap =
+          await Collection.collection('Shops').doc(shopId).get();
+      if (!snap.exists) return null;
+      return Shop.fromJson(snap.data() as Map<String, dynamic>?, id: snap.id);
+    } catch (e) {
+      print('Error fetching shop $shopId: $e');
+      return null;
+    }
+  }
+
   //Fetching Shop Currency from User Id
   Future<String?> fetchShopCurrency() async {
     print("running fetching Shop Current");
     String? id = AuthService.to.user.value?.id;
-    var url = Uri.parse(
-        'https://xiz7sjryubbtzcvgimxy7tcuem.appsync-api.eu-west-1.amazonaws.com/graphql');
-    String Query = """query MyQuery {
-  searchShops(filter: {usersID: {eq: "$id"}}) {
-    items {
-      id
-      currency_type
-    }
-  }
-}
-""";
-
-    var response = await http.post(
-      url,
-      headers: {'x-api-key': 'da2-qah2nlfghjd6hlve2dn7r5pi3a'},
-      body: json.encode(
-        {
-          'query': Query,
-        },
-      ),
-    );
-    print(
-        "Fetching Currency Type for Shop from User Id: ${AuthService.to.user.value!.id} \n");
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}');
-    String shopCurr = json.decode(response.body)['data']["searchShops"]['items']
-        [0]["currency_type"];
-    Get.log("Fetched ShopId : $shopCurr ");
-    return shopCurr;
-  }
-
-  Future<Shop?> FetchShopFromUserId({required String userid}) async {
-    print("we are fetching shop from user ID");
-    Shop? _shop = Shop();
-    var url = Uri.parse(
-        'https://xiz7sjryubbtzcvgimxy7tcuem.appsync-api.eu-west-1.amazonaws.com/graphql');
-    String Query = """query MyQuery {
-  searchShops(filter: {usersID: {eq: "$userid"}, is_deleted: {ne: true}}) {
-    items {
-      name
-      _deleted
-      _lastChangedAt
-      _version
-      about
-      closing_time
-      createdAt
-      created_on
-      currency_type
-      id
-      img_token
-      is_active
-      is_deleted
-      lat
-      license_expiry_date
-      license_renewed_on
-      lon
-      manager
-      opening_time
-      phn_number
-      phonepinID
-      phy_address
-      rating
-      shopcategoryID
-      updatedAt
-      url
-      usersID
-    }
-  }
-}
-""";
-    var response = await http.post(url,
-        headers: {'x-api-key': 'da2-qah2nlfghjd6hlve2dn7r5pi3a'},
-        body: json.encode({'query': Query}));
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}');
-    // var res = json.decode(response.body)['data']["searchShops"]['items'];
-    // Shop temp = Shop.fromJson(res);
-    var res = json.decode(response.body)['data']["searchShops"]['items'];
-    // print(_result.data);
-    // if ((_result.data ?? {})['searchShops']['items'].isNotEmpty) {
-    for (var _item in res) {
-      if (_item['name'].toString() != "null") {
-        _shop = Shop.fromJson(_item);
+    try {
+      CollectionReference ShopsDB = Collection.collection('Shops');
+      QuerySnapshot<Object?> querySnapshot =
+          await ShopsDB.where("shopAdmin", isEqualTo: id).limit(1).get();
+      if (querySnapshot.docs.isEmpty) {
+        return null;
       }
-    }
-    return _shop;
-  }
-
-  Future<List<Shop>> FetchShopFromUserHeirachy() async {
-    Get.log("Fetching Shops Data From User Heirachy");
-    String? Id = AuthService.to.user.value?.id;
-    List<Shop> _DataList = [];
-    var url = Uri.parse(
-        'https://xiz7sjryubbtzcvgimxy7tcuem.appsync-api.eu-west-1.amazonaws.com/graphql');
-
-    String getUsers = """query MyQuery {
-  listUsersHierarchies(filter: {managed_by: {eq: "$Id"}}) {
-    items {
-      user_id
+      var data = querySnapshot.docs.first.data() as Map<String, dynamic>;
+      String? shopCurr = data['currencyType'];
+      Get.log("Fetched Shop currency : $shopCurr ");
+      return shopCurr;
+    } catch (e) {
+      print('Error fetching shop currency: $e');
+      return null;
     }
   }
-}
-""";
 
-    var response = await http.post(url,
-        headers: {'x-api-key': 'da2-qah2nlfghjd6hlve2dn7r5pi3a'},
-        body: json.encode({'query': getUsers}));
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}');
-    var res =
-        json.decode(response.body)['data']["listUsersHierarchies"]['items'];
-
-    for (var item in res) {
-      print(item["user_id"]);
-      var uuid = item["user_id"];
-      await FetchShopFromUserId(userid: uuid).then((_shopresponse) {
-        _DataList.add(_shopresponse!);
-      });
-    }
-    return _DataList;
-  }
-
-  Future<List<Map<ActivityLog, Users?>>>
-      FetchActivityLogFromUserHeirachy() async {
-    Get.log("Fetching Shops Data From User Heirachy");
-    String? Id = AuthService.to.user.value?.id;
-    List<Map<ActivityLog, Users?>> _logs = [];
-    var url = Uri.parse(
-        'https://xiz7sjryubbtzcvgimxy7tcuem.appsync-api.eu-west-1.amazonaws.com/graphql');
-
-    String getUsers = """query MyQuery {
-  listUsersHierarchies(filter: {managed_by: {eq: "$Id"}}) {
-    items {
-      user_id
+  /// The `regionId`/`Country` to stamp onto a new Product or Bill doc,
+  /// read from the shop's own doc. Products and Bills are created by this
+  /// app (unlike Shops/Regions, which currently aren't), so this is where
+  /// the hierarchy denormalization actually gets applied going forward —
+  /// existing docs created before this need a separate backfill.
+  Future<({String? regionId, String? country})> fetchShopHierarchy(
+      String? shopId) async {
+    if (shopId == null) return (regionId: null, country: null);
+    try {
+      final DocumentSnapshot<Object?> doc =
+          await Collection.collection('Shops').doc(shopId).get();
+      final data = doc.data() as Map<String, dynamic>?;
+      return (
+        regionId: data?['regionId']?.toString(),
+        country: data?['Country']?.toString(),
+      );
+    } catch (e) {
+      print('Error fetching shop hierarchy for $shopId: $e');
+      return (regionId: null, country: null);
     }
   }
-}
-""";
 
-    var response = await http.post(url,
-        headers: {'x-api-key': 'da2-qah2nlfghjd6hlve2dn7r5pi3a'},
-        body: json.encode({'query': getUsers}));
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}');
-    var res =
-        json.decode(response.body)['data']["listUsersHierarchies"]['items'];
-    print(res[0]);
-    for (var item in res) {
-      print(item["user_id"]);
-      var id = item["user_id"];
-      await DataService.to
-          .FetchActivityLogsDetails(id)
-          .then((List<Map<ActivityLog, Users?>> _logresponse) {
-        _logs.addAll(_logresponse);
-      });
-    }
-    return _logs;
-  }
-
-  Future<List<Users?>> fetchAllCountryPartners() async {
-    List<Users?> _countr_partners = [];
-    // String? shopId = await fetchShopId();
-    print("Fetching Products Data of Country heads");
-    if (AuthService.to.isAuthenticated) {
-      try {
-        var url = Uri.parse(
-            'https://xiz7sjryubbtzcvgimxy7tcuem.appsync-api.eu-west-1.amazonaws.com/graphql');
-        String alllist = '''query MyQuery {
-  syncUsers(filter: {user_type: {eq: COUNTRY_HEAD}}) {
-    items {
-      _deleted
-      _lastChangedAt
-      _version
-      applie_id
-      city
-      country
-      createdAt
-      currency_type
-      current_language
-      current_lat
-      current_lon
-      deleted_parent
-      email
-      fb_id
-      fullname
-      gmail_id
-      id
-      img_token
-      isUserSecure
-      mag_subscription_left
-      managed_by
-      phn_number
-      phonepinID
-      radiusPreference
-      saved_location
-      shops_subscription_left
-      status
-      updatedAt
-      user_type
-    }
-  }
-}
-
-
-''';
-        var response = await http.post(
-          url,
-          headers: {'x-api-key': 'da2-qah2nlfghjd6hlve2dn7r5pi3a'},
-          body: json.encode(
-            {
-              'query': alllist,
-            },
-          ),
-        );
-        print('Response status: ${response.statusCode}');
-        print('Response body: ${response.body}');
-        Map versionResopnseMap = jsonDecode(response.body);
-
-        var versionResopnseList =
-            versionResopnseMap["data"]["syncUsers"]["items"];
-        print(versionResopnseMap.toString() + 'is working');
-        for (var i in versionResopnseList) {
-          _countr_partners.add(Users.fromJson(i));
-        }
-        Get.log(_countr_partners.toString() + 'response');
-        print("checking Refreshed Value:  ");
-        for (var item in _countr_partners) {
-          print('$item \n\n');
-        }
-      } on Exception catch (e) {
-        print('Query failed: $e');
-      } catch (e) {
-        print(e);
-      }
-    }
-    return _countr_partners;
-  }
-
+  /// Region Admins (`UserType.MERCHANT`) for the signed-in Country Admin's
+  /// country. Previously this went through the `Countries` collection's
+  /// `RegionMerchantUserID`/`ShopsUnderMerchant` fields, which had no
+  /// agreed relationship with the separate `Regions` collection that
+  /// actually backs shop lookups (`DataService.FetchShopIds`) — two
+  /// collections claiming the same region↔shop edge. `Regions` is now
+  /// the single source of truth for that edge (see `Regions.Country` in
+  /// [fetchRegionsForCountry]); this method no longer reads `Countries` at
+  /// all, and instead queries `Users` directly for Region Admins sharing
+  /// the Country Admin's `Country` name.
   Future<RxList<Users?>> fetchAllMERCANTS() async {
     RxList<Users?> _merchants = RxList<Users?>();
 
     if (AuthService.to.isAuthenticated) {
       try {
-        CollectionReference CountriesDB = Collection.collection('Countries');
         CollectionReference UsersDB = Collection.collection('Users');
         var UserCountry = AuthService.to.user.value!.country;
-        QuerySnapshot<Object?> querySnapshot =
-            await CountriesDB.where("Country", isEqualTo: UserCountry).get();
 
-        print("Fetching Merchants");
-        print("Users country is : ${AuthService.to.user.value!.country}");
-        print("priting data from Country: ${UserCountry}----->");
+        print("Fetching Merchants (Region Admins)");
+        print("Users country is : $UserCountry");
+
+        QuerySnapshot<Object?> querySnapshot = await UsersDB
+            .where('userType', isEqualTo: UserType.MERCHANT.name)
+            .where('Country', isEqualTo: UserCountry)
+            .get();
 
         for (var document in querySnapshot.docs) {
-          var merchantData = document.data() as Map<String, dynamic>;
-
-          // Access MerchantUserID and ShopsUnderMerchant
-          var merchantUserID = merchantData['RegionMerchantUserID'];
-          var shopsUnderMerchant = merchantData['ShopsUnderMerchant'];
-
-          print('MerchantUserID: $merchantUserID');
-          print('ShopsUnderMerchant: $shopsUnderMerchant');
-          DocumentSnapshot<Object?> querySnapshot =
-              await UsersDB.doc(merchantUserID).get();
-          if (querySnapshot.data() != null) {
-            // Assuming 'email' is a unique field, so there should be at most one document
-            var userDataMap = querySnapshot.data() as Map<String, dynamic>;
-            print(userDataMap);
-            print("*****************************");
-            String type_of_user = userDataMap['userType'];
-            // Create your Users object with the fetched data
-            Users temp = Users(
-              id: userDataMap['id'],
-              fullname: userDataMap['fullname'],
-              img_token: userDataMap['imgToken'],
-              phn_number: userDataMap['phone'],
-              gmail_id: "",
-              fb_id: "",
-              applie_id: "",
-              email: userDataMap['email'],
-              phonepinID: "",
-              user_type: getUserTypeFromString(userDataMap['userType'] ?? ''),
-              current_language: "",
-              current_lat: 0.0,
-              isUserSecure: true,
-              radiusPreference: 0.0,
-              saved_location: "",
-              current_lon: 0.0,
-              managed_by: "",
-              country: userDataMap['Country'],
-            );
-            // Assuming you have a Users.fromJson constructor to create Users objects
-            _merchants.add(temp);
-          }
+          var userDataMap = document.data() as Map<String, dynamic>;
+          print(userDataMap);
+          print("*****************************");
+          Users temp = Users(
+            id: document.id,
+            fullname: userDataMap['fullname'],
+            img_token: userDataMap['imgToken'],
+            phn_number: userDataMap['phone'],
+            gmail_id: "",
+            fb_id: "",
+            applie_id: "",
+            email: userDataMap['email'],
+            phonepinID: "",
+            user_type: getUserTypeFromString(userDataMap['userType']?.toString() ?? ''),
+            current_language: "",
+            current_lat: 0.0,
+            isUserSecure: true,
+            radiusPreference: 0.0,
+            saved_location: "",
+            current_lon: 0.0,
+            managed_by: "",
+            country: userDataMap['Country'],
+          );
+          _merchants.add(temp);
         }
       } on Exception catch (e) {
         print('Query failed: $e');
@@ -404,10 +191,42 @@ class FetchService extends GetxService {
     return _merchants;
   }
 
+  /// Regions belonging to a Country Admin's country — requires each
+  /// `Regions` doc to carry a `Country` field using the same name-string
+  /// convention already on `Users.Country`. Existing `Regions` docs
+  /// created before this field existed won't be returned until they're
+  /// backfilled with it.
+  Future<List<Map<String, dynamic>>> fetchRegionsForCountry(
+      String? countryName) async {
+    final List<Map<String, dynamic>> regions = [];
+    if (countryName == null) return regions;
+    try {
+      QuerySnapshot<Object?> querySnapshot = await Collection
+          .collection('Regions')
+          .where('Country', isEqualTo: countryName)
+          .get();
+      for (var doc in querySnapshot.docs) {
+        regions.add({'id': doc.id, ...(doc.data() as Map<String, dynamic>)});
+      }
+    } catch (e) {
+      print('Error fetching regions for country $countryName: $e');
+    }
+    return regions;
+  }
+
+  /// Streams the current user's own shop's online orders only. Deliberately
+  /// async-resolves shopId first rather than exposing an unscoped stream —
+  /// a prior version of this method queried the whole `OnlineOrders`
+  /// collection with no shop filter, leaking every shop's orders to any
+  /// signed-in client.
   Stream<QuerySnapshot> OnlineOrders({String? search, String? filter}) {
-    return Collection.collection('OnlineOrders')
-        .orderBy('booking', descending: true)
-        .snapshots();
+    return Stream.fromFuture(fetchShopId()).asyncExpand((String? shopId) {
+      if (shopId == null) return const Stream<QuerySnapshot>.empty();
+      return Collection.collection('OnlineOrders')
+          .where('shopId', isEqualTo: shopId)
+          .orderBy('booking', descending: true)
+          .snapshots();
+    });
   }
 
   Stream<QuerySnapshot> regions(int? filter) {
@@ -442,7 +261,6 @@ class FetchService extends GetxService {
         for (var document in querySnapshot.docs) {
           var OrderData = document.data() as Map<String, dynamic>;
 
-          // Access OrderUserID and ShopsUnderOrder
           var OrderUserID = OrderData['RegionOrderUserID'];
           var shopsUnderOrder = OrderData['ShopsUnderOrder'];
 
@@ -450,7 +268,6 @@ class FetchService extends GetxService {
           print('ShopsUnderOrder: $shopsUnderOrder');
           print(OrderData);
           print("*****************************");
-          // Create your Users object with the fetched data
           Orders temp = Orders.fromJson(OrderData);
           _onlineOrders.add(temp);
         }
@@ -463,6 +280,40 @@ class FetchService extends GetxService {
     print("Length of list fetched from google firebase for _onlineOrders");
     print(_onlineOrders.length);
     return _onlineOrders;
+  }
+
+  /// POS sales for the signed-in user's shop, from the `Bills` collection
+  /// `BillingController.createBill()` writes to. Ordered newest-first;
+  /// falls back to unordered if the composite index for
+  /// (shopId, createdAt) hasn't been deployed yet, so the offline-orders
+  /// table degrades gracefully instead of erroring outright.
+  Future<RxList<Bill>> fetchOfflineOrdersUsingShopId() async {
+    RxList<Bill> _offlineOrders = RxList<Bill>();
+    if (!AuthService.to.isAuthenticated) return _offlineOrders;
+    final String? shopId = await fetchShopId();
+    if (shopId == null) return _offlineOrders;
+    try {
+      QuerySnapshot<Object?> querySnapshot = await Collection
+          .collection('Bills')
+          .where('shopId', isEqualTo: shopId)
+          .orderBy('createdAt', descending: true)
+          .get();
+      _offlineOrders.addAll(querySnapshot.docs.map(Bill.fromDoc));
+    } catch (e) {
+      print('Ordered offline-orders query failed (index missing?), falling back to unordered: $e');
+      try {
+        QuerySnapshot<Object?> fallback = await Collection
+            .collection('Bills')
+            .where('shopId', isEqualTo: shopId)
+            .get();
+        final List<Bill> bills = fallback.docs.map(Bill.fromDoc).toList()
+          ..sort((a, b) => (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0)));
+        _offlineOrders.addAll(bills);
+      } catch (e2) {
+        print('Error fetching offline orders: $e2');
+      }
+    }
+    return _offlineOrders;
   }
 
   category() {

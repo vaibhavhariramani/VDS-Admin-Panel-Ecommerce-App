@@ -12,6 +12,10 @@ class PublishedProductsController extends GetxController {
   final RxBool productdeleting = false.obs;
   final RxList<Product> allProducts = <Product>[].obs;
   final RxList<Product> publishedProducts = <Product>[].obs;
+  final RxString searchQuery = ''.obs;
+  List<Product> get visiblePublishedProducts => publishedProducts
+      .where((Product p) => p.matchesSearch(searchQuery.value))
+      .toList();
   final DataService _dataService = DataService.to;
   final RxString shopId = ''.obs;
   final FormGroup productAddForm = FormGroup(

@@ -1,113 +1,51 @@
-import 'dart:convert';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_dashboard/flutter_dashboard.dart';
-import 'package:http/http.dart' as http;
-
-import 'auth_service.dart';
 
 class UpdateService extends GetxService {
   static UpdateService get to => Get.find<UpdateService>();
-
-  Future<bool> updateUserImage({
-    required String img_token,
-  }) async {
-    String? id = AuthService.to.user.value!.id;
-    print("updted image url $img_token");
-    try {
-      var url = Uri.parse(
-          'https://xiz7sjryubbtzcvgimxy7tcuem.appsync-api.eu-west-1.amazonaws.com/graphql');
-      String latestVersionNo = """query MyQuery {
-          getUsers(id: "$id") {
-            _version
-          }
-        }""";
-
-      var versionresponse = await http.post(url,
-          headers: {'x-api-key': 'da2-qah2nlfghjd6hlve2dn7r5pi3a'},
-          body: json.encode({'query': latestVersionNo}));
-
-      print('Response status: ${versionresponse.statusCode}');
-      print('Response body: ${versionresponse.body}');
-      Map versionResopnseMap = jsonDecode(versionresponse.body);
-
-      int versionNo = versionResopnseMap["data"]["getUsers"]["_version"];
-      print(versionNo);
-      //updateUsers(input: {id: "$id", fullname: "$fullname", img_token: "$img_token", _version: $versionNo, phn_number: "$phone_number"}) {
-      String updateMutation = """mutation MyMutation {
-          updateUsers(input: {id: "$id", img_token: "$img_token", _version: $versionNo,}) {
-            id
-            fullname
-            _version
-            img_token
-            phn_number
-          }
-        }
-        """;
-
-      var response = await http.post(url,
-          headers: {'x-api-key': 'da2-qah2nlfghjd6hlve2dn7r5pi3a'},
-          body: json.encode({'query': updateMutation}));
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
-      var decodedJson = json.decode(response.body);
-      var jsonValue = decodedJson['data']['updateUsers'];
-      print("new full name ${jsonValue['fullname']}");
-      return true;
-    } on Exception catch (e) {
-      print('Query failed: $e');
-    } catch (e) {
-      print(e);
-    }
-    return false;
-  }
+  final FirebaseFirestore Collection = FirebaseFirestore.instance;
 
   Future<bool> deleteShop({
     required String shopId,
   }) async {
-    String? id = AuthService.to.user.value!.id;
-    print("updted image url $shopId");
     try {
-      var url = Uri.parse(
-          'https://xiz7sjryubbtzcvgimxy7tcuem.appsync-api.eu-west-1.amazonaws.com/graphql');
-      String latestVersionNo = """query MyQuery {
-          getShop(id: "$shopId") {
-            _version
-          }
-        }""";
-
-      var versionresponse = await http.post(url,
-          headers: {'x-api-key': 'da2-qah2nlfghjd6hlve2dn7r5pi3a'},
-          body: json.encode({'query': latestVersionNo}));
-
-      print('Response status: ${versionresponse.statusCode}');
-      print('Response body: ${versionresponse.body}');
-      Map versionResopnseMap = jsonDecode(versionresponse.body);
-
-      int versionNo = versionResopnseMap["data"]["getShop"]["_version"];
-      print(versionNo);
-      //updateUsers(input: {id: "$id", fullname: "$fullname", img_token: "$img_token", _version: $versionNo, phn_number: "$phone_number"}) {
-      String updateMutation = """mutation MyMutation {
-  updateShop(input: {_version: $versionNo, id: "$shopId", is_deleted: true}) {
-    id
-  }
-}
-        """;
-
-      var response = await http.post(url,
-          headers: {'x-api-key': 'da2-qah2nlfghjd6hlve2dn7r5pi3a'},
-          body: json.encode({'query': updateMutation}));
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
-      var decodedJson = json.decode(response.body);
-      var jsonValue = decodedJson['data']['updateShop'];
-      // print("new full name ${jsonValue['fullname']}");
-      print('delete shop ${jsonValue}');
+      await Collection.collection('Shops').doc(shopId).update({
+        'isactive': false,
+      });
+      print('Shop $shopId marked inactive');
       return true;
-    } on Exception catch (e) {
-      print('Query failed: $e');
     } catch (e) {
-      print(e);
+      print('Error deleting shop $shopId: $e');
+      return false;
     }
-    return false;
+  }
+
+  /// Updates the fields the client app reads to render a shop's storefront
+  /// (name, contact info, and branding: logo/banners/accent color).
+  Future<bool> updateShopBranding({
+    required String shopId,
+    required String name,
+    required String about,
+    required String phoneNumber,
+    required String address,
+    required String? imgToken,
+    required List<String> bannerUrls,
+    required String? brandColor,
+  }) async {
+    try {
+      await Collection.collection('Shops').doc(shopId).update({
+        'name': name,
+        'about': about,
+        'phone_number': phoneNumber,
+        'address': address,
+        'imgToken': imgToken,
+        'bannerUrls': bannerUrls,
+        'brandColor': brandColor,
+      });
+      return true;
+    } catch (e) {
+      print('Error updating shop branding for $shopId: $e');
+      return false;
+    }
   }
 }

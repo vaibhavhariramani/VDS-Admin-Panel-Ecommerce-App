@@ -45,7 +45,7 @@ class ShopCard extends GetResponsiveView<ShopListingController> {
           children: [
             Expanded(
               child: CachedNetworkImage(
-                imageUrl: shopItem.keys.first.img_token![0],
+                imageUrl: shopItem.keys.first.img_token ?? '',
                 progressIndicatorBuilder: (context, url, progress) => Center(
                   child: CircularProgressIndicator(
                     color: Theme.of(context).indicatorColor,

@@ -21,6 +21,26 @@ class _OrderDetailsState extends State<OrderDetails> {
   DateFormat time = DateFormat.jm();
   String? delivery;
 
+  static const List<String> _knownStatuses = [
+    'Order Placed',
+    'Order Accepted',
+    'Order PickedUp',
+    'Order Completed',
+  ];
+
+  /// DropdownButton requires `value` to exactly match one of `items`, or it
+  /// throws. Orders placed from the client app can carry a status string
+  /// that isn't one of the 4 the admin panel recognizes (e.g. whatever the
+  /// client app's own wording is) — folding the order's actual status into
+  /// the list when it's unrecognized keeps the dropdown from crashing and
+  /// still lets the admin move it to a known status.
+  List<String> get _statusOptions {
+    if (status != null && !_knownStatuses.contains(status)) {
+      return [status!, ..._knownStatuses];
+    }
+    return _knownStatuses;
+  }
+
   // Safe numeric getters
   double get totalAmount {
     final v = widget.mp?.totalAmount;
@@ -104,12 +124,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                 underline: Container(),
                 hint: Text('Status'),
                 style: TextStyle(color: Colors.white, fontSize: 16),
-                items: [
-                  'Order Placed',
-                  'Order Accepted',
-                  'Order PickedUp',
-                  'Order Completed'
-                ].map((value) {
+                items: _statusOptions.map((value) {
                   return DropdownMenuItem(
                     value: value,
                     child: Text(value),
@@ -320,12 +335,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                                     underline: Container(),
                                     hint: Text('Status'),
                                     style: TextStyle(color: Colors.black),
-                                    items: [
-                                      'Order Placed',
-                                      'Order Accepted',
-                                      'Order PickedUp',
-                                      'Order Completed'
-                                    ].map((value) {
+                                    items: _statusOptions.map((value) {
                                       return DropdownMenuItem(
                                         value: value,
                                         child: Text(value),
@@ -361,32 +371,42 @@ class _OrderDetailsState extends State<OrderDetails> {
                     stream: FetchService.to.orderItems(widget.mp?.CartItemsId),
                     builder: (context, snapshot) {
                       if (snapshot.hasError) {
-                        return Text("Something went wrong");
+                        return Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text('Could not load items: ${snapshot.error}'),
+                        );
                       }
 
-                      if (snapshot.hasData) {
-                        return ListView.builder(
-                            physics: BouncingScrollPhysics(),
-                            shrinkWrap: true,
-                            itemCount: snapshot.data!.docs.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              Map<String, dynamic> data =
-                                  snapshot.data!.docs[index].data()
-                                      as Map<String, dynamic>;
-                              // return Text("Full Name: ${data['image']} ");
-                              return ItemsDetails(
-                                data: data,
-                              );
-                            });
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Padding(
+                          padding: EdgeInsets.all(24.0),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
                       }
 
-                      if (snapshot.connectionState == ConnectionState.done) {
-                        Map<String, dynamic> data =
-                            snapshot.data! as Map<String, dynamic>;
-                        return Text("Full Name: ${data['image']} ");
+                      final int itemCount = snapshot.data?.docs.length ?? 0;
+                      if (itemCount == 0) {
+                        return const Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Text(
+                            'No items found for this order.',
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        );
                       }
 
-                      return Text("loading");
+                      return ListView.builder(
+                          physics: BouncingScrollPhysics(),
+                          shrinkWrap: true,
+                          itemCount: itemCount,
+                          itemBuilder: (BuildContext context, int index) {
+                            Map<String, dynamic> data =
+                                snapshot.data!.docs[index].data()
+                                    as Map<String, dynamic>;
+                            return ItemsDetails(
+                              data: data,
+                            );
+                          });
                     },
                   ),
                 ],
@@ -409,43 +429,59 @@ class _OrderDetailsState extends State<OrderDetails> {
                     stream: FetchService.to.employee(),
                     builder: (context, snapshot) {
                       if (snapshot.hasError) {
-                        return Text('Something went wrong');
-                      }
-                      // if (snapshot.connectionState ==
-                      //     ConnectionState.waiting) {
-                      //   return Center(
-                      //       child: CircularProgressIndicator());
-                      // }
-                      if (snapshot.hasData) {
-                        return ListView.builder(
-                          physics: BouncingScrollPhysics(),
-                          shrinkWrap: true,
-                          itemCount: snapshot.data!.docs.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            Map<String, dynamic> data =
-                                snapshot.data!.docs[index].data()
-                                    as Map<String, dynamic>;
-                            return ListTile(
-                              leading: Container(
-                                  width: 60,
-                                  height: 60,
-                                  child: Image.network(
-                                    data['image'],
-                                  )),
-                              title: Text('${data['name']}'),
-                              subtitle: Text('${data['phone']}'),
-                              trailing: Radio(
-                                groupValue: delivery,
-                                value: snapshot.data!.docs[index].id,
-                                onChanged: (value) {
-                                  _deliveryBoy(snapshot.data!.docs[index]);
-                                },
-                              ),
-                            );
-                          },
+                        return Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(
+                              'Could not load delivery boys: ${snapshot.error}'),
                         );
                       }
-                      return const Center(child: CircularProgressIndicator());
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Padding(
+                          padding: EdgeInsets.all(24.0),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+                      final docs = snapshot.data?.docs ?? [];
+                      if (docs.isEmpty) {
+                        return const Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Text(
+                            'No delivery staff found.',
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        );
+                      }
+                      return ListView.builder(
+                        physics: BouncingScrollPhysics(),
+                        shrinkWrap: true,
+                        itemCount: docs.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          Map<String, dynamic> data =
+                              docs[index].data() as Map<String, dynamic>;
+                          final String? image = data['image']?.toString();
+                          return ListTile(
+                            leading: Container(
+                                width: 60,
+                                height: 60,
+                                child: (image != null && image.isNotEmpty)
+                                    ? Image.network(
+                                        image,
+                                        errorBuilder: (context, error, stack) =>
+                                            const Icon(Icons.person, size: 40),
+                                      )
+                                    : const Icon(Icons.person, size: 40)),
+                            title: Text('${data['name']}'),
+                            subtitle: Text('${data['phone']}'),
+                            trailing: Radio(
+                              groupValue: delivery,
+                              value: docs[index].id,
+                              onChanged: (value) {
+                                _deliveryBoy(docs[index]);
+                              },
+                            ),
+                          );
+                        },
+                      );
                     },
                   ),
                 ],

@@ -43,8 +43,17 @@ class FormTextInputField<T> extends ReactiveFormField<T, String> {
   }) : super(
           key: key,
           formControlName: controlName,
-          validationMessages:
-              validationMessage as Map<String, String Function(Object)>,
+          // `ReactiveFormField.validationMessages` wants a map of validator
+          // key -> message function (e.g. {'required': ...}), not a single
+          // function. Force-casting the single `validationMessage`
+          // function directly to that Map type is an invalid runtime cast
+          // that throws unconditionally, the moment any FormTextInputField
+          // is constructed — every field on this codebase's forms only
+          // ever supplies `Validators.required`, so the single message is
+          // for that key specifically.
+          validationMessages: {
+            ValidationMessage.required: validationMessage,
+          },
           builder: (ReactiveFormFieldState<T, String> field) {
             final _state = field as _ReactiveFormInputFieldState<T>;
 
