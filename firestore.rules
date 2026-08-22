@@ -86,6 +86,13 @@ service cloud.firestore {
       allow read, write: if isOwner(userId) || isStaff();
     }
 
+    // Per-customer saved delivery addresses (client app's address book -
+    // Users/{uid}/Addresses/{addressId}). Same owner-only shape as
+    // Favorites above, for the same reason (no subcollection inheritance).
+    match /Users/{userId}/Addresses/{addressId} {
+      allow read, write: if isOwner(userId) || isStaff();
+    }
+
     // Legacy/generic orders shape (kept for compatibility - not currently
     // written by the client app, see OnlineOrders below).
     match /Orders/{orderId} {

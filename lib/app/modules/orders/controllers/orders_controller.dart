@@ -17,6 +17,12 @@ class OrdersController extends GetxController {
   RxList<Orders?> OnlineordersData = RxList<Orders>();
   RxList<Bill> offlineOrdersData = RxList<Bill>();
 
+  /// Date Of order column index in the online orders table.
+  static const int dateColumnIndex = 1;
+  final RxInt sortColumnIndex = dateColumnIndex.obs;
+  /// Defaults to descending (most recent order first).
+  final RxBool sortAscending = false.obs;
+
   @override
   void onInit() {
     _fetch();
@@ -36,7 +42,23 @@ class OrdersController extends GetxController {
         .then((RxList<Orders?> response) {
       OnlineordersData = response;
     });
+    sortOnlineOrdersByDate(ascending: sortAscending.value);
     isLoading(false);
+  }
+
+  /// Sorts the online orders table by Date Of order. Nulls (orders missing
+  /// a date) always sort to the end, regardless of direction.
+  void sortOnlineOrdersByDate({required bool ascending}) {
+    sortAscending.value = ascending;
+    sortColumnIndex.value = dateColumnIndex;
+    OnlineordersData.sort((a, b) {
+      final DateTime? dateA = a?.dateOfOrder;
+      final DateTime? dateB = b?.dateOfOrder;
+      if (dateA == null && dateB == null) return 0;
+      if (dateA == null) return 1;
+      if (dateB == null) return -1;
+      return ascending ? dateA.compareTo(dateB) : dateB.compareTo(dateA);
+    });
   }
 
   Future<void> _fetchOfflineOrders() async {

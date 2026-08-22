@@ -1,0 +1,18 @@
+{
+  "projects": {
+    "default": "vaibhav-s-ecommerce-app"
+  },
+  "targets": {
+    "vaibhav-s-ecommerce-app": {
+      "hosting": {
+        "admin-panel": [
+          "vds-admin-panel"
+        ],
+        "local-bazaar-admin": [
+          "local-bazaar-admin-panel"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
