@@ -25,6 +25,9 @@ class ReactiveDatePickerField<T> extends ReactiveFormField<T, DateTime> {
   }) : super(
           key: key,
           formControlName: controlName,
+          validationMessages: {
+            ValidationMessage.required: validationMessage,
+          },
           builder: (ReactiveFormFieldState<T, DateTime> field) {
             final _ReactiveDatePickerFieldState<DateTime> _state =
                 field as _ReactiveDatePickerFieldState<DateTime>;

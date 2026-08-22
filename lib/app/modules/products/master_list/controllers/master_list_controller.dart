@@ -21,6 +21,9 @@ class MasterListController extends GetxController {
   int productsPerPage = 6;
   int currentPage = 0;
   final RxList<Product> allProducts = <Product>[].obs;
+  final RxString searchQuery = ''.obs;
+  List<Product> get visibleProducts =>
+      allProducts.where((Product p) => p.matchesSearch(searchQuery.value)).toList();
   final RxBool CreatingNewProduct = false.obs;
   final RxBool showProductUploadForm = false.obs;
   final RxBool showBulkProductUploadForm = false.obs;
@@ -325,7 +328,7 @@ class MasterListController extends GetxController {
     double? price = double.tryParse(productEditForm.control('product_price').value?.toString() ?? '');
     price ??= ProductDetails?.price;
 
-    double? discount = double.tryParse(productEditForm.control('discount').value?.toString() ?? '');
+    double? discount = double.tryParse(productEditForm.control('offer_price').value?.toString() ?? '');
     discount ??= ProductDetails?.discount;
     // ✅ Get DateTime values directly from controls
     DateTime? available_from = productEditForm.control('available_from').value;

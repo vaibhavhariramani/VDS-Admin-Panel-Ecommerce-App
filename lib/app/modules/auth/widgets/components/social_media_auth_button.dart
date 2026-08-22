@@ -19,20 +19,16 @@ class AuthSocialMediaButtons extends GetWidget<AuthService> {
     required this.isProcessing,
   }) : super(key: key);
 
-  void _navigateScreen() async {
-    await Future.delayed(400.milliseconds, () {
-      String? afterLoginRoute;
-      // print(Get.rootDelegate.parameters);
-      if (Get.rootDelegate.parameters.containsKey('then')) {
-        afterLoginRoute = Get.rootDelegate.parameters['then']!;
-      }
-      // print(afterLoginRoute);
-      if (afterLoginRoute != null) {
-        Get.rootDelegate.toNamed(afterLoginRoute);
-      } else {
-        Get.rootDelegate.toNamed(DashboardRoutes.DASHBOARD);
-      }
-    });
+  void _navigateScreen() {
+    String? afterLoginRoute;
+    if (Get.rootDelegate.parameters.containsKey('then')) {
+      afterLoginRoute = Get.rootDelegate.parameters['then']!;
+    }
+    if (afterLoginRoute != null) {
+      Get.rootDelegate.toNamed(afterLoginRoute);
+    } else {
+      Get.rootDelegate.toNamed(DashboardRoutes.DASHBOARD);
+    }
   }
 
   @override

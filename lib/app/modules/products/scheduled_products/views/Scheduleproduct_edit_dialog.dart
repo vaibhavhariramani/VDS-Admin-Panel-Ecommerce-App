@@ -119,8 +119,8 @@ class SchProductEditor extends GetResponsiveView<ScheduledProductsController> {
                       isRequired: true,
                       textfield: FormTextInputField<String>(
                         controlName: "product_price",
-                        hintText:
-                            "${ProductDetails.currency_type} ${ProductDetails.price} ",
+                        hintText: _priceHint(
+                            ProductDetails.currency_type, ProductDetails.price),
                         onEditingComplete: () => _form.focus("discount"),
                         textInputAction: TextInputAction.next,
                         keyboardType: TextInputType.text,
@@ -133,8 +133,8 @@ class SchProductEditor extends GetResponsiveView<ScheduledProductsController> {
                       isRequired: true,
                       textfield: FormTextInputField<String>(
                         controlName: "offer_price",
-                        hintText:
-                            "${ProductDetails.currency_type} ${ProductDetails.discount} ",
+                        hintText: _priceHint(ProductDetails.currency_type,
+                            ProductDetails.discount),
                         onEditingComplete: () => _form.focus("expiry_date"),
                         textInputAction: TextInputAction.next,
                         keyboardType: TextInputType.text,
@@ -150,8 +150,7 @@ class SchProductEditor extends GetResponsiveView<ScheduledProductsController> {
                         isRequired: true,
                         textfield: ReactiveDatePickerField<DateTime>(
                           controlName: "start_date",
-                          hintText:
-                              " ${ProductDetails.available_from.toString().substring(0, 10)} ",
+                          hintText: _dateHint(ProductDetails.available_from),
                           onEditingComplete: () =>
                               _form.focus("visibility_date"),
                           validationMessage: (error) => "valid date required",
@@ -163,8 +162,7 @@ class SchProductEditor extends GetResponsiveView<ScheduledProductsController> {
                       isRequired: true,
                       textfield: ReactiveDatePickerField<DateTime>(
                         controlName: "expiry_date",
-                        hintText:
-                            " ${ProductDetails.expires_on.toString().substring(0, 10)} ",
+                        hintText: _dateHint(ProductDetails.expires_on),
                         onEditingComplete: () => _form.focus("visibility_date"),
                         validationMessage: (error) => "valid date required",
                       ),
@@ -174,9 +172,7 @@ class SchProductEditor extends GetResponsiveView<ScheduledProductsController> {
                       isRequired: true,
                       textfield: ReactiveDatePickerField<DateTime>(
                         controlName: "available_from",
-                        hintText: ProductDetails.available_from
-                            .toString()
-                            .substring(0, 10),
+                        hintText: _dateHint(ProductDetails.available_from),
                         onEditingComplete: () => _form.unfocus(),
                         validationMessage: (error) => "valid date required",
                       ),
@@ -189,5 +185,20 @@ class SchProductEditor extends GetResponsiveView<ScheduledProductsController> {
         ),
       ],
     );
+  }
+
+  String _dateHint(DateTime? date) {
+    if (date == null) return 'Not set';
+    return date.toString().substring(0, 10);
+  }
+
+  /// `currency_type`/`price`/`discount` can each individually be null on a
+  /// product doc — interpolating them straight into the hint text rendered
+  /// the literal word "null" in the field, which read as if the value
+  /// itself had gone missing.
+  String _priceHint(String? currencyType, double? amount) {
+    final String currency = currencyType ?? '';
+    final String value = amount == null ? 'Not set' : amount.toString();
+    return currency.isEmpty ? value : '$currency $value';
   }
 }

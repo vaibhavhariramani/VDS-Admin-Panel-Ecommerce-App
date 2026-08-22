@@ -13,6 +13,7 @@ import '../../../widgets/utils/padding_wrapper.dart';
 import '../../deletion_status/controllers/deletion_status_controller.dart';
 import '../../deletion_status/views/deletion_status_view.dart';
 import '../controllers/home_controller.dart';
+import 'dashboard_alerts_panel.dart';
 
 DateTime startDate = DateTime(2000);
 DateTime endDate = DateTime(3000);
@@ -886,7 +887,7 @@ class _ShopAdminView extends GetResponsiveView<HomeController> {
                               data.x,
                           yValueMapper: (ShopVisitorChartData data, _) =>
                               data.y,
-                          name: 'Visitors',
+                          name: 'Orders',
                           borderRadius:
                               const BorderRadius.all(Radius.circular(15)),
                           isTrackVisible: true,
@@ -898,6 +899,12 @@ class _ShopAdminView extends GetResponsiveView<HomeController> {
                   },
                   listType: FlutterDashboardListType.Grid,
                 ),
+              ),
+            ),
+            SliverVisibility(
+              visible: !deletionStatusController.isVisible.value,
+              sliver: const SliverToBoxAdapter(
+                child: DashboardAlertsPanel(),
               ),
             ),
           ],

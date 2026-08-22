@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
 
+import '../../../../constants/constants.dart';
 import '../../../../models/Product.dart';
 import '../../../../themes/app_theme.dart';
 import '../../../widgets/components/animated_submit_button.dart';
@@ -54,7 +55,9 @@ class MasterCard extends GetResponsiveView<MasterListController> {
                   top: 0,
                   bottom: 0,
                   child: CachedNetworkImage(
-                    imageUrl: productItem.img_token ?? "",
+                    imageUrl: (productItem.img_token?.isNotEmpty ?? false)
+                        ? productItem.img_token!
+                        : noImg,
                     progressIndicatorBuilder: (context, url, progress) =>
                         Center(
                       child: CircularProgressIndicator(
@@ -97,32 +100,53 @@ class MasterCard extends GetResponsiveView<MasterListController> {
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Text(
-                            // '\$${productItem.price} ;',
-                            '${productItem.currency_type} ${productItem.price}',
-                            textScaleFactor: Get.textScaleFactor,
-                            style: DefaultTextStyle.of(context).style.copyWith(
-                                  fontSize: 12,
-                                  color: Theme.of(context).disabledColor,
-                                  fontWeight: FontWeight.w200,
-                                  decoration: TextDecoration.lineThrough,
+                      // A struck-through "was" price only makes sense when
+                      // there's an actual offer price lower than the base
+                      // price. Every plain (non-deal) product has no
+                      // `discount` set, which defaults to 0 — showing it
+                      // unconditionally made every regular product's price
+                      // read as "struck through, now 0".
+                      child: (productItem.discount != null &&
+                              productItem.discount! > 0 &&
+                              productItem.discount! < productItem.price)
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Text(
+                                  '${productItem.currency_type ?? ''} ${productItem.price}',
+                                  textScaleFactor: Get.textScaleFactor,
+                                  style: DefaultTextStyle.of(context)
+                                      .style
+                                      .copyWith(
+                                        fontSize: 12,
+                                        color: Theme.of(context).disabledColor,
+                                        fontWeight: FontWeight.w200,
+                                        decoration: TextDecoration.lineThrough,
+                                      ),
                                 ),
-                          ),
-                          Text(
-                            // '\$${productItem.price} ;',
-                            '${productItem.currency_type} ${productItem.discount}',
-                            textScaleFactor: Get.textScaleFactor,
-                            style: DefaultTextStyle.of(context).style.copyWith(
-                                  fontSize: 12,
-                                  color: Colors.green,
-                                  fontWeight: FontWeight.w600,
+                                const SizedBox(width: 6),
+                                Text(
+                                  '${productItem.currency_type ?? ''} ${productItem.discount}',
+                                  textScaleFactor: Get.textScaleFactor,
+                                  style: DefaultTextStyle.of(context)
+                                      .style
+                                      .copyWith(
+                                        fontSize: 12,
+                                        color: Colors.green,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                 ),
-                          ),
-                        ],
-                      ),
+                              ],
+                            )
+                          : Text(
+                              '${productItem.currency_type ?? ''} ${productItem.price}',
+                              textScaleFactor: Get.textScaleFactor,
+                              style: DefaultTextStyle.of(context).style.copyWith(
+                                    fontSize: 12,
+                                    color: Theme.of(context).disabledColor,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                            ),
                     ),
                   ],
                 ),
@@ -230,7 +254,6 @@ class MasterCard extends GetResponsiveView<MasterListController> {
                     ),
                   ),
                 );
-                Get.back();
               },
               child: const Padding(
                 padding: EdgeInsets.all(8),
@@ -285,7 +308,6 @@ class MasterCard extends GetResponsiveView<MasterListController> {
                                       controller.isEditing(true);
                                       await controller
                                           .deleteproduct(productItem.id!);
-                                      Get.back();
                                     }),
                               ],
                             ),
@@ -294,7 +316,6 @@ class MasterCard extends GetResponsiveView<MasterListController> {
                   ),
                 ),
               );
-              Get.back();
             },
             child: const Padding(
               padding: EdgeInsets.all(8),
@@ -499,7 +520,6 @@ class MasterCard extends GetResponsiveView<MasterListController> {
                       ),
                     ),
                   );
-                  Get.back();
                 },
                 color: AppColors.yellow,
                 shape: RoundedRectangleBorder(
@@ -595,7 +615,9 @@ class MasterCard extends GetResponsiveView<MasterListController> {
                                 child: SizedBox.square(
                                   dimension: 100,
                                   child: CachedNetworkImage(
-                                    imageUrl: productItem.img_token ?? "",
+                                    imageUrl: (productItem.img_token?.isNotEmpty ?? false)
+                        ? productItem.img_token!
+                        : noImg,
                                     progressIndicatorBuilder:
                                         (context, url, progress) => Center(
                                       child: CircularProgressIndicator(

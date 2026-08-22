@@ -19,6 +19,15 @@ class Product {
   DateTime? _expires_on;
   DateTime? _available_from;
 
+  /// Denormalized from the owning shop at creation time (see
+  /// `DataService.CreateNewHotProduct` / `CreateService.CreateNewGreenProduct`)
+  /// so region/country-scoped product queries and Firestore rules don't
+  /// need a join back to `Shops`. `null` on any product created before
+  /// this field existed, until backfilled.
+  String? _region_id;
+  String? _country;
+  String? _brand;
+
   Product({
     this.id,
     String? barcode,
@@ -34,6 +43,9 @@ class Product {
     String? currency_type,
     String? img_token,
     String? shop_id,
+    String? region_id,
+    String? country,
+    String? brand,
     ProductDealType? deal_type,
     DateTime? expires_on,
     DateTime? available_from,
@@ -54,6 +66,29 @@ class Product {
     _expires_on = expires_on;
     _available_from = available_from;
     _shop_id = shop_id;
+    _region_id = region_id;
+    _country = country;
+    _brand = brand;
+  }
+
+  String? get shop_id => _shop_id;
+
+  String? get region_id => _region_id;
+
+  String? get country => _country;
+
+  String? get brand => _brand;
+
+  /// True if [query] (case-insensitive, substring) matches this product's
+  /// name, barcode, category, or brand — the fields search covers on the
+  /// Master List / Scheduled / Published product screens.
+  bool matchesSearch(String query) {
+    final String q = query.trim().toLowerCase();
+    if (q.isEmpty) return true;
+    return (_name?.toLowerCase().contains(q) ?? false) ||
+        (_barcode?.toLowerCase().contains(q) ?? false) ||
+        (_category?.toLowerCase().contains(q) ?? false) ||
+        (_brand?.toLowerCase().contains(q) ?? false);
   }
 
   double get price {
@@ -162,10 +197,6 @@ class Product {
   }
 
   static Product fromJson(Map<String, dynamic> data) {
-    
-    print("Converted snapshot data into Map");
-    print(data);
-    // Product tempProduct = emptyProduct();
     // Safely parse barcode as string
     String barcode = data['barcode']?.toString() ?? '';
 
@@ -175,38 +206,70 @@ class Product {
     // Safely parse count as int (used for the 'count' field)
     int count = int.tryParse(data['quantity']?.toString() ?? '0') ?? 0;
 
-    // Safely parse price and mrp as doubles
+    // Safely parse price, mrp and discount as doubles
     double price = (data['price'] is num) ? (data['price'] as num).toDouble() : 0.0;
     double mrp = (data['mrp'] is num) ? (data['mrp'] as num).toDouble() : 0.0;
+    double discount = (data['discount'] is num) ? (data['discount'] as num).toDouble() : 0.0;
 
     // Parse optional fields with null safety
-    String? shopId = data['shop_id']?.toString();
+    String? shopId = data['shopId']?.toString() ?? data['shop_id']?.toString();
+    String? regionId = data['regionId']?.toString();
+    String? country = data['Country']?.toString();
     String? description = data['description']?.toString();
+    String? brand = data['brand']?.toString();
     String category = data['category']?.toString() ?? '';
     String? image = data['image']?.toString();
     String? name = data['name']?.toString();
+    String? currencyType = data['currencyType']?.toString();
+
+    ProductDealType dealType = ProductDealType.values.firstWhere(
+      (e) => e.name == data['dealType']?.toString(),
+      orElse: () => ProductDealType.GREENDEALS,
+    );
+
+    DateTime? availableFrom = _timestampToDateTime(data['availableFrom']);
+    DateTime? expiresOn = _timestampToDateTime(data['expiresOn']);
 
     try {
-    Product tempProduct = Product(
-      price: price,
-      mrp: mrp,
-      barcode: barcode,
-      shop_id: shopId,
-      description: description,
-      category: category,
-      quantity: quantity,
-      count: count,
-      image: image,
-      name: name,
-      id: barcode, // or use a dedicated 'id' field if available
-    );
-    print("Product detail added: ${tempProduct.barcode}");
-    return tempProduct;
-  } catch (e, stackTrace) {
-    print('Error parsing product data: $e\n$stackTrace');
-    rethrow;
+      Product tempProduct = Product(
+        price: price,
+        mrp: mrp,
+        discount: discount,
+        barcode: barcode,
+        shop_id: shopId,
+        region_id: regionId,
+        country: country,
+        brand: brand,
+        description: description,
+        category: category,
+        quantity: quantity,
+        count: count,
+        image: image,
+        img_token: image,
+        currency_type: currencyType,
+        deal_type: dealType,
+        available_from: availableFrom,
+        expires_on: expiresOn,
+        name: name,
+        id: barcode, // or use a dedicated 'id' field if available
+      );
+      return tempProduct;
+    } catch (e, stackTrace) {
+      print('Error parsing product data: $e\n$stackTrace');
+      rethrow;
     }
-    
+  }
+
+  static DateTime? _timestampToDateTime(dynamic value) {
+    if (value == null) return null;
+    try {
+      // Avoids a hard dependency on cloud_firestore's Timestamp type here;
+      // Timestamp exposes toDate() so this works for both Timestamp and DateTime.
+      if (value is DateTime) return value;
+      return (value as dynamic).toDate() as DateTime;
+    } catch (_) {
+      return null;
+    }
   }
 
   static Product emptyProduct() {

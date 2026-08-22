@@ -56,6 +56,29 @@ class MasterListView extends GetResponsiveView<MasterListController> {
               ),
             ),
           ),
+          // Search — filters the grid below by name, barcode, category, or
+          // brand (controller.visibleProducts).
+          SliverVisibility(
+            visible: !controller.isLoading.value &&
+                controller.allProducts.isNotEmpty &&
+                !controller.CreatingNewProduct.value,
+            sliver: PaddingWrapper(
+              isSliverItem: true,
+              horizontalPadding: screen.isDesktop ? 40 : 10,
+              topPadding: 10,
+              child: SliverToBoxAdapter(
+                child: TextField(
+                  onChanged: (String value) => controller.searchQuery.value = value,
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.search),
+                    hintText: 'Search by name, barcode, or category',
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                ),
+              ),
+            ),
+          ),
           //Header For Master List
           SliverVisibility(
             visible: !controller.isLoading.value &&
@@ -64,7 +87,7 @@ class MasterListView extends GetResponsiveView<MasterListController> {
             sliver: ProductsHeader(
               title: "Masterlist",
               subTitle: "Products Listed",
-              totalCount: controller.allProducts.length,
+              totalCount: controller.visibleProducts.length,
               actions: const [
                 //   DropdownButtonHideUnderline(
                 //     child: DropdownButton2(
@@ -214,10 +237,23 @@ class MasterListView extends GetResponsiveView<MasterListController> {
           //     isOpen: true.obs,
           //   ),
 
+          // No-results state — distinct from the "no products at all" case
+          // above, which is what !controller.allProducts.isNotEmpty covers.
+          SliverVisibility(
+            visible: !controller.isLoading.value &&
+                controller.allProducts.isNotEmpty &&
+                controller.visibleProducts.isEmpty,
+            sliver: const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 60),
+                child: Center(child: Text('No products match your search.')),
+              ),
+            ),
+          ),
           //Grid View for Master List
           SliverVisibility(
               visible: !controller.isLoading.value &&
-                  controller.allProducts.isNotEmpty &&
+                  controller.visibleProducts.isNotEmpty &&
                   !controller.CreatingNewProduct.value,
               sliver: PaddingWrapper(
                 isSliverItem: true,
@@ -225,7 +261,7 @@ class MasterListView extends GetResponsiveView<MasterListController> {
                 horizontalPadding: screen.isDesktop ? 40 : 10,
                 child: FlutterDashboardListView.grid(
                   isSliverItem: true,
-                  childCount: controller.allProducts.length,
+                  childCount: controller.visibleProducts.length,
                   mainAxisSpacing: 20,
                   crossAxisSpacing: 20,
                   gridDelegate: !screen.isDesktop
@@ -260,7 +296,7 @@ class MasterListView extends GetResponsiveView<MasterListController> {
                   buildItem: (BuildContext context, int index) {
                     return Obx(() => MasterCard(
                           isMasterListItem: true,
-                          productItem: controller.allProducts[index],
+                          productItem: controller.visibleProducts[index],
                         ));
                   },
                   listType: FlutterDashboardListType.Grid,
@@ -270,7 +306,7 @@ class MasterListView extends GetResponsiveView<MasterListController> {
           //Pagination for Master List Grid View
           SliverVisibility(
             visible: !controller.isLoading.value &&
-                controller.allProducts.isNotEmpty &&
+                controller.visibleProducts.isNotEmpty &&
                 !controller.CreatingNewProduct.value,
             sliver: PaddingWrapper(
               isSliverItem: true,

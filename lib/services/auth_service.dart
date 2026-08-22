@@ -1,5 +1,4 @@
 import 'dart:js';
-import 'dart:js_interop';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -32,11 +31,8 @@ class AuthService extends GetxService {
   final FirebaseFirestore Collection = FirebaseFirestore.instance;
   final FacebookAuth _facebookAuth = FacebookAuth.instance;
   Rx<Users?> appUser = Rx<Users?>(null);
-  // GraphQLClient? client;
 
   String? authToken;
-  // static final _amplify = Amplify;
-  // APICategory api = _amplify.API;
 
   final Rx<UserType> userType = Rx<UserType>(UserType.ADMIN);
 
@@ -64,58 +60,101 @@ class AuthService extends GetxService {
     }
   }
 
+  /// Nav-menu visibility only — this is a convenience for hiding items the
+  /// signed-in user shouldn't see, not an authorization boundary. Actual
+  /// access control is [hasPermission] plus (eventually) Firestore
+  /// security rules; never trust this list server-side.
+  ///
+  /// Keyed on the user's actual [UserType] with a `switch`, not the old
+  /// `user.user_type ?? UserType.X` pattern repeated per branch: that
+  /// pattern meant a user with a `null` user_type (a missing/malformed
+  /// profile) satisfied *every* branch's null-coalesced check at once and
+  /// walked away with every role's routes enabled simultaneously — the
+  /// most fail-open outcome possible. A `null`/unrecognized type here now
+  /// gets no routes at all.
   void enableOrDisableRoutes(Users user) {
-    FlutterDashboardNavService.to.enabledRoutes.clear();
-    if ((user.user_type ?? UserType.ADMIN) == UserType.ADMIN) {
-      FlutterDashboardNavService.to.enabledRoutes.addAll(const [
-        "Dashboard", //Firstpage alsways need to be enabled
-        "Country Partners",
-        // "Users",
-        "Merchants",
-        "Action Log",
-        "Subscriptions",
-        "Banner Ads"
-      ]);
-    }
-    if ((user.user_type ?? UserType.SHOP_ADMIN) == UserType.SHOP_ADMIN) {
-      FlutterDashboardNavService.to.enabledRoutes.addAll(const [
-        "Dashboard", //Firstpage alsways need to be enabled
-        "Master List",
-        "Scheduled Products",
-        "Billing",
-        "Published Products",
-        "Product Listing",
-        "Orders",
+    final navRoutes = FlutterDashboardNavService.to.enabledRoutes;
+    navRoutes.clear();
+    switch (user.user_type) {
+      case UserType.ADMIN:
+        navRoutes.addAll(const [
+          "Dashboard", //Firstpage alsways need to be enabled
+          "Country Partners",
+          // "Users",
+          "Merchants",
+          "Action Log",
+          "Subscriptions",
+          "Banner Ads"
+        ]);
+        break;
+      case UserType.SHOP_ADMIN:
+        navRoutes.addAll(const [
+          "Dashboard", //Firstpage alsways need to be enabled
+          "Master List",
+          "Scheduled Products",
+          "Billing",
+          "Published Products",
+          "Product Listing",
+          "Orders",
+          "Storefront",
+          "Customers",
 
-        // "Magazine",
-        // "Registration"
-      ]);
+          // "Magazine",
+          // "Registration"
+        ]);
+        break;
+      case UserType.MERCHANT: // Region Admin — see UserTypeLabel.
+        navRoutes.addAll(const [
+          "Dashboard", //Firstpage alsways need to be enabled
+          "Shop Listing",
+          "Magazine",
+          "Subscriptions",
+          "Action Log",
+        ]);
+        break;
+      case UserType.AFFILIATES:
+        navRoutes.addAll(const [
+          "Dashboard",
+          "Merchants", //Firstpage alsways need to be enabled
+          "Subscriptions",
+          "Action Log",
+        ]);
+        break;
+      case UserType.COUNTRY_HEAD:
+        navRoutes.addAll(const [
+          "Dashboard", //Firstpage alsways need to be enabled
+          "Merchants",
+          "Subscriptions",
+          "Action Log",
+          "Banner Ads",
+        ]);
+        break;
+      case UserType.CUSTOMER:
+      case null:
+        // No admin-panel routes for a customer account or an
+        // unrecognized/missing profile — fail closed, not open.
+        break;
     }
-    if ((user.user_type ?? UserType.MERCHANT) == UserType.MERCHANT) {
-      FlutterDashboardNavService.to.enabledRoutes.addAll(const [
-        "Dashboard", //Firstpage alsways need to be enabled
-        "Shop Listing",
-        "Magazine",
-        "Subscriptions",
-        "Action Log",
-      ]);
-    }
-    if ((user.user_type ?? UserType.AFFILIATES) == UserType.AFFILIATES) {
-      FlutterDashboardNavService.to.enabledRoutes.addAll(const [
-        "Dashboard",
-        "Merchants", //Firstpage alsways need to be enabled
-        "Subscriptions",
-        "Action Log",
-      ]);
-    }
-    if ((user.user_type ?? UserType.COUNTRY_HEAD) == UserType.COUNTRY_HEAD) {
-      FlutterDashboardNavService.to.enabledRoutes.addAll(const [
-        "Dashboard", //Firstpage alsways need to be enabled
-        "Merchants",
-        "Subscriptions",
-        "Action Log",
-        "Banner Ads",
-      ]);
+  }
+
+  /// `FlutterDashboardNavService`'s own listener only reacts to *future*
+  /// changes to `enabledRoutes` (it registers via `ever(enabledRoutes, ...)`
+  /// in its own `onInit()`) — if this runs even slightly before that
+  /// listener is live, the write is silently missed and the sidebar stays
+  /// empty until something else touches `enabledRoutes`, which on a plain
+  /// page refresh might be never. That's the "nav bar disappeared on
+  /// refresh" bug: [_applyCachedRoleForInstantNav] used to call
+  /// [enableOrDisableRoutes] exactly once. Re-applying a few times a short
+  /// delay apart is idempotent (same route list each time) and guarantees
+  /// at least one application lands after the listener is registered,
+  /// without needing to know its exact registration timing.
+  Future<void> _reapplyRoutesReliably(Users forUser) async {
+    for (int attempt = 0; attempt < 5; attempt++) {
+      enableOrDisableRoutes(forUser);
+      Get.forceAppUpdate();
+      if (attempt < 4) {
+        await Future.delayed(const Duration(milliseconds: 150));
+      }
     }
   }
 
@@ -133,30 +172,70 @@ class AuthService extends GetxService {
     _storage.remove('token');
   }
 
+  static const String _cachedRoleKey = 'cachedUserTypeName';
+
   @override
   void onInit() {
-    // removeAuthToken();
     ever(user, (Users? _user) {
       if (_user != null) {
         loggedUser = _user.user_type;
         userType(_user.user_type ?? UserType.ADMIN);
-        enableOrDisableRoutes(user.value!);
+        _reapplyRoutesReliably(user.value!);
+        // Remember the role so a future refresh can render the nav
+        // instantly (see _applyCachedRoleForInstantNav) instead of showing
+        // an empty sidebar for the second or so the profile re-fetch takes.
+        if (_user.user_type != null) {
+          _storage.write(_cachedRoleKey, _user.user_type!.name);
+        }
       }
     });
-    _getGqlClient();
+    // Defer the startup user-restore fetch until after the first frame.
+    // FlutterDashboardNavService registers its own `ever(enabledRoutes, ...)`
+    // listener during its onInit(), which normally runs while that first
+    // frame is being built. `ever` only reacts to *future* changes, so if
+    // enableOrDisableRoutes() (triggered by the fetch above resolving) ran
+    // before that listener was registered, the nav menu would silently stay
+    // empty after a refresh even though the user is authenticated.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _applyCachedRoleForInstantNav();
+      getLogedInUserDetails();
+    });
     super.onInit();
   }
 
-  void _getGqlClient() async {
-    // client = await GqlHelper.getClient();
-    getLogedInUserDetails();
+  /// Renders the nav menu immediately from the last-known role cached
+  /// locally, before the authoritative Firestore profile fetch
+  /// (`getLogedInUserDetails`) has had a chance to complete. Without this,
+  /// every page refresh showed an empty sidebar for however long that
+  /// fetch's network round trip took, then popped the real routes in —
+  /// jarring on a slow connection and pointless when the role essentially
+  /// never changes between refreshes. This is purely a rendering
+  /// optimization: `getLogedInUserDetails()` still runs right after and its
+  /// `ever(user, ...)` callback re-applies (and corrects, if anything
+  /// changed) the authoritative routes.
+  void _applyCachedRoleForInstantNav() {
+    if (!isAuthenticated || user.value != null) return;
+    final String? cachedRoleName = _storage.read(_cachedRoleKey);
+    if (cachedRoleName == null) return;
+    final UserType? cachedType = getUserTypeFromString(cachedRoleName);
+    if (cachedType == null) return;
+    _reapplyRoutesReliably(Users(user_type: cachedType));
   }
 
-  void getLogedInUserDetails() async {
-    if (isAuthenticated) {
+  Future<void> getLogedInUserDetails() async {
+    if (isAuthenticated && user.value == null) {
       readAuthToken();
-      print(authToken);
-      if (authToken != null) {}
+      if (authToken != null) {
+        final Users fetchedUser = await fetchUserDetails(authToken);
+        user(fetchedUser);
+        // The dashboard shell (drawer/nav menu) has already been built by
+        // this point on a page refresh, and it reads the nav-service route
+        // list as a one-off snapshot rather than reactively — so populating
+        // enabledRoutes above (via the `ever(user, ...)` listener) isn't
+        // picked up on its own. Force a rebuild so the restored session's
+        // nav items actually show up instead of leaving the sidebar empty.
+        Get.forceAppUpdate();
+      }
     }
   }
 
@@ -182,8 +261,6 @@ class AuthService extends GetxService {
       if (_userCreds != null) {
         print("User exist on Google Firebase: $_userCreds");
         firebaseUser(_userCreds.user!);
-        print(
-            "Not Fetching User Details from AWS Amplify instead of that filling google firebase user details in user");
         return await checkUser(
                 email: firebaseUser.value?.providerData[0].email ??
                     firebaseUser.value?.email,
@@ -196,13 +273,12 @@ class AuthService extends GetxService {
               text: 'Login Success'.tr,
               duration: 2.seconds,
             );
-            await DataService.to.CreateLogs(action: "User Logged in");
+            // Fire-and-forget: the activity log write shouldn't hold up
+            // navigation into the dashboard.
+            DataService.to.CreateLogs(action: "User Logged in");
             return _userExists;
           } else {
             BotToast.showText(text: 'No User Found'.tr);
-            // return await _createUserInDatabase(
-            //   credentials: credential,
-            // );
             return false;
           }
         });
@@ -221,6 +297,15 @@ class AuthService extends GetxService {
     user(null);
     await _auth.signOut();
     removeAuthToken();
+    // The cached role (see _applyCachedRoleForInstantNav) is only meant to
+    // survive a refresh of the *same* signed-in session, not a logout - a
+    // stale role here would flash the previous account's nav items for an
+    // instant if a different user (or the same one) logs back in. (Not
+    // clearing `enabledRoutes` itself: an empty list there means "show
+    // every route" as far as `FlutterDashboardNavService` is concerned -
+    // the next real login's `ever(user, ...)` callback overwrites it with
+    // the correct list anyway.)
+    _storage.remove(_cachedRoleKey);
     Get.resetRootNavigator();
     await Future.delayed(2.seconds, () {
       Get.rootDelegate.toNamed(Routes.LOGIN);
@@ -230,19 +315,9 @@ class AuthService extends GetxService {
   Future<bool> checkUser(
       {required String? email, required Rx<User?> userData}) async {
     if (email != null) {
-      print("got user creds");
-      print("${userData.value?.email}");
-      print("${userData.value}");
-      print("User ID:${userData.value?.uid}");
-      await Future.delayed(100.milliseconds, () async {
-        await fetchUserDetails(userData.value?.uid).then((Users? responseUser) {
-          user(responseUser).obs;
-          print("Got User Authenticated: $responseUser");
-
-          _storage.write('token', responseUser?.id);
-        });
-      });
-
+      final Users? responseUser = await fetchUserDetails(userData.value?.uid);
+      user(responseUser);
+      _storage.write('token', responseUser?.id);
       return true;
     } else {
       BotToast.showText(text: 'No User Found'.tr);
@@ -437,24 +512,8 @@ class AuthService extends GetxService {
     required String loginProvider,
     Map<String, dynamic>? credentials,
   }) async {
-    late String _mutationDoc;
-
-    switch (loginProvider) {
-      case "register":
-        print("creating account with: ${loginProvider}");
-        print("with credentials : ${credentials}");
-        // _mutationDoc = CustomMutations.createAndUpdateUserByEmail;
-        break;
-      case "google":
-        // _mutationDoc = CustomMutations.createAndUpdateUserByGmailId;
-        break;
-      case "facebook":
-        // _mutationDoc = CustomMutations.createAndUpdateuserByFacebookId;
-        break;
-      case "apple":
-        // _mutationDoc = CustomMutations.createAndUpdateUserByAppleId;
-        break;
-    }
+    print("creating account with: $loginProvider");
+    print("with credentials : $credentials");
     Get.log("saving user");
     return await _saveUser(
       payload: Users(
@@ -469,34 +528,8 @@ class AuthService extends GetxService {
   }
 
   Future<Users?> refreshUserDetails({required User? user}) async {
-    if (
-        // _amplifyService.isAmlifyConfigured.value &&
-        token != null) {
-      try {
-        // final amplify.GraphQLOperation _operation = _amplifyService.api.query(
-        //   request: amplify.GraphQLRequest(
-        //     document: CustomQueries.getUserbyID,
-        //     variables: {
-        //       'id': token,
-        //     },
-        //   ),
-        // );
-        // return await _operation.response.then(
-        //   (_response) {
-        //     final _responseData = jsonDecode(_response.data);
-        //     final Users _userData = Users.fromJson(_responseData['getUsers']);
-        appUser = Users(fullname: user?.displayName).obs;
-        //     print(_userData);
-        //     return amplifyUser.value;
-        //   },
-        // );
-
-        // } on amplify.ApiException catch (e) {
-        //   print('Query failed: $e');
-      } catch (e) {
-        print(e);
-      }
-      return appUser.value;
+    if (token != null) {
+      appUser = Users(fullname: user?.displayName).obs;
     }
     return appUser.value;
   }
@@ -505,90 +538,12 @@ class AuthService extends GetxService {
     required String loginProvider,
     required String email,
   }) async {
-    // final amplify.GraphQLOperation _operation = _amplifyService.api.query(
-    //   request: amplify.GraphQLRequest(
-    //     document: CustomQueries.getUserbyEmail,
-    //     variables: {'email': email},
-    //   ),
-    // );
-    // return await _operation.response.then(
-    //   (_response) async {
-    //     var _responseData = jsonDecode(_response.data);
-    //     while (!(_responseData['listUsers']['nextToken'] == null ||
-    //         _responseData['listUsers']['items'].isNotEmpty)) {
-    //       Get.log(1.toString());
-    //       await _amplifyService.api
-    //           .query(
-    //             request: amplify.GraphQLRequest(
-    //               document: CustomQueries.getUserbyEmailwithToken,
-    //               variables: {
-    //                 'email': email,
-    //                 'nextToken': _responseData['listUsers']['nextToken'],
-    //               },
-    //             ),
-    //           )
-    //           .response
-    //           .then((value) => _responseData = jsonDecode(value.data));
-    //     }
-    //     if (_responseData['listUsers']['items'].isNotEmpty) {
-    //       Users? _userData;
-    //       for (var _userItem in _responseData['listUsers']['items']) {
-    //         if (_userItem['_deleted'] == null) {
-    //           _userData = Users.fromJson(_userItem);
-    //           amplifyUser(_userData);
-    //           _storage.write('token', _userData.id);
-    //           print('From email chek : $_userData');
-    //           return true;
-    //         }
-    //       }
-    //       return false;
-    //     } else {
-    //       print('from check');
-    //       return false;
-    //     }
-    //   },
-    // );
     return true;
   }
 
   Future<bool> _saveUser({
     required Users payload,
-    //  String mutationDocument,
   }) async {
-    // if (
-    //   // _amplifyService.isAmlifyConfigured.value
-    //   ) {
-    //   try {
-    //     final amplify.GraphQLOperation _operation = _amplifyService.api.mutate(
-    //       request: amplify.GraphQLRequest(
-    //         document: mutationDocument,
-    //         variables: payload.toJson(),
-    //       ),
-    //     );
-    //     return await _operation.response.then(
-    //       (_response) {
-    //         final _responseData = jsonDecode(_response.data);
-    //         final Users _userData =
-    //             Users.fromJson(_responseData['createUsers']);
-    //         amplifyUser(_userData);
-    //         _storage.write('token', _userData.id);
-    //         print(_userData);
-    //         BotToast.showText(
-    //           text: 'Registration Successful'.tr,
-    //           duration: 2.seconds,
-    //         );
-    //         refreshUserDetails();
-    //         return true;
-    //       },
-    //     );
-    //   } on amplify.ApiException catch (e) {
-    //     print('Query failed: $e');
-    //   } catch (e) {
-    //     print(e);
-    //   }
-    // } else {
-    //   return false;
-    // }
     return false;
   }
 
@@ -597,28 +552,45 @@ class AuthService extends GetxService {
     CollectionReference UsersDB = Collection.collection('Users');
     print("*****************************");
 
-    DocumentSnapshot<Object?> querySnapshot = await UsersDB.doc(uid).get();
+    // A thrown read (permission-denied, transient network error, etc.)
+    // used to propagate out of this Future uncaught — since the caller
+    // (getLogedInUserDetails) doesn't await/catch it either, that silently
+    // dropped the real profile fetch and left the nav menu stuck on
+    // whatever the cached-role fast path had already applied, with no
+    // retry. Treating a failed read the same as "no doc" keeps the
+    // existing fail-closed behavior below instead of leaving this hanging.
+    DocumentSnapshot<Object?>? querySnapshot;
+    try {
+      querySnapshot = await UsersDB.doc(uid).get();
+    } catch (e) {
+      print('Error fetching user doc for $uid: $e');
+    }
     print(querySnapshot);
-    if (querySnapshot.data() != null) {
+    if (querySnapshot != null && querySnapshot.data() != null) {
       // Assuming 'email' is a unique field, so there should be at most one document
       var userDataMap = querySnapshot.data() as Map<String, dynamic>;
       print(userDataMap);
       print("*****************************");
-      String type_of_user = userDataMap['userType'];
       print("Are we here ?");
+      // Explicit per-user grants, if an admin has set any — `permissions`
+      // is absent on every user doc that predates this field, in which
+      // case Users.effectivePermissions falls back to the role default.
+      final List<dynamic>? permissionsRaw =
+          userDataMap['permissions'] as List<dynamic>?;
+      final Set<String>? permissions =
+          permissionsRaw?.map((dynamic p) => p.toString()).toSet();
       // Create your Users object with the fetched data
       temp = Users(
           id: userDataMap['id'],
           fullname: userDataMap['fullname'],
           img_token: userDataMap['imgToken'],
-          phn_number: "",
+          phn_number: userDataMap['phone'] ?? "",
           gmail_id: "",
           fb_id: "",
           applie_id: "",
-          email: "",
+          email: userDataMap['email'] ?? "",
           phonepinID: "",
-          user_type:
-              getUserTypeFromString(userDataMap['userType'].toString() ?? ''),
+          user_type: getUserTypeFromString(userDataMap['userType']?.toString() ?? ''),
           current_language: "",
           current_lat: 0.0,
           isUserSecure: true,
@@ -627,11 +599,16 @@ class AuthService extends GetxService {
           current_lon: 0.0,
           managed_by: "",
           country: userDataMap['Country'],
-          shops: []);
+          shops: [],
+          permissions: permissions);
       print("----------------------------------------------");
       print("User Type: ${temp.user_type}");
       print(temp.fullname);
     } else {
+      // Fail closed: a missing/unreadable profile gets no role and no
+      // permissions (see [Users.hasPermission] / [enableOrDisableRoutes]),
+      // rather than the ADMIN fallback this used to have — a broken
+      // profile read should never be more privileged than a working one.
       print("Error fetching user details:");
 
       temp = Users(
@@ -644,7 +621,7 @@ class AuthService extends GetxService {
           applie_id: "",
           email: "",
           phonepinID: "",
-          user_type: UserType.ADMIN,
+          user_type: null,
           current_language: "",
           current_lat: 0.0,
           isUserSecure: true,
@@ -652,20 +629,21 @@ class AuthService extends GetxService {
           saved_location: "",
           current_lon: 0.0,
           managed_by: "");
-      user(temp).obs;
-      _storage.write('token', temp.id);
       print("User Details Updated");
+      BotToast.showText(text: 'No User Found'.tr);
     }
-    BotToast.showText(text: 'No User Found'.tr);
     return temp;
   }
+
+  bool hasPermission(String permission) =>
+      user.value?.hasPermission(permission) ?? false;
 }
 
-// Future<bool> _createUserInDatabase(Map<String, dynamic> credential) async {
-//   return false;
-// }
-
-UserType getUserTypeFromString(String userTypeString) {
+/// Returns `null` for an unrecognized/missing role string instead of
+/// throwing, so a malformed `userType` field fails closed (no role, see
+/// the `case null` branch in [AuthService.enableOrDisableRoutes]) rather
+/// than crashing the profile fetch entirely.
+UserType? getUserTypeFromString(String userTypeString) {
   switch (userTypeString) {
     case 'ADMIN':
       return UserType.ADMIN;
@@ -680,6 +658,6 @@ UserType getUserTypeFromString(String userTypeString) {
     case 'SHOP_ADMIN':
       return UserType.SHOP_ADMIN;
     default:
-      throw Exception('Unsupported UserType: $userTypeString');
+      return null;
   }
 }

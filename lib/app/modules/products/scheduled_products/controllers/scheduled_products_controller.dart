@@ -13,6 +13,10 @@ class ScheduledProductsController extends GetxController {
 
   final RxList<Product> allProducts = <Product>[].obs;
   final RxList<Product> scheduledProducts = <Product>[].obs;
+  final RxString searchQuery = ''.obs;
+  List<Product> get visibleScheduledProducts => scheduledProducts
+      .where((Product p) => p.matchesSearch(searchQuery.value))
+      .toList();
   final RxBool isLoadingForScheduled = false.obs;
   final DataService _dataService = DataService.to;
   final RxString shopId = ''.obs;

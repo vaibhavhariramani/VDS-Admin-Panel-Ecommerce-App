@@ -11,12 +11,16 @@ import 'package:visibility_detector/visibility_detector.dart';
 import 'package:get/get.dart';
 
 import '../../../../constants/constants.dart';
+import '../../../../models/Permission.dart';
+import '../../../../services/auth_service.dart';
 import '../../../../themes/app_theme.dart';
 import '../../../widgets/components/common_card.dart';
 import '../../../widgets/utils/padding_wrapper.dart';
 import '../../deletion_status/views/deletion_status_view.dart';
 import '../../home/views/home_view.dart';
 import '../controllers/billing_controller.dart';
+import 'create_bill_view.dart';
+import 'users_table_dialog.dart';
 
 class BillingView extends GetResponsiveView<BillingController> {
   BillingView({Key? key}) : super(key: key);
@@ -66,32 +70,45 @@ class BillingView extends GetResponsiveView<BillingController> {
     );
   }
 
+  /// The Billing route itself is nav-menu gated to roles that carry
+  /// `pos.access` by default (see `kDefaultPermissionsByRole` and
+  /// `AuthService.enableOrDisableRoutes`), but a user reaching this tile
+  /// (e.g. via a stale bookmark, or once an admin revokes just this one
+  /// permission from an otherwise Shop Admin user) should still be turned
+  /// away here rather than being able to start a bill.
   Widget _BillButtons() {
+    final bool canUsePos = AuthService.to.hasPermission(Permission.posAccess);
     return SliverVisibility(
       visible: true,
       sliver: PaddingWrapper(
         isSliverItem: true,
         topPadding: screen.isDesktop ? 50 : 20,
         horizontalPadding: screen.isDesktop ? 60 : 20,
-        child: FlutterDashboardListView.grid(
-          isSliverItem: true,
-          childCount: 2,
-          mainAxisSpacing: screen.isPhone ? 20 : 50,
-          crossAxisSpacing: screen.isPhone ? 20 : 50,
-          gridDelegate: !screen.isPhone
-              ? FlutterDashboardGridDelegates.columns_2(
+        child: canUsePos
+            ? FlutterDashboardListView.grid(
+                isSliverItem: true,
+                childCount: 1,
+                mainAxisSpacing: screen.isPhone ? 20 : 50,
+                crossAxisSpacing: screen.isPhone ? 20 : 50,
+                gridDelegate: FlutterDashboardGridDelegates.columns_1(
                   width: screen.width,
-                  length: 2,
-                )
-              : FlutterDashboardGridDelegates.columns_1(
-                  width: screen.width,
-                  length: 2,
+                  length: 1,
                 ),
-          buildItem: (BuildContext context, int index) {
-            return _cardItems()[index];
-          },
-          listType: FlutterDashboardListType.Grid,
-        ),
+                buildItem: (BuildContext context, int index) {
+                  return _cardItems()[index];
+                },
+                listType: FlutterDashboardListType.Grid,
+              )
+            : const Padding(
+                padding: EdgeInsets.symmetric(vertical: 40),
+                child: Center(
+                  child: Text(
+                    "Your account doesn't have POS access. Ask your admin to grant it.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ),
+              ),
       ),
     );
   }
@@ -101,13 +118,11 @@ class BillingView extends GetResponsiveView<BillingController> {
       _buildCard(
         text: 'Start Billing',
         onPressed: () {
-          
-        },
-      ),
-      _buildCard(
-        text: 'Start Billing from DB',
-        onPressed: () {
-          
+          controller.clearBill();
+          // Dismissible by clicking outside, same as every other dialog in
+          // the app — nothing is committed until "Create Bill" is tapped,
+          // so closing early just loses the in-progress cart.
+          Get.dialog(const CreateBillView());
         },
       ),
     ];
@@ -149,20 +164,26 @@ class BillingView extends GetResponsiveView<BillingController> {
         height: 120,
         // gradient: AppColors.gradient1,
         color: const Color(0xffD5E8CF),
+        onTap: () {
+          controller.loadAllUsers();
+          Get.dialog(const UsersTableDialog());
+        },
         child: Center(
-          child: _buildTileItem(
-            totalCount: 21459,
-            title: 'Total Users',
-            color: const Color(0xff006E1B),
-            icon: Material(
-              color: AppColors.white,
-              shape: const CircleBorder(),
-              child: Image.asset(
-                'assets/all_user.png',
-                scale: 1,
-              ),
-            ),
-          ),
+          child: !controller.isloading.value
+              ? _buildTileItem(
+                  totalCount: controller.totalUserCount.value,
+                  title: 'Total Users',
+                  color: const Color(0xff006E1B),
+                  icon: Material(
+                    color: AppColors.white,
+                    shape: const CircleBorder(),
+                    child: Image.asset(
+                      'assets/all_user.png',
+                      scale: 1,
+                    ),
+                  ),
+                )
+              : const CircularProgressIndicator(),
         ),
       ),
       CommonCard(

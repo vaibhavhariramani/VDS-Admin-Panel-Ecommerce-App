@@ -3,7 +3,28 @@ import 'Product.dart';
 class Shop {
   String? id;
   String? _name;
-  List<String>? _img_token;
+
+  /// The shop's single logo image. Sourced from Firestore's `imgToken`
+  /// field, which has only ever stored one URL — this used to be typed
+  /// `List<String>?` while every call site indexed it as `img_token![0]`,
+  /// which meant `Shop.fromJson` threw the moment a shop actually had a
+  /// logo set (assigning the String from `imgToken` to a `List<String>?`
+  /// field is a runtime type error), silently "working" only because no
+  /// shop had the field populated yet.
+  String? _img_token;
+
+  /// Extra promotional images shown in the client app's shop header/carousel.
+  List<String>? _bannerUrls;
+
+  /// Hex color string (e.g. `#2E7D32`) the client app themes this shop's
+  /// storefront with.
+  String? _brandColor;
+
+  /// URL-safe, platform-wide-unique slug (e.g. `fashion-hub`) identifying
+  /// this shop's public storefront URL. Reserved via the `StoreCodes`
+  /// collection so two shops can never collide. `null` until the shop
+  /// admin claims one from the Storefront > Store URL screen.
+  String? _storeCode;
   String? _phn_number;
   DateTime? _opening_time;
   DateTime? _closing_time;
@@ -30,10 +51,25 @@ class Shop {
   DateTime? _createdAt;
   DateTime? _updatedAt;
 
+  /// The `Regions` doc this shop belongs to. `Regions` is the canonical
+  /// region↔shop edge (a Region's `ShopsList` array is still the source of
+  /// truth for *assignment*); this is a denormalized copy for querying and
+  /// for Firestore security rules to check without a second lookup.
+  /// `null` on any shop that predates this field until backfilled.
+  String? _regionId;
+
+  /// Same name-string convention as `Users.Country` / `Regions.Country` —
+  /// denormalized from the owning region, not an independent value.
+  String? _country;
+
   @override
   String? getId() {
     return id;
   }
+
+  String? get regionId => _regionId;
+
+  String? get country => _country;
 
   String? get name {
     return _name;
@@ -43,8 +79,20 @@ class Shop {
     return _phn_number;
   }
 
-  List<String>? get img_token {
+  String? get img_token {
     return _img_token;
+  }
+
+  List<String>? get bannerUrls {
+    return _bannerUrls;
+  }
+
+  String? get brandColor {
+    return _brandColor;
+  }
+
+  String? get storeCode {
+    return _storeCode;
   }
 
   DateTime? get opening_time {
@@ -107,6 +155,9 @@ class Shop {
       {required this.id,
       name,
       img_token,
+      bannerUrls,
+      brandColor,
+      storeCode,
       phn_number,
       opening_time,
       closing_time,
@@ -126,9 +177,16 @@ class Shop {
       renewed_on,
       expiry_date,
       currency_type,
-      is_active})
-      : _name = name,
+      is_active,
+      regionId,
+      country})
+      : _regionId = regionId,
+        _country = country,
+        _name = name,
         _img_token = img_token,
+        _bannerUrls = bannerUrls,
+        _brandColor = brandColor,
+        _storeCode = storeCode,
         _phn_number = phn_number,
         _opening_time = opening_time,
         _closing_time = closing_time,
@@ -152,6 +210,9 @@ class Shop {
       {String? id,
       String? name,
       String? img_token,
+      List<String>? bannerUrls,
+      String? brandColor,
+      String? storeCode,
       String? phn_number,
       String? opening_time,
       String? closing_time,
@@ -171,11 +232,16 @@ class Shop {
       String? renewed_on,
       String? expiry_date,
       String? currency_type,
-      String? is_active}) {
+      String? is_active,
+      String? regionId,
+      String? country}) {
     return Shop._internal(
         id: id,
         name: name,
         img_token: img_token,
+        bannerUrls: bannerUrls,
+        brandColor: brandColor,
+        storeCode: storeCode,
         phn_number: phn_number,
         opening_time: opening_time,
         closing_time: closing_time,
@@ -194,7 +260,9 @@ class Shop {
         renewed_on: renewed_on,
         expiry_date: expiry_date,
         currency_type: currency_type,
-        is_active: is_active);
+        is_active: is_active,
+        regionId: regionId,
+        country: country);
   }
 
   //fetching Shop Details index wise
@@ -203,7 +271,25 @@ class Shop {
     return Shop();
   }
 
-  static Shop? fromJson(item) {
-    return null;
+  static Shop? fromJson(Map<String, dynamic>? data, {String? id}) {
+    if (data == null) return null;
+    return Shop(
+      id: id ?? data['id']?.toString(),
+      name: data['name']?.toString(),
+      img_token: data['imgToken']?.toString(),
+      bannerUrls: (data['bannerUrls'] as List<dynamic>?)
+          ?.map((e) => e.toString())
+          .toList(),
+      brandColor: data['brandColor']?.toString(),
+      storeCode: data['storeCode']?.toString(),
+      phn_number: data['phone_number']?.toString(),
+      address: data['address']?.toString(),
+      url: data['url']?.toString(),
+      managed_by: data['shopAdmin']?.toString(),
+      currency_type: data['currencyType']?.toString(),
+      is_active: data['isactive']?.toString(),
+      regionId: data['regionId']?.toString(),
+      country: data['Country']?.toString(),
+    );
   }
 }

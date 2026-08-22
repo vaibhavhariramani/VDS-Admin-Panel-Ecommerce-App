@@ -1,3 +1,4 @@
+import 'Permission.dart';
 import 'UserType.dart';
 
 class Users {
@@ -20,6 +21,29 @@ class Users {
   String? _managed_by;
   String? _country;
   List<String?> _shops;
+
+  /// Explicit per-user permission grants read from `Users/{uid}.permissions`.
+  /// `null` (the case for every existing user doc, which predates this
+  /// field) means "no explicit grant" — [effectivePermissions] falls back
+  /// to the role's default set. An explicit set here *replaces* the role
+  /// default rather than adding to it, so it can express revocation
+  /// (e.g. a Shop Admin with `pos.access` intentionally removed), not just
+  /// extra grants.
+  Set<String>? _permissions;
+
+  Set<String>? get permissions => _permissions;
+
+  /// The permission set actually in effect for this user.
+  Set<String> get effectivePermissions =>
+      _permissions ?? kDefaultPermissionsByRole[_user_type] ?? const <String>{};
+
+  bool hasPermission(String permission) {
+    final Set<String> granted = effectivePermissions;
+    return granted.contains(Permission.platformFullAccess) ||
+        granted.contains(permission);
+  }
+
+  String get roleLabel => _user_type?.label ?? 'Unknown role';
 
   get current_lon => null;
 
@@ -99,8 +123,10 @@ class Users {
       current_lon,
       managed_by,
       country,
-      shops})
-      : _fullname = fullname,
+      shops,
+      Set<String>? permissions})
+      : _permissions = permissions,
+        _fullname = fullname,
         _img_token = img_token,
         _phn_number = phn_number,
         _gmail_id = gmail_id,
@@ -137,7 +163,8 @@ class Users {
       double? current_lon,
       String? managed_by,
       String? country,
-      List<String?>? shops}) {
+      List<String?>? shops,
+      Set<String>? permissions}) {
     return Users._internal(
         id: id,
         fullname: fullname,
@@ -156,7 +183,8 @@ class Users {
         current_lon: current_lon,
         managed_by: managed_by,
         country: country,
-        shops: shops);
+        shops: shops,
+        permissions: permissions);
   }
 
   static Users? fromJson(versionResopnseMap) {

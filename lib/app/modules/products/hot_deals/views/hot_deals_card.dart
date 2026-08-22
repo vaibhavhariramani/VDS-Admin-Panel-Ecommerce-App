@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
 
+import '../../../../../constants/constants.dart';
 import '../../../../../models/Product.dart';
 import '../../../../../services/data_service.dart';
 import '../../../../../themes/app_theme.dart';
@@ -54,7 +55,9 @@ class HotDealProductCard extends GetResponsiveView<HotDealsController> {
                   top: 0,
                   bottom: 0,
                   child: CachedNetworkImage(
-                    imageUrl: productItem.img_token!,
+                    imageUrl: (productItem.img_token?.isNotEmpty ?? false)
+                        ? productItem.img_token!
+                        : noImg,
                     progressIndicatorBuilder: (context, url, progress) =>
                         Center(
                       child: CircularProgressIndicator(
@@ -102,7 +105,7 @@ class HotDealProductCard extends GetResponsiveView<HotDealsController> {
                         children: [
                           Text(
                             // '\$${productItem.price} ;',
-                            '${productItem.currency_type} ${productItem.price}',
+                            '${productItem.currency_type ?? ''} ${productItem.price}',
                             textScaleFactor: Get.textScaleFactor,
                             style: DefaultTextStyle.of(context).style.copyWith(
                                   fontSize: 12,
@@ -113,7 +116,7 @@ class HotDealProductCard extends GetResponsiveView<HotDealsController> {
                           ),
                           Text(
                             // '\$${productItem.price} ;',
-                            '${productItem.currency_type} ${productItem.discount}',
+                            '${productItem.currency_type ?? ''} ${productItem.discount}',
                             textScaleFactor: Get.textScaleFactor,
                             style: DefaultTextStyle.of(context).style.copyWith(
                                   fontSize: 12,
@@ -266,7 +269,9 @@ class HotDealProductCard extends GetResponsiveView<HotDealsController> {
                               height: 75,
                               width: 70,
                               child: CachedNetworkImage(
-                                imageUrl: productItem.img_token!,
+                                imageUrl: (productItem.img_token?.isNotEmpty ?? false)
+                        ? productItem.img_token!
+                        : noImg,
                                 progressIndicatorBuilder:
                                     (context, url, progress) => Center(
                                   child: CircularProgressIndicator(
@@ -344,7 +349,6 @@ class HotDealProductCard extends GetResponsiveView<HotDealsController> {
                     ),
                   ),
                 );
-                Get.back();
               },
               child: const Padding(
                 padding: EdgeInsets.all(8),
@@ -407,7 +411,6 @@ class HotDealProductCard extends GetResponsiveView<HotDealsController> {
                   ),
                 ),
               );
-              Get.back();
             },
             child: const Padding(
               padding: EdgeInsets.all(8),

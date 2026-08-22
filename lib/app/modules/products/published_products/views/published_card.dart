@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
 
+import '../../../../../constants/constants.dart';
 import '../../../../../models/Product.dart';
 import '../../../../../themes/app_theme.dart';
 import '../../../../widgets/components/animated_submit_button.dart';
@@ -54,7 +55,9 @@ class PublishedProductCard
                   top: 0,
                   bottom: 0,
                   child: CachedNetworkImage(
-                    imageUrl: productItem.img_token!,
+                    imageUrl: (productItem.img_token?.isNotEmpty ?? false)
+                        ? productItem.img_token!
+                        : noImg,
                     progressIndicatorBuilder: (context, url, progress) =>
                         Center(
                       child: CircularProgressIndicator(
@@ -98,32 +101,51 @@ class PublishedProductCard
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Text(
-                            // '\$${productItem.price} ;',
-                            '${productItem.currency_type} ${productItem.price}',
-                            textScaleFactor: Get.textScaleFactor,
-                            style: DefaultTextStyle.of(context).style.copyWith(
-                                  fontSize: 12,
-                                  color: Theme.of(context).disabledColor,
-                                  fontWeight: FontWeight.w200,
-                                  decoration: TextDecoration.lineThrough,
+                      // Only show a struck-through "was" price when there's
+                      // an actual offer lower than the base price — every
+                      // plain product has no `discount` set (defaults to
+                      // 0), which read as "struck through, now 0".
+                      child: (productItem.discount != null &&
+                              productItem.discount! > 0 &&
+                              productItem.discount! < productItem.price)
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Text(
+                                  '${productItem.currency_type ?? ''} ${productItem.price}',
+                                  textScaleFactor: Get.textScaleFactor,
+                                  style: DefaultTextStyle.of(context)
+                                      .style
+                                      .copyWith(
+                                        fontSize: 12,
+                                        color: Theme.of(context).disabledColor,
+                                        fontWeight: FontWeight.w200,
+                                        decoration: TextDecoration.lineThrough,
+                                      ),
                                 ),
-                          ),
-                          Text(
-                            // '\$${productItem.price} ;',
-                            '${productItem.currency_type} ${productItem.discount}',
-                            textScaleFactor: Get.textScaleFactor,
-                            style: DefaultTextStyle.of(context).style.copyWith(
-                                  fontSize: 12,
-                                  color: Colors.green,
-                                  fontWeight: FontWeight.w600,
+                                const SizedBox(width: 6),
+                                Text(
+                                  '${productItem.currency_type ?? ''} ${productItem.discount}',
+                                  textScaleFactor: Get.textScaleFactor,
+                                  style: DefaultTextStyle.of(context)
+                                      .style
+                                      .copyWith(
+                                        fontSize: 12,
+                                        color: Colors.green,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                 ),
-                          ),
-                        ],
-                      ),
+                              ],
+                            )
+                          : Text(
+                              '${productItem.currency_type ?? ''} ${productItem.price}',
+                              textScaleFactor: Get.textScaleFactor,
+                              style: DefaultTextStyle.of(context).style.copyWith(
+                                    fontSize: 12,
+                                    color: Theme.of(context).disabledColor,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                            ),
                     ),
                   ],
                 ),
@@ -260,7 +282,9 @@ class PublishedProductCard
                               height: 75,
                               width: 70,
                               child: CachedNetworkImage(
-                                imageUrl: productItem.img_token!,
+                                imageUrl: (productItem.img_token?.isNotEmpty ?? false)
+                        ? productItem.img_token!
+                        : noImg,
                                 progressIndicatorBuilder:
                                     (context, url, progress) => Center(
                                   child: CircularProgressIndicator(
@@ -339,7 +363,6 @@ class PublishedProductCard
                     ),
                   ),
                 );
-                Get.back();
               },
               child: const Padding(
                 padding: EdgeInsets.all(8),
@@ -402,7 +425,6 @@ class PublishedProductCard
                   ),
                 ),
               );
-              Get.back();
             },
             child: const Padding(
               padding: EdgeInsets.all(8),

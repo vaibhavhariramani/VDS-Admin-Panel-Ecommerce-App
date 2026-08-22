@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dashboard/flutter_dashboard.dart';
 
+import '../../../../constants/constants.dart';
 import '../../../../models/Product.dart';
 import '../../../../themes/app_theme.dart';
 import '../../../widgets/components/animated_submit_button.dart';
@@ -23,7 +24,9 @@ class ProductScheduler extends GetResponsiveView<MasterListController> {
             children: [
               CircleAvatar(
                 backgroundImage: NetworkImage(
-                  ProductDetails.img_token!,
+                  (ProductDetails.img_token?.isNotEmpty ?? false)
+                      ? ProductDetails.img_token!
+                      : noImg,
                 ),
                 radius: 35,
               ),
@@ -106,8 +109,10 @@ class ProductScheduler extends GetResponsiveView<MasterListController> {
                       isRequired: true,
                       textfield: ReactiveDatePickerField<DateTime>(
                         controlName: "available_from",
-                        hintText: controller.dataSer.DateTimeToString(
-                            date: ProductDetails.available_from!),
+                        hintText: ProductDetails.available_from != null
+                            ? controller.dataSer.DateTimeToString(
+                                date: ProductDetails.available_from!)
+                            : 'Not set',
                         onEditingComplete: () => _form.unfocus(),
                         validationMessage: (error) =>
                             "valid date time required",
@@ -118,8 +123,10 @@ class ProductScheduler extends GetResponsiveView<MasterListController> {
                       isRequired: true,
                       textfield: ReactiveDatePickerField<DateTime>(
                         controlName: "expiry_date",
-                        hintText: controller.dataSer
-                            .DateTimeToString(date: ProductDetails.expires_on!),
+                        hintText: ProductDetails.expires_on != null
+                            ? controller.dataSer.DateTimeToString(
+                                date: ProductDetails.expires_on!)
+                            : 'Not set',
                         onEditingComplete: () => _form.focus("visibility_date"),
                         validationMessage: (error) => "Valid date required",
                       ),

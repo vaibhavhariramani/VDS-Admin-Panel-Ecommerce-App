@@ -1,0 +1,128 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function staffRoles() {
+      return ['ADMIN', 'MERCHANT', 'SHOP_ADMIN', 'AFFILIATES', 'COUNTRY_HEAD', 'SUPERADMIN'];
+    }
+
+    // Mirrors the admin panel's own role check (Users/{uid}.userType,
+    // read client-side today in lib/services/auth_service.dart) - this
+    // makes that role model actually enforced server-side.
+    function isStaff() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/Users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/Users/$(request.auth.uid)).data.get('userType', 'CUSTOMER') in staffRoles();
+    }
+
+    // Re-derives storefront ownership from the Shops doc itself server-side
+    // - never trusts a shopId path segment the client supplied on its own.
+    function isShopOwner(shopId) {
+      return isStaff() &&
+        exists(/databases/$(database)/documents/Shops/$(shopId)) &&
+        get(/databases/$(database)/documents/Shops/$(shopId)).data.get('shopAdmin', '') == request.auth.uid;
+    }
+
+    function isPlatformAdmin() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/Users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/Users/$(request.auth.uid)).data.get('userType', '') == 'ADMIN';
+    }
+
+    // Storefront Configuration Manager: a shop's own admin (or a platform
+    // admin) edits `draft`; `published` is what the separate Client App's
+    // per-shop storefront page reads, so it stays publicly readable like
+    // the rest of the storefront catalog below.
+    match /Shops/{shopId}/Storefront/draft {
+      allow read, write: if isShopOwner(shopId) || isPlatformAdmin();
+    }
+    match /Shops/{shopId}/Storefront/published {
+      allow read: if true;
+      allow write: if isShopOwner(shopId) || isPlatformAdmin();
+    }
+
+    // Uniqueness reservation for a shop's public store-URL slug
+    // (Shops/{id}.storeCode). Immutable once claimed - "change store code"
+    // is a client-side transaction that deletes the old reservation and
+    // creates a new one atomically, not an update.
+    match /StoreCodes/{code} {
+      allow read: if true;
+      allow create: if isShopOwner(request.resource.data.shopId) || isPlatformAdmin();
+      allow delete: if isShopOwner(resource.data.shopId) || isPlatformAdmin();
+      allow update: if false;
+    }
+
+    // Public storefront catalog: anyone can browse, including guests
+    // before sign-in (the client app supports a "Skip Sign In" flow).
+    // Only staff accounts can edit.
+    match /Shops/{id} { allow read: if true; allow write: if isStaff(); }
+    match /ShopCategories/{id} { allow read: if true; allow write: if isStaff(); }
+    match /Category/{id} { allow read: if true; allow write: if isStaff(); }
+    match /Products/{id} { allow read: if true; allow write: if isStaff(); }
+    match /Banners/{id} { allow read: if true; allow write: if isStaff(); }
+    match /Regions/{id} { allow read: if true; allow write: if isStaff(); }
+    match /Countries/{id} { allow read: if true; allow write: if isStaff(); }
+
+    // Every signed-in user manages only their own profile; staff can
+    // manage any (customer lookups, staff account management).
+    match /Users/{userId} {
+      allow read, write: if isOwner(userId) || isStaff();
+    }
+
+    // Per-customer saved shops, written by the client app's Favorites
+    // feature (Users/{uid}/Favorites/{shopId}). Doesn't inherit from the
+    // Users/{userId} match above - Firestore rules don't cascade to
+    // subcollections, so this needs its own explicit rule.
+    match /Users/{userId}/Favorites/{favId} {
+      allow read, write: if isOwner(userId) || isStaff();
+    }
+
+    // Legacy/generic orders shape (kept for compatibility - not currently
+    // written by the client app, see OnlineOrders below).
+    match /Orders/{orderId} {
+      allow create: if isSignedIn() &&
+        request.resource.data.get('userId', '') == request.auth.uid;
+      allow read: if isSignedIn() &&
+        (resource.data.get('userId', '') == request.auth.uid || isStaff());
+      allow update, delete: if isStaff();
+    }
+
+    // Orders placed through the client app checkout, in the shape the
+    // shop-admin panel actually reads (per-shop order + customerUid marks
+    // ownership; the admin's own screens don't use customerUid).
+    match /OnlineOrders/{orderId} {
+      allow create: if isSignedIn() &&
+        request.resource.data.get('customerUid', '') == request.auth.uid;
+      allow read: if isSignedIn() &&
+        (resource.data.get('customerUid', '') == request.auth.uid || isStaff());
+      allow update, delete: if isStaff();
+    }
+
+    // Line items for an OnlineOrders doc. A customer may only add/read
+    // items under an order they themselves created.
+    match /Items/{itemId} {
+      allow create: if isSignedIn() &&
+        get(/databases/$(database)/documents/OnlineOrders/$(request.resource.data.orderID)).data.get('customerUid', '') == request.auth.uid;
+      allow read: if isSignedIn() &&
+        (isStaff() ||
+          get(/databases/$(database)/documents/OnlineOrders/$(resource.data.orderID)).data.get('customerUid', '') == request.auth.uid);
+      allow update, delete: if isStaff();
+    }
+
+    // Everything else (OfflineOrders, Bills, InvoiceRequests, Staff,
+    // Attendance, ActivityLogs, etc.) is internal to the admin panel / POS
+    // - only staff accounts may touch it.
+    match /{document=**} {
+      allow read, write: if isStaff();
+    }
+  }
+}

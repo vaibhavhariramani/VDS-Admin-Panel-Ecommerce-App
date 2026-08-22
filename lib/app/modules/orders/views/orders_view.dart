@@ -8,6 +8,7 @@ import 'package:iconly/iconly.dart';
 import '../../../widgets/components/common_card.dart';
 import '../../../widgets/utils/padding_wrapper.dart';
 import '../controllers/orders_controller.dart';
+import 'components/table_datasrc_offline_orders.dart';
 import 'online_orders_table.dart';
 
 class OrdersView extends GetResponsiveView<OrdersController> {
@@ -20,6 +21,7 @@ class OrdersView extends GetResponsiveView<OrdersController> {
           slivers: [
             _OrdersButtons(),
             _OnlineOrders(context),
+            _OfflineOrders(context),
           ],
         ));
   }
@@ -78,6 +80,93 @@ class OrdersView extends GetResponsiveView<OrdersController> {
     );
   }
 
+  /// Table of POS sales, sourced from the `Bills` collection
+  /// `BillingController.createBill()` writes to. Refreshes on every open
+  /// (not just once on page load) so a bill rung up moments ago — possibly
+  /// in another tab — actually shows up.
+  Widget _OfflineOrders(BuildContext context) {
+    screen.context = context;
+    return SliverVisibility(
+      visible: controller.showOfflineOrdersTable.value,
+      sliver: PaddingWrapper(
+        isSliverItem: true,
+        topPadding: 10,
+        horizontalPadding: screen.isDesktop ? 30 : 20,
+        child: SliverToBoxAdapter(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: () => controller.showOfflineOrdersTable(false),
+                        icon: const Icon(Icons.arrow_back_ios),
+                      ),
+                      Text(
+                        'Offline Orders',
+                        textScaleFactor: Get.textScaleFactor,
+                        style: DefaultTextStyle.of(context).style.copyWith(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 24,
+                            ),
+                      ),
+                    ],
+                  ),
+                  IconButton(
+                    tooltip: 'Refresh',
+                    onPressed: controller.refreshOfflineOrders,
+                    icon: const Icon(Icons.refresh),
+                  ),
+                ],
+              ),
+              if (controller.isLoadingOffline.value)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 60),
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else if (controller.offlineOrdersData.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 60, vertical: 40),
+                  child: Center(
+                    child: Text(
+                      'No offline (POS) sales yet for this shop.',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                )
+              else
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: PaginatedDataTable(
+                    showCheckboxColumn: false,
+                    rowsPerPage: controller.offlineOrdersData.length < 10
+                        ? controller.offlineOrdersData.length
+                        : 10,
+                    columns: const [
+                      DataColumn(label: Text('Invoice')),
+                      DataColumn(label: Text('Date')),
+                      DataColumn(label: Text('Customer')),
+                      DataColumn(label: Text('Items')),
+                      DataColumn(label: Text('Total')),
+                      DataColumn(label: Text('Actions')),
+                    ],
+                    columnSpacing: 20,
+                    source: DataSourceOfflineOrders(
+                      context,
+                      controller.offlineOrdersData,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   List<Widget> _cardItems() {
     return [
       _buildCard(
@@ -90,6 +179,7 @@ class OrdersView extends GetResponsiveView<OrdersController> {
         text: 'Offline Orders',
         onPressed: () {
           controller.showOfflineOrdersTable(true);
+          controller.refreshOfflineOrders();
         },
       ),
     ];

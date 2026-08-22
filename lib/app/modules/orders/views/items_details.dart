@@ -27,8 +27,18 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                 height: MediaQuery.of(context).size.height * 0.18,
                 child: Padding(
                   padding: const EdgeInsets.all(12.0),
-                  child: widget.data['image'] != null
-                      ? Image.network(widget.data['image'])
+                  child: (widget.data['image'] != null &&
+                          widget.data['image'].toString().isNotEmpty)
+                      ? Image.network(
+                          widget.data['image'],
+                          errorBuilder: (context, error, stack) => Container(
+                            alignment: Alignment.center,
+                            height: MediaQuery.of(context).size.height * 0.18,
+                            width: MediaQuery.of(context).size.width * 0.3,
+                            child: const Icon(
+                                Icons.photo_size_select_actual_outlined),
+                          ),
+                        )
                       : Container(
                           alignment: Alignment.center,
                           height: MediaQuery.of(context).size.height * 0.18,

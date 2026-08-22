@@ -38,24 +38,13 @@ class NotificationButton extends GetResponsiveView {
       disabledElevation: 0,
       highlightElevation: 0,
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Badge(
-          //   badgeColor: Theme.of(context).primaryColor,
-          //   badgeContent: Text(
-          //     '0',
-          //     textScaleFactor: Get.textScaleFactor,
-          //     style: DefaultTextStyle.of(context).style.copyWith(
-          //           fontSize: 12,
-          //           fontFamily: GoogleFonts.montserrat().fontFamily,
-          //           fontWeight: FontWeight.w400,
-          //           color: AppColors.white,
-          //         ),
-          //   ),
-          //   child: const Icon(
-          //     Icons.notifications_outlined,
-          //     size: 26,
-          //   ),
-          // ),
+          Icon(
+            Icons.notifications_outlined,
+            size: 24,
+            color: DefaultTextStyle.of(context).style.color,
+          ),
           if (screen.isPhone)
             Row(
               children: [

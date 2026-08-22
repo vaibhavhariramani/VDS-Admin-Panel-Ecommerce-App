@@ -22,12 +22,12 @@ import '../modules/products/master_list/bindings/master_list_binding.dart';
 import '../modules/products/master_list/views/master_list_view.dart';
 import '../modules/products/products_listing/bindings/products_listing_binding.dart';
 import '../modules/products/products_listing/views/products_listing_view.dart';
-import '../modules/products/published_products/bindings/published_products_binding.dart';
-import '../modules/products/published_products/views/published_products_view.dart';
-import '../modules/products/scheduled_products/bindings/scheduled_products_binding.dart';
-import '../modules/products/scheduled_products/views/scheduled_products_view.dart';
 import '../modules/shop_listing/bindings/shop_listing_binding.dart';
 import '../modules/shop_listing/views/shop_listing_view.dart';
+import '../modules/storefront/bindings/storefront_binding.dart';
+import '../modules/storefront/views/storefront_overview_view.dart';
+import '../modules/customers/bindings/customers_binding.dart';
+import '../modules/customers/views/customers_view.dart';
 import '../utilities/contact_us/bindings/contact_us_binding.dart';
 import '../utilities/contact_us/views/contact_us_view.dart';
 import '../utilities/help/bindings/help_binding.dart';
@@ -122,7 +122,7 @@ class AppPages {
       //   ),
       // ),
       FlutterDashboardItem(
-        title: 'Contact us',
+        title: 'Notifications',
         page: GetPage(
           name: _Paths.CONTACT_US,
           page: () {
@@ -135,10 +135,10 @@ class AppPages {
           ],
         ),
         icon: const Icon(
-          IconlyLight.profile,
+          Icons.notifications_outlined,
         ),
         selectedIcon: Icon(
-          IconlyBold.profile,
+          Icons.notifications,
           color: Theme.of(context).scaffoldBackgroundColor,
         ),
       ),
@@ -300,6 +300,38 @@ class AppPages {
           color: Theme.of(context).scaffoldBackgroundColor,
         ),
       ),
+      FlutterDashboardItem(
+        title: 'Storefront',
+        page: GetPage(
+          name: _Paths.STOREFRONT,
+          page: () {
+            deletionStatusController.isVisible.value = false;
+            return const StorefrontOverviewView();
+          },
+          binding: StorefrontBinding(),
+          middlewares: [
+            EnsureAuthenticated(),
+          ],
+        ),
+        icon: const Icon(
+          Icons.storefront_outlined,
+        ),
+        selectedIcon: Icon(
+          Icons.storefront,
+          color: Theme.of(context).scaffoldBackgroundColor,
+        ),
+      ),
+      FlutterDashboardItem(
+        title: 'Customers',
+        page: GetPage(
+          name: _Paths.CUSTOMERS,
+          page: () => const CustomersView(),
+          binding: CustomersBinding(),
+          middlewares: [EnsureAuthenticated()],
+        ),
+        icon: const Icon(Icons.people_outline),
+        selectedIcon: Icon(Icons.people, color: Theme.of(context).scaffoldBackgroundColor),
+      ),
       // FlutterDashboardItem(
       //   title: 'Magazine',
       //   page: GetPage(
@@ -376,43 +408,6 @@ class AppPages {
         ),
         selectedIcon: Icon(
           IconlyBold.chart,
-          color: Theme.of(context).scaffoldBackgroundColor,
-        ),
-      ),
-      FlutterDashboardItem(
-        title: 'Scheduled Products',
-        page: GetPage(
-          name: _Paths.SCHEDULED_PRODUCTS,
-          page: () => ScheduledProductsView(),
-          binding: ScheduledProductsBinding(),
-          middlewares: [
-            EnsureAuthenticated(),
-          ],
-        ),
-        icon: const Icon(
-          IconlyLight.calendar,
-        ),
-        selectedIcon: Icon(
-          IconlyBold.calendar,
-          color: Theme.of(context).scaffoldBackgroundColor,
-        ),
-      ),
-
-      FlutterDashboardItem(
-        title: 'Published Products',
-        page: GetPage(
-          name: _Paths.PUBLISHED_PRODUCTS,
-          page: () => PublishedProductsView(),
-          binding: PublishedProductsBinding(),
-          middlewares: [
-            EnsureAuthenticated(),
-          ],
-        ),
-        icon: const Icon(
-          IconlyLight.bag,
-        ),
-        selectedIcon: Icon(
-          IconlyBold.bag,
           color: Theme.of(context).scaffoldBackgroundColor,
         ),
       ),

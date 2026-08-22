@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
 
+import '../../../../constants/constants.dart';
 import '../../../../models/Product.dart';
 import '../../../../themes/app_theme.dart';
 import '../../../widgets/components/animated_submit_button.dart';
@@ -53,7 +54,9 @@ class ProductCard extends GetResponsiveView<ScheduledProductsController> {
                   top: 0,
                   bottom: 0,
                   child: CachedNetworkImage(
-                    imageUrl: productItem.img_token!,
+                    imageUrl: (productItem.img_token?.isNotEmpty ?? false)
+                        ? productItem.img_token!
+                        : noImg,
                     progressIndicatorBuilder: (context, url, progress) =>
                         Center(
                       child: CircularProgressIndicator(
@@ -103,7 +106,7 @@ class ProductCard extends GetResponsiveView<ScheduledProductsController> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            '${productItem.currency_type} ${productItem.price}',
+                            '${productItem.currency_type ?? ''} ${productItem.price}',
                             style: DefaultTextStyle.of(context).style.copyWith(
                                   fontSize: 12,
                                   color: Theme.of(context).disabledColor,
@@ -113,7 +116,7 @@ class ProductCard extends GetResponsiveView<ScheduledProductsController> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            '${productItem.currency_type} ${productItem.discount}',
+                            '${productItem.currency_type ?? ''} ${productItem.discount}',
                             style: DefaultTextStyle.of(context).style.copyWith(
                                   fontSize: 12,
                                   color: Colors.green,
@@ -246,7 +249,9 @@ class ProductCard extends GetResponsiveView<ScheduledProductsController> {
                               height: 75,
                               width: 70,
                               child: CachedNetworkImage(
-                                imageUrl: productItem.img_token ?? '',
+                                imageUrl: (productItem.img_token?.isNotEmpty ?? false)
+                                    ? productItem.img_token!
+                                    : noImg,
                                 fit: BoxFit.cover,   // better than BoxFit.fill
                                 placeholder: (context, url) => Center(
                                   child: CircularProgressIndicator(
@@ -331,7 +336,6 @@ class ProductCard extends GetResponsiveView<ScheduledProductsController> {
                   ),
                 ),
               );
-              Get.back();
             },
             child: Padding(
               padding: const EdgeInsets.only(left: 10.0),
@@ -403,7 +407,6 @@ class ProductCard extends GetResponsiveView<ScheduledProductsController> {
                   ),
                 ),
               );
-              Get.back();
             },
             child: Padding(
               padding: const EdgeInsets.only(left: 10),
