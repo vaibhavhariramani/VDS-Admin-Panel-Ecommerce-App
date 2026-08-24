@@ -21,6 +21,7 @@ abstract class Routes {
   static const HELP = _Paths.HELP;
   static const STOREFRONT = _Paths.STOREFRONT;
   static const CUSTOMERS = _Paths.CUSTOMERS;
+  static const SETTINGS = _Paths.SETTINGS;
 }
 
 abstract class _Paths {
@@ -41,4 +42,5 @@ abstract class _Paths {
   static const HELP = '/help';
   static const STOREFRONT = '/storefront';
   static const CUSTOMERS = '/customers';
+  static const SETTINGS = '/settings';
 }

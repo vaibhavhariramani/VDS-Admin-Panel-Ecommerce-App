@@ -22,8 +22,13 @@ abstract class AppConfig extends StatelessWidget {
           scale: 1,
         ),
         theme: AppTheme.lightTheme,
-        // darkTheme: AppTheme.darkTheme,
-        themeMode: ThemeMode.light,
+        darkTheme: AppTheme.darkTheme,
+        // Settings > Dark mode switches this live via Get.changeThemeMode()
+        // regardless of what's picked here - this only decides which mode
+        // the app boots into, from whatever was last saved to GetStorage.
+        themeMode: GetStorage().read(themeModeStorageKey) == 'dark'
+            ? ThemeMode.dark
+            : ThemeMode.light,
         dashboardAppbarPadding: EdgeInsets.only(
           bottom: Get.height * 0.03,
         ),
