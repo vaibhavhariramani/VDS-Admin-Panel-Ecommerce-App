@@ -121,9 +121,28 @@ class HomeController extends GetxController {
     isLoadingChart(true);
     isLoadingAlerts(true);
 
+    // `AuthService.userType` defaults to UserType.ADMIN until the
+    // post-login Firestore profile fetch resolves it to the real role.
+    // onInit() used to read it immediately, so a Shop Admin was briefly
+    // (mis)treated as platform Admin - which made _loadOrderTrendAndAlerts
+    // below skip its shopId filter and pull every shop's OnlineOrders into
+    // this admin's "New Orders" popup. Waiting for the resolved user first
+    // means `userType` is always the real role by the time it's read here.
+    if (userService.user.value == null) {
+      await userService.user.stream.firstWhere((u) => u != null);
+    }
+
     final String? shopId = userType == UserType.SHOP_ADMIN
         ? await FetchService.to.fetchShopId()
         : null;
+
+    if (userType == UserType.SHOP_ADMIN && shopId == null) {
+      // Shop Admin with no resolvable shop: nothing to show, and
+      // definitely not every other shop's orders/stock as a fallback.
+      isLoadingChart(false);
+      isLoadingAlerts(false);
+      return;
+    }
 
     await Future.wait([
       _loadOrderTrendAndAlerts(shopId),
