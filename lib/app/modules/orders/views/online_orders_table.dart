@@ -80,7 +80,12 @@ class OnlineOrderstableView extends GetResponsiveView<OrdersController> {
                         ),
                       ),
                     )
-                  : const Center(child: CircularProgressIndicator()),
+                  : controller.isLoading.value
+                      ? const Center(child: CircularProgressIndicator())
+                      : const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 48),
+                          child: Center(child: Text('No orders found')),
+                        ),
             ),
           ),
         ],
