@@ -6,6 +6,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:url_strategy/url_strategy.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'app/routes/app_pages.dart';
+import 'app/utilities/settings/controllers/settings_controller.dart';
 import 'app/widgets/appbar_actions/go_to_live_store_button.dart';
 import 'app/widgets/appbar_actions/notification_button.dart';
 import 'app/widgets/appbar_actions/user_button.dart';

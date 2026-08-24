@@ -32,6 +32,8 @@ import '../utilities/contact_us/bindings/contact_us_binding.dart';
 import '../utilities/contact_us/views/contact_us_view.dart';
 import '../utilities/help/bindings/help_binding.dart';
 import '../utilities/help/views/help_view.dart';
+import '../utilities/settings/bindings/settings_binding.dart';
+import '../utilities/settings/views/settings_view.dart';
 
 part 'app_routes.dart';
 
@@ -143,7 +145,7 @@ class AppPages {
         ),
       ),
       FlutterDashboardItem(
-        title: 'Help',
+        title: 'FAQs',
         page: GetPage(
           name: _Paths.HELP,
           page: () {
@@ -160,6 +162,27 @@ class AppPages {
         ),
         selectedIcon: Icon(
           Icons.help_outlined,
+          color: Theme.of(context).scaffoldBackgroundColor,
+        ),
+      ),
+      FlutterDashboardItem(
+        title: 'Settings',
+        page: GetPage(
+          name: _Paths.SETTINGS,
+          page: () {
+            deletionStatusController.isVisible.value = false;
+            return const SettingsView();
+          },
+          binding: SettingsBinding(),
+          middlewares: [
+            EnsureAuthenticated(),
+          ],
+        ),
+        icon: const Icon(
+          Icons.settings_outlined,
+        ),
+        selectedIcon: Icon(
+          Icons.settings,
           color: Theme.of(context).scaffoldBackgroundColor,
         ),
       ),
