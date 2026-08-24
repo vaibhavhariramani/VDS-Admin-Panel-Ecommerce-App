@@ -45,8 +45,14 @@ abstract class AppConfig extends StatelessWidget {
         footer: Align(
           alignment: AlignmentDirectional.bottomCenter,
           child: Padding(
+            // Was bottom: 10 - the drawer's footer area (nav list + this
+            // footer widget) sits in a SliverFillRemaining(hasScrollBody:
+            // false), which doesn't grant extra scroll room for overflow.
+            // Adding the Settings item to the footer nav list pushed total
+            // content 1px past the remaining space; trimming this margin
+            // gives back more than enough room without a visible change.
             padding: const EdgeInsets.only(
-              bottom: 10,
+              bottom: 2,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
