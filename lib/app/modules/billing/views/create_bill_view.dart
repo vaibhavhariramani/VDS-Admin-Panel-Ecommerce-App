@@ -109,7 +109,15 @@ class CreateBillView extends StatelessWidget {
               tooltip: 'Close',
               onPressed: () {
                 controller.clearBill();
-                Get.back();
+                // Navigator.pop(context) rather than Get.back(): this
+                // dialog and "Add from Database" below can both be open at
+                // once (a dialog opened from within a dialog), and
+                // Get.back() resolves against GetX's own single
+                // current-dialog reference rather than the actual nesting
+                // depth, so it isn't reliable here — Navigator.of(context)
+                // always resolves to the real Navigator this dialog's
+                // context sits under.
+                Navigator.of(context).pop();
               },
             ),
           ],
@@ -397,7 +405,12 @@ class CreateBillView extends StatelessWidget {
                         ),
                         IconButton(
                           icon: const Icon(Icons.close),
-                          onPressed: () => Get.back(),
+                          // See the header close button above for why this
+                          // is Navigator.pop(context) and not Get.back() -
+                          // this dialog is opened from within the already
+                          // -open "Create Bill" dialog, and Get.back()
+                          // isn't reliable at that nesting depth.
+                          onPressed: () => Navigator.of(context).pop(),
                         ),
                       ],
                     ),
