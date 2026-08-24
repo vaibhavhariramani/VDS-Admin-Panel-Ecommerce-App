@@ -28,6 +28,17 @@ class _InsufficientStockException implements Exception {
   _InsufficientStockException(this.itemName);
 }
 
+/// Thrown when a product's `quantity` field isn't a plain stock-count
+/// number at all (e.g. a pack-size string like `"50 ml"` typed into the
+/// wrong field when the product was created) - int.tryParse would silently
+/// read that as "0 in stock" and this would otherwise surface as a
+/// confusing generic "Error creating bill" with no indication of what's
+/// actually wrong or which product to go fix.
+class _InvalidStockQuantityException implements Exception {
+  final String itemName;
+  _InvalidStockQuantityException(this.itemName);
+}
+
 class BillingController extends GetxController {
   // Dashboard tile counters shown at the top of the Billing tab (unrelated
   // to the cart/invoice flow below).
@@ -355,8 +366,11 @@ class BillingController extends GetxController {
         for (final MapEntry<BillLineItem, DocumentSnapshot<Object?>> entry
             in productSnaps.entries) {
           final data = entry.value.data() as Map<String, dynamic>?;
-          final int available =
-              int.tryParse(data?['quantity']?.toString() ?? '0') ?? 0;
+          final String? rawQuantity = data?['quantity']?.toString();
+          final int? available = rawQuantity == null ? 0 : int.tryParse(rawQuantity);
+          if (available == null) {
+            throw _InvalidStockQuantityException(entry.key.name);
+          }
           if (available < entry.key.quantity.value) {
             throw _InsufficientStockException(entry.key.name);
           }
@@ -407,6 +421,13 @@ class BillingController extends GetxController {
       return true;
     } on _InsufficientStockException catch (e) {
       Fluttertoast.showToast(msg: 'Not enough stock for ${e.itemName}');
+      return false;
+    } on _InvalidStockQuantityException catch (e) {
+      Fluttertoast.showToast(
+        msg:
+            "${e.itemName}'s stock quantity isn't a number - fix it from Product Listing before billing it",
+        toastLength: Toast.LENGTH_LONG,
+      );
       return false;
     } catch (e) {
       print('Error creating bill: $e');
