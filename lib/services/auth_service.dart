@@ -89,15 +89,15 @@ class AuthService extends GetxService {
         break;
       case UserType.SHOP_ADMIN:
         navRoutes.addAll(const [
-          "Dashboard", //Firstpage alsways need to be enabled
-          "Master List",
-          "Scheduled Products",
+          "Dashboard", //Firstpage alsways need to be enabled - stays pinned first, rest alphabetical
           "Billing",
-          "Published Products",
-          "Product Listing",
-          "Orders",
-          "Storefront",
           "Customers",
+          "Master List",
+          "Orders",
+          "Product Listing",
+          "Published Products",
+          "Scheduled Products",
+          "Storefront",
 
           // "Magazine",
           // "Registration"

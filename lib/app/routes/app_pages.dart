@@ -279,6 +279,10 @@ class AppPages {
       //     color: Theme.of(context).scaffoldBackgroundColor,
       //   ),
       // ),
+      // Order below is alphabetical (Dashboard excepted, pinned first
+      // above) among whichever of these a given role actually sees -
+      // FlutterDashboardNavService renders items in this list's order,
+      // filtered to AuthService.enableOrDisableRoutes()'s per-role set.
       FlutterDashboardItem(
         title: 'Shop Listing',
         page: GetPage(
@@ -301,36 +305,25 @@ class AppPages {
         ),
       ),
       FlutterDashboardItem(
-        title: 'Storefront',
+        title: 'Merchants',
         page: GetPage(
-          name: _Paths.STOREFRONT,
+          name: _Paths.MERCHANTS,
           page: () {
-            deletionStatusController.isVisible.value = false;
-            return const StorefrontOverviewView();
+            deletionStatusController2.isVisible.value = false;
+            return MerchantsView();
           },
-          binding: StorefrontBinding(),
+          binding: MerchantsBinding(),
           middlewares: [
             EnsureAuthenticated(),
           ],
         ),
         icon: const Icon(
-          Icons.storefront_outlined,
+          IconlyLight.profile,
         ),
         selectedIcon: Icon(
-          Icons.storefront,
+          IconlyBold.profile,
           color: Theme.of(context).scaffoldBackgroundColor,
         ),
-      ),
-      FlutterDashboardItem(
-        title: 'Customers',
-        page: GetPage(
-          name: _Paths.CUSTOMERS,
-          page: () => const CustomersView(),
-          binding: CustomersBinding(),
-          middlewares: [EnsureAuthenticated()],
-        ),
-        icon: const Icon(Icons.people_outline),
-        selectedIcon: Icon(Icons.people, color: Theme.of(context).scaffoldBackgroundColor),
       ),
       // FlutterDashboardItem(
       //   title: 'Magazine',
@@ -353,28 +346,6 @@ class AppPages {
       //     color: Theme.of(context).scaffoldBackgroundColor,
       //   ),
       // ),
-
-      FlutterDashboardItem(
-        title: 'Merchants',
-        page: GetPage(
-          name: _Paths.MERCHANTS,
-          page: () {
-            deletionStatusController2.isVisible.value = false;
-            return MerchantsView();
-          },
-          binding: MerchantsBinding(),
-          middlewares: [
-            EnsureAuthenticated(),
-          ],
-        ),
-        icon: const Icon(
-          IconlyLight.profile,
-        ),
-        selectedIcon: Icon(
-          IconlyBold.profile,
-          color: Theme.of(context).scaffoldBackgroundColor,
-        ),
-      ),
       FlutterDashboardItem(
         title: 'Billing',
         page: GetPage(
@@ -394,6 +365,17 @@ class AppPages {
         ),
       ),
       FlutterDashboardItem(
+        title: 'Customers',
+        page: GetPage(
+          name: _Paths.CUSTOMERS,
+          page: () => const CustomersView(),
+          binding: CustomersBinding(),
+          middlewares: [EnsureAuthenticated()],
+        ),
+        icon: const Icon(Icons.people_outline),
+        selectedIcon: Icon(Icons.people, color: Theme.of(context).scaffoldBackgroundColor),
+      ),
+      FlutterDashboardItem(
         title: 'Master List',
         page: GetPage(
           name: _Paths.MATSER_LIST,
@@ -408,6 +390,24 @@ class AppPages {
         ),
         selectedIcon: Icon(
           IconlyBold.chart,
+          color: Theme.of(context).scaffoldBackgroundColor,
+        ),
+      ),
+      FlutterDashboardItem(
+        title: 'Orders',
+        page: GetPage(
+          name: _Paths.ORDERS,
+          page: () => OrdersView(),
+          binding: OrdersBinding(),
+          middlewares: [
+            EnsureAuthenticated(),
+          ],
+        ),
+        icon: const Icon(
+          IconlyLight.bag,
+        ),
+        selectedIcon: Icon(
+          IconlyBold.bag,
           color: Theme.of(context).scaffoldBackgroundColor,
         ),
       ),
@@ -429,7 +429,6 @@ class AppPages {
           color: Theme.of(context).scaffoldBackgroundColor,
         ),
       ),
-
       FlutterDashboardItem.items(
         title: 'Products',
         icon: const Icon(
@@ -438,20 +437,23 @@ class AppPages {
         subItems: [],
       ),
       FlutterDashboardItem(
-        title: 'Orders',
+        title: 'Storefront',
         page: GetPage(
-          name: _Paths.ORDERS,
-          page: () => OrdersView(),
-          binding: OrdersBinding(),
+          name: _Paths.STOREFRONT,
+          page: () {
+            deletionStatusController.isVisible.value = false;
+            return const StorefrontOverviewView();
+          },
+          binding: StorefrontBinding(),
           middlewares: [
             EnsureAuthenticated(),
           ],
         ),
         icon: const Icon(
-          IconlyLight.bag,
+          Icons.storefront_outlined,
         ),
         selectedIcon: Icon(
-          IconlyBold.bag,
+          Icons.storefront,
           color: Theme.of(context).scaffoldBackgroundColor,
         ),
       ),
