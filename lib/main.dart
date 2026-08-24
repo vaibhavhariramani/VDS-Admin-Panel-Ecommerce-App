@@ -47,7 +47,13 @@ class RootApp extends AppConfig {
     return FlutterDashboardMaterialApp(
       title: "Emart Admin",
       dashboardItems: AppPages.allPages(context),
-      // config: AppConfig.dashboardConfig,
+      // This was commented out, so FlutterDashboardMaterialApp fell back to
+      // DashboardConfig's own bare defaults (theme/darkTheme both null,
+      // themeMode: ThemeMode.system) instead of AppTheme's actual
+      // light/dark themes - GetMaterialApp.router falls back to `theme`
+      // for every mode when `darkTheme` is null, so Settings' dark-mode
+      // toggle had nothing to switch to no matter what it set.
+      config: AppConfig.dashboardConfig,
 
       drawerOptions: AppConfig.drawerOptions(context),
       appBarOptions: AppConfig.rootAppBarOptions,
