@@ -12,7 +12,12 @@ abstract class AppConfig extends StatelessWidget {
         "buildNumber": packageInfo.buildNumber,
       };
 
-  static DashboardConfig get dashboardConfig => DashboardConfig(
+  // Takes BuildContext (RootApp.build's, from the plain MaterialApp wrapping
+  // it in main()) instead of reading Get.height: this getter runs while
+  // FlutterDashboardMaterialApp - and the GetMaterialApp.router inside it -
+  // is still being constructed, so GetX's own navigator/context isn't
+  // attached yet and Get.height null-checks a window that doesn't exist.
+  static DashboardConfig dashboardConfig(BuildContext context) => DashboardConfig(
         enableSpacing: false,
         enableBodySpacing: true,
         debugShowCheckedModeBanner: false,
@@ -30,7 +35,7 @@ abstract class AppConfig extends StatelessWidget {
             ? ThemeMode.dark
             : ThemeMode.light,
         dashboardAppbarPadding: EdgeInsets.only(
-          bottom: Get.height * 0.03,
+          bottom: MediaQuery.of(context).size.height * 0.03,
         ),
       );
 

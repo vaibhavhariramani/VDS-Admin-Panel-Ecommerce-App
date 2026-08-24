@@ -53,7 +53,7 @@ class RootApp extends AppConfig {
       // light/dark themes - GetMaterialApp.router falls back to `theme`
       // for every mode when `darkTheme` is null, so Settings' dark-mode
       // toggle had nothing to switch to no matter what it set.
-      config: AppConfig.dashboardConfig,
+      config: AppConfig.dashboardConfig(context),
 
       drawerOptions: AppConfig.drawerOptions(context),
       appBarOptions: AppConfig.rootAppBarOptions,
