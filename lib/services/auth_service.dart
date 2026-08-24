@@ -12,6 +12,14 @@ import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../app/modules/auth/widgets/authentication_files/authentication.dart';
+import '../app/modules/billing/controllers/billing_controller.dart';
+import '../app/modules/home/controllers/home_controller.dart';
+import '../app/modules/products/hot_deals/controllers/hot_deals_controller.dart';
+import '../app/modules/products/master_list/controllers/master_list_controller.dart';
+import '../app/modules/products/products_listing/controllers/products_listing_controller.dart';
+import '../app/modules/products/published_products/controllers/published_products_controller.dart';
+import '../app/modules/products/scheduled_products/controllers/scheduled_products_controller.dart';
+import '../app/modules/storefront/controllers/storefront_controller.dart';
 import '../app/routes/app_pages.dart';
 import '../models/Users.dart';
 import 'data_service.dart';
@@ -174,10 +182,31 @@ class AuthService extends GetxService {
 
   static const String _cachedRoleKey = 'cachedUserTypeName';
 
+  /// GetX singletons that resolve the signed-in Shop Admin's shopId once
+  /// (in onInit()) and cache it in an instance field/Rx - a plain
+  /// `Get.lazyPut` instance isn't recreated just because a *different*
+  /// user logs in on top of it in the same browser tab, so without this,
+  /// switching accounts (logout, then log in as another Shop Admin)
+  /// carried the previous shop's products/orders/dashboard data straight
+  /// into the new session. Deleting them here forces each to be rebuilt
+  /// fresh - via its GetPage binding - the next time its page is opened,
+  /// so onInit() reruns fetchShopId() for whoever is actually signed in.
+  void _resetShopScopedControllers() {
+    Get.delete<BillingController>();
+    Get.delete<HomeController>();
+    Get.delete<StorefrontController>();
+    Get.delete<MasterListController>();
+    Get.delete<ScheduledProductsController>();
+    Get.delete<HotDealsController>();
+    Get.delete<ProductsListingController>();
+    Get.delete<PublishedProductsController>();
+  }
+
   @override
   void onInit() {
     ever(user, (Users? _user) {
       if (_user != null) {
+        _resetShopScopedControllers();
         loggedUser = _user.user_type;
         userType(_user.user_type ?? UserType.ADMIN);
         _reapplyRoutesReliably(user.value!);
