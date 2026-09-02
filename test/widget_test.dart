@@ -1,30 +1,43 @@
-// This is a basic Flutter widget test.
+// Smoke test for CI.
 //
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility that Flutter provides. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
+// The real app entry point (MyApp in lib/main.dart) initializes Firebase,
+// OneSignal, and SharedPreferences in initState, none of which have platform
+// channel mocks available in a plain `flutter test` run - pumping MyApp
+// directly would throw MissingPluginException before rendering anything.
+// Instead, this verifies the shared design-system widgets (used throughout
+// the app's screens) render without error, which is enough to catch a build
+// that's fundamentally broken (bad imports, syntax errors, broken theming).
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:vdsadmin/main.dart';
+import 'package:vdsadmin/theme/app_theme.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('Design-system widgets render without error',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            children: [
+              AppCard(
+                child: const Text('Smoke test card'),
+              ),
+              PillButton(
+                label: 'Tap me',
+                onPressed: () {},
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    expect(find.text('Smoke test card'), findsOneWidget);
+    expect(find.text('Tap me'), findsOneWidget);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+    await tester.tap(find.text('Tap me'));
     await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
   });
 }

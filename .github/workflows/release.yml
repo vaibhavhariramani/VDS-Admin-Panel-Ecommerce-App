@@ -1,0 +1,179 @@
+name: Release (Play Store internal / TestFlight)
+
+# Manual only - this submits builds to real app store tracks, so it never
+# runs automatically on a push. Trigger it from the Actions tab.
+#
+# Required GitHub Secrets before this will succeed:
+#
+# Android:
+#   ANDROID_KEYSTORE_BASE64        - `base64 -i upload-keystore.jks | pbcopy`
+#   ANDROID_KEYSTORE_PASSWORD
+#   ANDROID_KEY_ALIAS
+#   ANDROID_KEY_PASSWORD
+#   GOOGLE_PLAY_SERVICE_ACCOUNT_JSON - service account JSON with
+#     "Release manager" access to this app in Play Console API access settings.
+#     The app must already exist in Play Console with at least one manually
+#     uploaded release before the API can publish to it.
+#
+# iOS:
+#   IOS_DIST_CERTIFICATE_BASE64    - `base64 -i distribution.p12 | pbcopy`
+#   IOS_DIST_CERTIFICATE_PASSWORD  - the .p12 export password
+#   IOS_PROVISIONING_PROFILE_BASE64 - App Store distribution profile,
+#     `base64 -i profile.mobileprovision | pbcopy`
+#   APP_STORE_CONNECT_ISSUER_ID
+#   APP_STORE_CONNECT_KEY_ID
+#   APP_STORE_CONNECT_PRIVATE_KEY - contents of the App Store Connect API key .p8
+#
+# Also required before first use:
+#   - The iOS bundle id is currently `com.example.vdsadmin` (the Flutter
+#     template default) - this must be changed to a real id registered as an
+#     App ID in your Apple Developer account, with a matching App Store
+#     Connect app record, before a TestFlight upload can succeed.
+#   - The Android app id (com.vaibhav.vdsadmin) must already exist in Play
+#     Console with at least one release uploaded manually (the Play publish
+#     API can't create a brand-new app listing).
+
+on:
+  workflow_dispatch:
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.29.2"
+          channel: "stable"
+      - run: flutter pub get
+      # Reports pre-existing lint issues without blocking release - this repo
+      # has a backlog of style warnings unrelated to correctness.
+      - run: flutter analyze
+        continue-on-error: true
+      - run: flutter test
+
+  build-android:
+    needs: smoke-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.29.2"
+          channel: "stable"
+      - uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Decode release keystore
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
+
+      - name: Write key.properties
+        run: |
+          cat > android/key.properties <<EOF
+          storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
+          keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
+          storeFile=upload-keystore.jks
+          EOF
+
+      - run: flutter pub get
+      - run: flutter build appbundle --release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-release-bundle
+          path: build/app/outputs/bundle/release/app-release.aab
+
+  deploy-android-play-internal:
+    needs: build-android
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: app-release-bundle
+          path: build-output
+
+      - uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.vaibhav.vdsadmin
+          releaseFiles: build-output/app-release.aab
+          track: internal
+
+  build-ios:
+    needs: smoke-test
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.29.2"
+          channel: "stable"
+
+      - name: Import distribution certificate and provisioning profile
+        env:
+          IOS_DIST_CERTIFICATE_BASE64: ${{ secrets.IOS_DIST_CERTIFICATE_BASE64 }}
+          IOS_DIST_CERTIFICATE_PASSWORD: ${{ secrets.IOS_DIST_CERTIFICATE_PASSWORD }}
+          IOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
+        run: |
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          KEYCHAIN_PASSWORD=$(uuidgen)
+          CERTIFICATE_PATH=$RUNNER_TEMP/distribution.p12
+          PROFILE_PATH=$RUNNER_TEMP/profile.mobileprovision
+
+          echo "$IOS_DIST_CERTIFICATE_BASE64" | base64 --decode -o "$CERTIFICATE_PATH"
+          echo "$IOS_PROVISIONING_PROFILE_BASE64" | base64 --decode -o "$PROFILE_PATH"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$CERTIFICATE_PATH" -P "$IOS_DIST_CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychain -d user -s "$KEYCHAIN_PATH" $(security list-keychains -d user | sed 's/"//g')
+
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp "$PROFILE_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
+
+      - name: Write ExportOptions.plist
+        run: |
+          cat > ios/ExportOptions.plist <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store</string>
+            <key>teamID</key>
+            <string>Q3QN2FFXT6</string>
+            <key>signingStyle</key>
+            <string>automatic</string>
+          </dict>
+          </plist>
+          EOF
+
+      - run: flutter pub get
+      - run: flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-release-ipa
+          path: build/ios/ipa/*.ipa
+
+  deploy-ios-testflight:
+    needs: build-ios
+    runs-on: macos-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: app-release-ipa
+          path: build-output
+
+      - uses: apple-actions/upload-testflight-build@v1
+        with:
+          app-path: build-output/*.ipa
+          issuer-id: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          api-key-id: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          api-private-key: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
