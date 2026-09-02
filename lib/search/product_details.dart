@@ -4,16 +4,65 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_share/flutter_share.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:vdsadmin/billing/bill.dart';
+import 'package:vdsadmin/models/product_data.dart';
 
 class ProductDetails extends StatefulWidget {
   final DocumentSnapshot snapshot;
-  const ProductDetails({Key? key, required this.snapshot}) : super(key: key);
+  final List<ProductData>? productList;
+  final VoidCallback? onChanged;
+  const ProductDetails({
+    Key? key,
+    required this.snapshot,
+    this.productList,
+    this.onChanged,
+  }) : super(key: key);
 
   @override
   _ProductDetailsState createState() => _ProductDetailsState();
 }
 
 class _ProductDetailsState extends State<ProductDetails> {
+  void _addToBill() {
+    final data = widget.snapshot.data() as Map<String, dynamic>?;
+    final barcode = data?['barcode']?.toString() ?? widget.snapshot.id;
+    final newProduct = ProductData(
+      barcode: barcode,
+      image: '${widget.snapshot.get('image')}',
+      name: '${widget.snapshot.get('name')}',
+      mrp: double.parse(widget.snapshot.get('mrp').toString()),
+      price: double.parse(widget.snapshot.get('selling').toString()),
+      quantity: "quantity",
+      count: 1,
+      description: "description",
+      category: "category",
+    );
+
+    final productList = widget.productList;
+    if (productList != null) {
+      final existingIndex =
+          productList.indexWhere((p) => p.barcode == barcode);
+      setState(() {
+        if (existingIndex >= 0) {
+          productList[existingIndex].count += 1;
+        } else {
+          productList.add(newProduct);
+        }
+      });
+      widget.onChanged?.call();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Added to bill')),
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => Bill(products: [newProduct], addedfromDB: false),
+        ),
+      );
+    }
+  }
+
   Future<void> _createDynamicLink(bool short) async {
     // final DynamicLinkParameters parameters = DynamicLinkParameters(
     //   uriPrefix: 'https://ecom.page.link',
@@ -68,6 +117,14 @@ class _ProductDetailsState extends State<ProductDetails> {
           },
         ),
         actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.add_shopping_cart,
+              color: Colors.white,
+            ),
+            tooltip: 'Add to bill',
+            onPressed: _addToBill,
+          ),
           IconButton(
             icon: const Icon(
               Icons.share_outlined,

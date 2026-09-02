@@ -161,6 +161,8 @@ class _ReviewQueue extends StatelessWidget {
                           children: [
                             Expanded(
                               child: Text(r.requestedByName,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                   style: AppText.bodyStrong(context)),
                             ),
                             _StatusBadge(status: r.status),
@@ -206,6 +208,8 @@ class _ReviewQueue extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: Text(r.requestedByName,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                     style: AppText.bodyStrong(context)),
                               ),
                               _StatusBadge(status: r.status),

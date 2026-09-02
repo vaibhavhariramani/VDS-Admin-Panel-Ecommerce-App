@@ -152,7 +152,8 @@ class _HomeGridProductListState extends State<HomeGridProductList> {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 6),
-              child: count == 0
+              child: Center(
+                child: count == 0
                   ? ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
@@ -193,6 +194,7 @@ class _HomeGridProductListState extends State<HomeGridProductList> {
                         ],
                       ),
                     ),
+              ),
             ),
           ],
         ),
@@ -201,8 +203,11 @@ class _HomeGridProductListState extends State<HomeGridProductList> {
         Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (BuildContext context) =>
-                    ProductDetails(snapshot: widget.snapshot)));
+                builder: (BuildContext context) => ProductDetails(
+                      snapshot: widget.snapshot,
+                      productList: widget.listOfProductsInBilling,
+                      onChanged: widget.onChanged,
+                    )));
       },
     );
   }

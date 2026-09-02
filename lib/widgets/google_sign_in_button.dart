@@ -62,12 +62,27 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
                 setState(() {
                   _isSigningIn = true;
                 });
-                User? user =
-                    await Authentication.signInWithGoogle(context: context);
-                print("got user authrnticated $user");
-                setState(() {
-                  _isSigningIn = false;
-                });
+                User? user;
+                try {
+                  user =
+                      await Authentication.signInWithGoogle(context: context);
+                  print("got user authrnticated $user");
+                } catch (e) {
+                  print("Google sign in failed: $e");
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Error occurred using Google Sign In. Try again.'),
+                      ),
+                    );
+                  }
+                } finally {
+                  if (mounted) {
+                    setState(() {
+                      _isSigningIn = false;
+                    });
+                  }
+                }
 
                 if (user != null) {
                   // Navigator.of(context).pushReplacement(

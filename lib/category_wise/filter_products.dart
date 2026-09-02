@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:vdsadmin/database/add_item_to_db.dart';
 import 'package:vdsadmin/models/data_provider.dart';
 import 'package:vdsadmin/search/product_details.dart';
 import 'package:vdsadmin/theme/app_theme.dart';
@@ -20,6 +21,16 @@ class FilterProduct extends StatelessWidget {
         title: Text(tag),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            tooltip: 'Add new product',
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ShopRegister()),
+            ),
+          ),
+        ],
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: dataProvider.products(null, filter: tag),

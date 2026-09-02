@@ -168,9 +168,9 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
                                       color: AppColors.shade50)))
                           : GridView.builder(
                               gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 3,
-                                mainAxisExtent: 140,
+                                  const SliverGridDelegateWithMaxCrossAxisExtent(
+                                maxCrossAxisExtent: 320,
+                                mainAxisExtent: 160,
                                 crossAxisSpacing: 16,
                                 mainAxisSpacing: 16,
                               ),

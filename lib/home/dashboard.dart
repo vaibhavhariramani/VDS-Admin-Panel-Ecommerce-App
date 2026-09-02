@@ -283,14 +283,37 @@ class _DashboardState extends State<Dashboard> {
                         ),
                       ),
                       const SizedBox(height: 24),
-                      Wrap(
-                        alignment: WrapAlignment.center,
-                        spacing: 20,
-                        runSpacing: 20,
-                        children: [
-                          for (final card in cards)
-                            _DashboardCard(data: card, dark: dark),
-                        ],
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final isMobile = constraints.maxWidth < 600;
+                          if (!isMobile) {
+                            return Wrap(
+                              alignment: WrapAlignment.center,
+                              spacing: 20,
+                              runSpacing: 20,
+                              children: [
+                                for (final card in cards)
+                                  _DashboardCard(data: card, dark: dark),
+                              ],
+                            );
+                          }
+                          const spacing = 16.0;
+                          final cardWidth =
+                              (constraints.maxWidth - spacing) / 2;
+                          return Wrap(
+                            alignment: WrapAlignment.center,
+                            spacing: spacing,
+                            runSpacing: spacing,
+                            children: [
+                              for (final card in cards)
+                                _DashboardCard(
+                                  data: card,
+                                  dark: dark,
+                                  width: cardWidth,
+                                ),
+                            ],
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -400,14 +423,19 @@ class _DashboardCardData {
 class _DashboardCard extends StatelessWidget {
   final _DashboardCardData data;
   final bool dark;
+  final double width;
 
-  const _DashboardCard({required this.data, required this.dark});
+  const _DashboardCard({
+    required this.data,
+    required this.dark,
+    this.width = 230,
+  });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 230,
-      height: 150,
+      width: width,
+      height: 172,
       child: AppCard(
         padding: const EdgeInsets.all(18),
         onTap: data.onTap,
@@ -428,6 +456,8 @@ class _DashboardCard extends StatelessWidget {
               children: [
                 Text(
                   data.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: AppText.bodyStrong(context).copyWith(fontSize: 16),
                 ),
                 const SizedBox(height: 3),
@@ -453,6 +483,7 @@ class _StartBillingHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isNarrow = MediaQuery.of(context).size.width < 600;
     return Material(
       color: AppColors.primary,
       borderRadius: BorderRadius.circular(AppRadius.xl),
@@ -465,32 +496,39 @@ class _StartBillingHero extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Start Billing',
-                    style: AppText.display(context, color: Colors.white)
-                        .copyWith(fontSize: 28, fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Scan or add items to create a new bill',
-                    style: AppText.body(context,
-                        color: Colors.white.withOpacity(0.85)),
-                  ),
-                  const SizedBox(height: 20),
-                  PillButton(
-                    label: 'Click Here',
-                    icon: Icons.arrow_forward,
-                    onPressed: onTap,
-                    filled: true,
-                    color: Colors.white,
-                  ),
-                ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Start Billing',
+                      style: AppText.display(context, color: Colors.white)
+                          .copyWith(fontSize: 28, fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Scan or add items to create a new bill',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppText.body(context,
+                          color: Colors.white.withOpacity(0.85)),
+                    ),
+                    const SizedBox(height: 20),
+                    PillButton(
+                      label: 'Click Here',
+                      icon: Icons.arrow_forward,
+                      onPressed: onTap,
+                      filled: true,
+                      color: Colors.white,
+                    ),
+                  ],
+                ),
               ),
-              Icon(Icons.point_of_sale_rounded,
-                  color: Colors.white.withOpacity(0.25), size: 96),
+              if (!isNarrow) ...[
+                const SizedBox(width: 16),
+                Icon(Icons.point_of_sale_rounded,
+                    color: Colors.white.withOpacity(0.25), size: 96),
+              ],
             ],
           ),
         ),

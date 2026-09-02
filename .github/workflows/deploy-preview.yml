@@ -34,3 +34,18 @@ jobs:
           projectId: ecommerce-26b18
           channelId: "${{ steps.channel.outputs.id }}"
           expires: 30d
+
+  build-ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.29.2"
+          channel: "stable"
+
+      - run: flutter pub get
+      # No signing certs/provisioning profiles configured in CI, so this
+      # only verifies the iOS app still compiles - it doesn't archive or export an IPA.
+      - run: flutter build ios --release --no-codesign

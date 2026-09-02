@@ -121,14 +121,29 @@ class BillState extends State<Bill> {
       barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
           '#ff6666', 'Cancel', true, ScanMode.BARCODE);
       print(barcodeScanRes);
-    } on PlatformException {
-      barcodeScanRes = 'Failed to get platform version.';
+    } on PlatformException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not open the scanner: ${e.message ?? e.code}')),
+        );
+      }
+      return;
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not open the scanner: $e')),
+        );
+      }
+      return;
     }
 
     // If the widget was removed from the tree while the asynchronous platform
     // message was in flight, we want to discard the reply rather than calling
     // setState to update our non-existent appearance.
     if (!mounted) return;
+
+    // The scanner returns '-1' when the user cancels the scan.
+    if (barcodeScanRes == '-1') return;
 
     setState(() {
       scanBarcode = barcodeScanRes;
@@ -712,20 +727,15 @@ class BillState extends State<Bill> {
                   context: context,
                   builder: (BuildContext context) {
                     return AlertDialog(
+                      insetPadding: const EdgeInsets.all(16),
+                      contentPadding: EdgeInsets.zero,
                       content: SizedBox(
-                        // Wrap your content in a Container
-                        width: MediaQuery.of(context).size.width *
-                            0.9, // Adjust the width as needed
+                        width: MediaQuery.of(context).size.width * 0.9,
+                        height: MediaQuery.of(context).size.height * 0.8,
                         child: GridScreen(
                           dataViewer: false,
                           listOfProductsInBill: widget.products,
                         ),
-                        // contentPadding: EdgeInsets.fromLTRB(
-                        //     24, 12, 24, 12), // Adjust content padding
-                        // insetPadding:
-                        //     EdgeInsets.all(0), // Remove default inset padding
-                        // Set the width of the AlertDialog by limiting its constraints
-                        // constraints: const BoxConstraints(maxWidth: 400),
                       ),
                     );
                   },
