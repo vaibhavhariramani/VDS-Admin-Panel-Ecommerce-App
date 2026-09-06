@@ -82,6 +82,14 @@ service cloud.firestore {
     match /Regions/{id} { allow read: if true; allow write: if isStaff(); }
     match /Countries/{id} { allow read: if true; allow write: if isStaff(); }
 
+    // Platform-wide settings (currently just delivery.radiusKm - see
+    // docs/architecture/DELIVERY_RADIUS.md). Not sensitive, so publicly
+    // readable; only a platform admin can change it.
+    match /PlatformConfig/{id} {
+      allow read: if true;
+      allow write: if isPlatformAdmin();
+    }
+
     // Every signed-in user manages only their own profile; staff can
     // manage any (customer lookups, staff account management).
     match /Users/{userId} {
@@ -133,11 +141,12 @@ service cloud.firestore {
         (resource.data.get('customerUid', '') == request.auth.uid ||
           resource.data.get('riderId', '') == request.auth.uid ||
           isStaff());
-      // A rider may only touch an order already assigned to them
-      // (riderId set by staff via the assignment flow - see
-      // order_details.dart), and only to advance its status/pickup/
-      // delivery timestamps - never the amount, address, or who it
-      // belongs to.
+      // A rider may only touch an order already assigned to them, and only
+      // to advance its status/pickup/delivery timestamps - never the
+      // amount, address, or who it belongs to. riderId itself is set
+      // either by staff (order_details.dart) or by the acceptDelivery
+      // Cloud Function (Admin SDK, bypasses this rule) - never directly by
+      // a rider's own write. See docs/architecture/DELIVERY_RADIUS.md.
       allow update: if isStaff() ||
         (isRider() &&
           resource.data.get('riderId', '') == request.auth.uid &&
