@@ -27,6 +27,7 @@ class Product {
   String? _region_id;
   String? _country;
   String? _brand;
+  bool _is_published = false;
 
   Product({
     this.id,
@@ -49,7 +50,9 @@ class Product {
     ProductDealType? deal_type,
     DateTime? expires_on,
     DateTime? available_from,
+    bool is_published = false,
   }) {
+    _is_published = is_published;
     _barcode = barcode;
     _image = image;
     _name = name;
@@ -112,7 +115,11 @@ class Product {
   }
 
   bool get is_published {
-    return true;
+    return _is_published;
+  }
+
+  set is_published(bool value) {
+    _is_published = value;
   }
 
   double get mrp {
@@ -229,6 +236,7 @@ class Product {
 
     DateTime? availableFrom = _timestampToDateTime(data['availableFrom']);
     DateTime? expiresOn = _timestampToDateTime(data['expiresOn']);
+    bool isPublished = data['isPublished'] == true;
 
     try {
       Product tempProduct = Product(
@@ -250,6 +258,7 @@ class Product {
         deal_type: dealType,
         available_from: availableFrom,
         expires_on: expiresOn,
+        is_published: isPublished,
         name: name,
         id: barcode, // or use a dedicated 'id' field if available
       );

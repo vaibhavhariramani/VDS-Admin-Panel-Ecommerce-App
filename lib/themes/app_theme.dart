@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dashboard/flutter_dashboard.dart';
 
 part './colors.dart';
+part './tokens.dart';
 
 part 'light_theme.dart';
 part 'dark_theme.dart';

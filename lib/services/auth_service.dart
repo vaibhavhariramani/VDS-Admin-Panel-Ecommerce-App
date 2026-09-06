@@ -14,11 +14,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 import '../app/modules/auth/widgets/authentication_files/authentication.dart';
 import '../app/modules/billing/controllers/billing_controller.dart';
 import '../app/modules/home/controllers/home_controller.dart';
-import '../app/modules/products/hot_deals/controllers/hot_deals_controller.dart';
-import '../app/modules/products/master_list/controllers/master_list_controller.dart';
+import '../app/modules/products/product_management/controllers/product_management_controller.dart';
 import '../app/modules/products/products_listing/controllers/products_listing_controller.dart';
-import '../app/modules/products/published_products/controllers/published_products_controller.dart';
-import '../app/modules/products/scheduled_products/controllers/scheduled_products_controller.dart';
 import '../app/modules/storefront/controllers/storefront_controller.dart';
 import '../app/routes/app_pages.dart';
 import '../models/Users.dart';
@@ -197,11 +194,8 @@ class AuthService extends GetxService {
     Get.delete<BillingController>();
     Get.delete<HomeController>();
     Get.delete<StorefrontController>();
-    Get.delete<MasterListController>();
-    Get.delete<ScheduledProductsController>();
-    Get.delete<HotDealsController>();
+    Get.delete<ProductManagementController>();
     Get.delete<ProductsListingController>();
-    Get.delete<PublishedProductsController>();
   }
 
   @override

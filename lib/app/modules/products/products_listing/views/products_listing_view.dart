@@ -17,8 +17,6 @@ import '../../../../widgets/components/table_datasrc_bundle.dart';
 import '../../../../widgets/components/table_datasrc_productBundle.dart';
 import '../../../../widgets/utils/padding_wrapper.dart';
 import '../../components/image_viewer_for_product.dart';
-import '../../scheduled_products/views/scheduled_products_view.dart';
-import '../../published_products/views/published_products_view.dart';
 import '../controllers/products_listing_controller.dart';
 
 // DateTime startDate = DateTime(2000);
@@ -2537,30 +2535,13 @@ class ProductsListingView extends GetResponsiveView<ProductsListingController> {
           controller.showBulkProductUploadForm(true);
         },
       ),
-      _buildCard(
-        text: 'Scheduled Products',
-        onPressed: () => Navigator.push(
-          screen.context,
-          MaterialPageRoute(
-            builder: (context) => Scaffold(
-              appBar: AppBar(title: const Text('Scheduled Products')),
-              body: ScheduledProductsView(),
-            ),
-          ),
-        ),
-      ),
-      _buildCard(
-        text: 'Published Products',
-        onPressed: () => Navigator.push(
-          screen.context,
-          MaterialPageRoute(
-            builder: (context) => Scaffold(
-              appBar: AppBar(title: const Text('Published Products')),
-              body: PublishedProductsView(),
-            ),
-          ),
-        ),
-      ),
+      // Scheduled Products / Published Products used to link out to two
+      // more pages from here (Navigator.push, bypassing GetX's own route
+      // table) - both are superseded by the "Products" page's status
+      // filter chips (All/Published/Scheduled/Hot Deals), which read the
+      // same Products collection instead of duplicating the fetch+filter
+      // logic across separate pages. See
+      // docs/architecture/CURRENT_ARCHITECTURE.md.
     ];
   }
 

@@ -1,11 +1,7 @@
-import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dashboard/flutter_dashboard.dart';
-import 'package:iconly/iconly.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:syncfusion_flutter_datepicker/datepicker.dart';
+import 'package:get/get.dart';
 
-import '../../../../constants/constants.dart';
 import '../../../../models/UserType.dart';
 import '../../../../themes/app_theme.dart';
 import '../../../widgets/components/common_card.dart';
@@ -14,11 +10,20 @@ import '../../deletion_status/controllers/deletion_status_controller.dart';
 import '../../deletion_status/views/deletion_status_view.dart';
 import '../controllers/home_controller.dart';
 import 'dashboard_alerts_panel.dart';
+import 'widgets/performance_chart_card.dart';
+import 'widgets/stat_card.dart';
 
+// These three top-level globals are pre-existing cross-file coupling, not
+// introduced here: several unrelated files (billing_view.dart,
+// app_pages.dart, deletion_status/component/{header,masterheader}.dart,
+// products_listing's greendeal_form.dart) import this file specifically to
+// use these as date-picker bounds and a shared controller instance,
+// instead of each owning its own. Left in place rather than fixed here -
+// untangling it means touching 5+ unrelated files' imports, out of scope
+// for a dashboard redesign.
 DateTime startDate = DateTime(2000);
 DateTime endDate = DateTime(3000);
-DeletionStatusController deletionStatusController =
-    Get.put(DeletionStatusController());
+DeletionStatusController deletionStatusController = Get.put(DeletionStatusController());
 
 class HomeView extends GetResponsiveView<HomeController> {
   HomeView({Key? key}) : super(key: key);
@@ -28,1139 +33,244 @@ class HomeView extends GetResponsiveView<HomeController> {
     screen.context = context;
     controller.onInit();
     return Obx(() {
-      // if (controller.userType == UserType.ADMIN) {}
-      switch (controller.userType) {
-        case UserType.ADMIN:
-          return _RootAdminHome();
-        case UserType.SHOP_ADMIN:
-          return _ShopAdminView();
-        case UserType.MERCHANT:
-          return _MerchantAdminView();
-        case UserType.COUNTRY_HEAD:
-          return _CountryAdminView();
-        case UserType.AFFILIATES:
-          return _AffiliatesAdminView();
-        default:
-          return const Scaffold(
-            body: Center(
-              child: Text(
-                "you don't have enough permission to view this page",
-              ),
-            ),
-          );
+      final _RoleDashboardConfig? config = _configFor(controller.userType);
+      if (config == null) {
+        return const Scaffold(
+          body: Center(
+            child: Text("You don't have enough permission to view this page"),
+          ),
+        );
       }
+      return _RoleDashboard(controller: controller, config: config, screen: screen);
     });
   }
-}
 
-class _RootAdminHome extends GetResponsiveView<HomeController> {
-  _RootAdminHome({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    screen.context = context;
-    return Obx(
-      () => FlutterDashboardListView(
-        slivers: [
-          SliverVisibility(
-            visible: deletionStatusController.isVisible.value,
-            sliver: SliverToBoxAdapter(
-              child: DeletionStatusView(),
+  _RoleDashboardConfig? _configFor(UserType userType) {
+    switch (userType) {
+      case UserType.ADMIN:
+      case UserType.AFFILIATES:
+      case UserType.COUNTRY_HEAD:
+        return _RoleDashboardConfig(
+          statCards: (HomeController c) => [
+            StatCardData(
+              count: c.totalCustomerCount,
+              title: 'Total Customers',
+              color: AppSemanticColors.success,
+              backgroundColor: AppSemanticColors.successBg,
+              icon: Icons.groups_outlined,
             ),
-          ),
-          SliverVisibility(
-            visible: !deletionStatusController.isVisible.value,
-            sliver: PaddingWrapper(
-              isSliverItem: true,
-              horizontalPadding: 20,
-              topPadding: 20,
-              child: FlutterDashboardListView.grid(
-                isSliverItem: true,
-                childCount: 3,
-                gridDelegate: screen.isPhone
-                    ? null
-                    : !screen.isDesktop
-                        ? FlutterDashboardGridDelegates.columns_1(
-                            width: screen.width,
-                            length: 3,
-                          )
-                        : FlutterDashboardGridDelegates.fit(3, 3, 1),
-                crossAxisSpacing: screen.isDesktop ? 20 : 0,
-                mainAxisSpacing: screen.isDesktop ? 15 : 15,
-                buildItem: (BuildContext context, int index) {
-                  return Obx(() => _buildTiles()[index]);
-                },
-                listType: FlutterDashboardListType.Grid,
-              ),
+            StatCardData(
+              count: c.activeUserCount.value,
+              title: 'Active Customers',
+              color: AppSemanticColors.info,
+              backgroundColor: AppSemanticColors.infoBg,
+              icon: Icons.person_outline,
             ),
-          ),
-          SliverVisibility(
-            visible: !deletionStatusController.isVisible.value,
-            sliver: PaddingWrapper(
-              isSliverItem: true,
-              horizontalPadding: 35,
-              topPadding: 50,
-              child: FlutterDashboardListView.grid(
-                isSliverItem: true,
-                childCount: 2,
-                gridDelegate: screen.isPhone
-                    ? null
-                    : !screen.isDesktop
-                        ? FlutterDashboardGridDelegates.columns_1(
-                            width: screen.width,
-                            length: 2,
-                          )
-                        : FlutterDashboardGridDelegates.fit(2, 2, 1),
-                crossAxisSpacing: 20,
-                mainAxisSpacing: 20,
-                buildItem: (BuildContext context, int index) {
-                  return _buildBody(
-                    screen,
-                    chartData: <CartesianSeries<dynamic, dynamic>>[
-                      ColumnSeries<ShopVisitorChartData, String>(
-                        dataSource: controller.data,
-                        xValueMapper: (ShopVisitorChartData data, _) => data.x,
-                        yValueMapper: (ShopVisitorChartData data, _) => data.y,
-                        name: 'Visitors',
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(15)),
-                        isTrackVisible: true,
-                        trackBorderWidth: 0,
-                        color: Theme.of(screen.context).primaryColor,
-                      )
-                    ],
-                  )[index];
-                },
-                listType: FlutterDashboardListType.Grid,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  List<Widget> _buildTiles() {
-    return [
-      CommonCard(
-        height: 120,
-        // gradient: AppColors.gradient1,
-        color: const Color(0xffD5E8CF),
-        child: Center(
-          child: _buildTileItem(
-            totalCount: 21459,
-            title: 'Total Users',
-            color: const Color(0xff006E1B),
-            icon: Material(
-              color: AppColors.white,
-              shape: const CircleBorder(),
-              child: Image.asset(
-                'assets/all_user.png',
-                scale: 1,
-              ),
-            ),
-          ),
-        ),
-      ),
-      CommonCard(
-        height: 120,
-        // gradient: AppColors.gradient1,
-        color: const Color(0xffE5F6FF),
-        child: Center(
-          child: !controller.isloading.value
-              ? _buildTileItem(
-                  totalCount: controller.activeUserCount.value,
-                  title: 'Active Users',
-                  color: const Color(0xff2C71FF),
-                  icon: Material(
-                    color: AppColors.white,
-                    shape: const CircleBorder(),
-                    child: Image.asset(
-                      'assets/active_user.png',
-                      scale: 1,
-                    ),
-                  ),
-                )
-              : const CircularProgressIndicator(),
-        ),
-      ),
-      CommonCard(
-        height: 120,
-        // gradient: AppColors.gradient1,
-        color: const Color(0xffF6F3FF),
-        child: Center(
-          child: !controller.isloading.value
-              ? _buildTileItem(
-                  totalCount: controller.inActiveUserCount.value,
-                  title: 'Inactive Users',
-                  color: const Color(0xff6955BF),
-                  icon: Material(
-                    color: AppColors.white,
-                    shape: const CircleBorder(),
-                    child: Image.asset(
-                      'assets/pending_user.png',
-                      scale: 1,
-                    ),
-                  ),
-                )
-              : const CircularProgressIndicator(),
-        ),
-      )
-    ];
-  }
-
-  _buildTileItem({
-    required int totalCount,
-    required String title,
-    required Widget icon,
-    required Color color,
-  }) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(
-        vertical: 15,
-        horizontal: 20,
-      ),
-      dense: true,
-      title: Text(
-        "$totalCount".replaceAllMapped(numberFormatterRegex, formatNumberCount),
-        textScaleFactor: Get.textScaleFactor,
-        style: Theme.of(screen.context).textTheme.bodyLarge?.copyWith(
-              // color: AppColors.white,
-              color: color,
-              fontSize: 32,
-            ),
-      ),
-      subtitle: Text(
-        title,
-        textScaleFactor: Get.textScaleFactor,
-        style: Theme.of(screen.context).textTheme.bodyLarge?.copyWith(
-              // color: AppColors.white,
-              color: color,
-              fontSize: 14,
-            ),
-      ),
-      trailing: icon,
-    );
-  }
-}
-
-class _AffiliatesAdminView extends GetResponsiveView<HomeController> {
-  _AffiliatesAdminView({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    screen.context = context;
-    return Obx(
-      () => FlutterDashboardListView(
-        slivers: [
-          SliverVisibility(
-            visible: deletionStatusController.isVisible.value,
-            sliver: SliverToBoxAdapter(
-              child: DeletionStatusView(),
-            ),
-          ),
-          SliverVisibility(
-            visible: !deletionStatusController.isVisible.value,
-            sliver: PaddingWrapper(
-              isSliverItem: true,
-              horizontalPadding: 20,
-              topPadding: 20,
-              child: FlutterDashboardListView.grid(
-                isSliverItem: true,
-                childCount: 3,
-                gridDelegate: screen.isPhone
-                    ? null
-                    : !screen.isDesktop
-                        ? FlutterDashboardGridDelegates.columns_1(
-                            width: screen.width,
-                            length: 3,
-                          )
-                        : FlutterDashboardGridDelegates.fit(3, 3, 1),
-                crossAxisSpacing: screen.isDesktop ? 20 : 0,
-                mainAxisSpacing: screen.isDesktop ? 15 : 15,
-                buildItem: (BuildContext context, int index) {
-                  return Obx(() => _buildTiles()[index]);
-                },
-                listType: FlutterDashboardListType.Grid,
-              ),
-            ),
-          ),
-          SliverVisibility(
-            visible: !deletionStatusController.isVisible.value,
-            sliver: PaddingWrapper(
-              isSliverItem: true,
-              horizontalPadding: 35,
-              topPadding: 50,
-              child: FlutterDashboardListView.grid(
-                isSliverItem: true,
-                childCount: 2,
-                gridDelegate: screen.isPhone
-                    ? null
-                    : !screen.isDesktop
-                        ? FlutterDashboardGridDelegates.columns_1(
-                            width: screen.width,
-                            length: 2,
-                          )
-                        : FlutterDashboardGridDelegates.fit(2, 2, 1),
-                crossAxisSpacing: 20,
-                mainAxisSpacing: 20,
-                buildItem: (BuildContext context, int index) {
-                  return _buildBody(
-                    screen,
-                    chartData: <CartesianSeries<dynamic, dynamic>>[
-                      ColumnSeries<ShopVisitorChartData, String>(
-                        dataSource: controller.data,
-                        xValueMapper: (ShopVisitorChartData data, _) => data.x,
-                        yValueMapper: (ShopVisitorChartData data, _) => data.y,
-                        name: 'Visitors',
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(15)),
-                        isTrackVisible: true,
-                        trackBorderWidth: 0,
-                        color: Theme.of(screen.context).primaryColor,
-                      )
-                    ],
-                  )[index];
-                },
-                listType: FlutterDashboardListType.Grid,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  List<Widget> _buildTiles() {
-    return [
-      CommonCard(
-        height: 120,
-        // gradient: AppColors.gradient1,
-        color: const Color(0xffD5E8CF),
-        child: Center(
-          child: _buildTileItem(
-            totalCount: 21459,
-            title: 'Total Users',
-            color: const Color(0xff006E1B),
-            icon: Material(
-              color: AppColors.white,
-              shape: const CircleBorder(),
-              child: Image.asset(
-                'assets/all_user.png',
-                scale: 1,
-              ),
-            ),
-          ),
-        ),
-      ),
-      CommonCard(
-        height: 120,
-        // gradient: AppColors.gradient1,
-        color: const Color(0xffE5F6FF),
-        child: Center(
-          child: !controller.isloading.value
-              ? _buildTileItem(
-                  totalCount: controller.activeUserCount.value,
-                  title: 'Active Users',
-                  color: const Color(0xff2C71FF),
-                  icon: Material(
-                    color: AppColors.white,
-                    shape: const CircleBorder(),
-                    child: Image.asset(
-                      'assets/active_user.png',
-                      scale: 1,
-                    ),
-                  ),
-                )
-              : const CircularProgressIndicator(),
-        ),
-      ),
-      CommonCard(
-        height: 120,
-        // gradient: AppColors.gradient1,
-        color: const Color(0xffF6F3FF),
-        child: Center(
-          child: !controller.isloading.value
-              ? _buildTileItem(
-                  totalCount: controller.inActiveUserCount.value,
-                  title: 'Inactive Users',
-                  color: const Color(0xff6955BF),
-                  icon: Material(
-                    color: AppColors.white,
-                    shape: const CircleBorder(),
-                    child: Image.asset(
-                      'assets/pending_user.png',
-                      scale: 1,
-                    ),
-                  ),
-                )
-              : const CircularProgressIndicator(),
-        ),
-      )
-    ];
-  }
-
-  _buildTileItem({
-    required int totalCount,
-    required String title,
-    required Widget icon,
-    required Color color,
-  }) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(
-        vertical: 15,
-        horizontal: 20,
-      ),
-      dense: true,
-      title: Text(
-        "$totalCount".replaceAllMapped(numberFormatterRegex, formatNumberCount),
-        textScaleFactor: Get.textScaleFactor,
-        style: Theme.of(screen.context).textTheme.bodyLarge?.copyWith(
-              // color: AppColors.white,
-              color: color,
-              fontSize: 32,
-            ),
-      ),
-      subtitle: Text(
-        title,
-        textScaleFactor: Get.textScaleFactor,
-        style: Theme.of(screen.context).textTheme.bodyLarge?.copyWith(
-              // color: AppColors.white,
-              color: color,
-              fontSize: 14,
-            ),
-      ),
-      trailing: icon,
-    );
-  }
-}
-
-class _CountryAdminView extends GetResponsiveView<HomeController> {
-  _CountryAdminView({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    screen.context = context;
-    return Obx(
-      () => FlutterDashboardListView(
-        slivers: [
-          SliverVisibility(
-            visible: deletionStatusController.isVisible.value,
-            sliver: SliverToBoxAdapter(
-              child: DeletionStatusView(),
-            ),
-          ),
-          SliverVisibility(
-            visible: !deletionStatusController.isVisible.value,
-            sliver: PaddingWrapper(
-              isSliverItem: true,
-              horizontalPadding: 20,
-              topPadding: 20,
-              child: FlutterDashboardListView.grid(
-                isSliverItem: true,
-                childCount: 3,
-                gridDelegate: screen.isPhone
-                    ? null
-                    : !screen.isDesktop
-                        ? FlutterDashboardGridDelegates.columns_1(
-                            width: screen.width,
-                            length: 3,
-                          )
-                        : FlutterDashboardGridDelegates.fit(3, 3, 1),
-                crossAxisSpacing: screen.isDesktop ? 20 : 0,
-                mainAxisSpacing: screen.isDesktop ? 15 : 15,
-                buildItem: (BuildContext context, int index) {
-                  return Obx(() => _buildTiles()[index]);
-                },
-                listType: FlutterDashboardListType.Grid,
-              ),
-            ),
-          ),
-          SliverVisibility(
-            visible: !deletionStatusController.isVisible.value,
-            sliver: PaddingWrapper(
-              isSliverItem: true,
-              horizontalPadding: 35,
-              topPadding: 50,
-              child: FlutterDashboardListView.grid(
-                isSliverItem: true,
-                childCount: 2,
-                gridDelegate: screen.isPhone
-                    ? null
-                    : !screen.isDesktop
-                        ? FlutterDashboardGridDelegates.columns_1(
-                            width: screen.width,
-                            length: 2,
-                          )
-                        : FlutterDashboardGridDelegates.fit(2, 2, 1),
-                crossAxisSpacing: 20,
-                mainAxisSpacing: 20,
-                buildItem: (BuildContext context, int index) {
-                  return _buildBody(
-                    screen,
-                    chartData: <CartesianSeries<dynamic, dynamic>>[
-                      ColumnSeries<ShopVisitorChartData, String>(
-                        dataSource: controller.data,
-                        xValueMapper: (ShopVisitorChartData data, _) => data.x,
-                        yValueMapper: (ShopVisitorChartData data, _) => data.y,
-                        name: 'Visitors',
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(15)),
-                        isTrackVisible: true,
-                        trackBorderWidth: 0,
-                        color: Theme.of(screen.context).primaryColor,
-                      )
-                    ],
-                  )[index];
-                },
-                listType: FlutterDashboardListType.Grid,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  List<Widget> _buildTiles() {
-    return [
-      CommonCard(
-        height: 120,
-        // gradient: AppColors.gradient1,
-        color: const Color(0xffD5E8CF),
-        child: Center(
-          child: _buildTileItem(
-            totalCount: 21459,
-            title: 'Total Users',
-            color: const Color(0xff006E1B),
-            icon: Material(
-              color: AppColors.white,
-              shape: const CircleBorder(),
-              child: Image.asset(
-                'assets/all_user.png',
-                scale: 1,
-              ),
-            ),
-          ),
-        ),
-      ),
-      CommonCard(
-        height: 120,
-        // gradient: AppColors.gradient1,
-        color: const Color(0xffE5F6FF),
-        child: Center(
-          child: !controller.isloading.value
-              ? _buildTileItem(
-                  totalCount: controller.activeUserCount.value,
-                  title: 'Active Users',
-                  color: const Color(0xff2C71FF),
-                  icon: Material(
-                    color: AppColors.white,
-                    shape: const CircleBorder(),
-                    child: Image.asset(
-                      'assets/active_user.png',
-                      scale: 1,
-                    ),
-                  ),
-                )
-              : const CircularProgressIndicator(),
-        ),
-      ),
-      CommonCard(
-        height: 120,
-        // gradient: AppColors.gradient1,
-        color: const Color(0xffF6F3FF),
-        child: Center(
-          child: !controller.isloading.value
-              ? _buildTileItem(
-                  totalCount: controller.inActiveUserCount.value,
-                  title: 'Inactive Users',
-                  color: const Color(0xff6955BF),
-                  icon: Material(
-                    color: AppColors.white,
-                    shape: const CircleBorder(),
-                    child: Image.asset(
-                      'assets/pending_user.png',
-                      scale: 1,
-                    ),
-                  ),
-                )
-              : const CircularProgressIndicator(),
-        ),
-      )
-    ];
-  }
-
-  _buildTileItem({
-    required int totalCount,
-    required String title,
-    required Widget icon,
-    required Color color,
-  }) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(
-        vertical: 15,
-        horizontal: 20,
-      ),
-      dense: true,
-      title: Text(
-        "$totalCount".replaceAllMapped(numberFormatterRegex, formatNumberCount),
-        textScaleFactor: Get.textScaleFactor,
-        style: Theme.of(screen.context).textTheme.bodyLarge?.copyWith(
-              // color: AppColors.white,
-              color: color,
-              fontSize: 32,
-            ),
-      ),
-      subtitle: Text(
-        title,
-        textScaleFactor: Get.textScaleFactor,
-        style: Theme.of(screen.context).textTheme.bodyLarge?.copyWith(
-              // color: AppColors.white,
-              color: color,
-              fontSize: 14,
-            ),
-      ),
-      trailing: icon,
-    );
-  }
-}
-
-class _MerchantAdminView extends GetResponsiveView<HomeController> {
-  _MerchantAdminView({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    screen.context = context;
-    return Obx(() => FlutterDashboardListView(
-          slivers: [
-            SliverVisibility(
-              visible: deletionStatusController.isVisible.isTrue,
-              sliver: SliverToBoxAdapter(
-                child: DeletionStatusView(),
-              ),
-            ),
-            SliverVisibility(
-              visible: deletionStatusController.isVisible.isFalse,
-              sliver: PaddingWrapper(
-                isSliverItem: true,
-                horizontalPadding: 20,
-                topPadding: 20,
-                child: FlutterDashboardListView.grid(
-                  isSliverItem: true,
-                  childCount: 3,
-                  gridDelegate: screen.isPhone
-                      ? null
-                      : !screen.isDesktop
-                          ? FlutterDashboardGridDelegates.columns_1(
-                              width: screen.width,
-                              length: 3,
-                            )
-                          : FlutterDashboardGridDelegates.fit(3, 3, 1),
-                  crossAxisSpacing: screen.isDesktop ? 20 : 0,
-                  mainAxisSpacing: screen.isDesktop ? 15 : 15,
-                  buildItem: (BuildContext context, int index) {
-                    return Obx(() => _buildTiles()[index]);
-                  },
-                  listType: FlutterDashboardListType.Grid,
-                ),
-              ),
-            ),
-            SliverVisibility(
-              visible: deletionStatusController.isVisible.isFalse,
-              sliver: PaddingWrapper(
-                isSliverItem: true,
-                horizontalPadding: 35,
-                topPadding: 50,
-                child: FlutterDashboardListView.grid(
-                  isSliverItem: true,
-                  childCount: 2,
-                  gridDelegate: screen.isPhone
-                      ? null
-                      : !screen.isDesktop
-                          ? FlutterDashboardGridDelegates.columns_1(
-                              width: screen.width,
-                              length: 2,
-                            )
-                          : FlutterDashboardGridDelegates.fit(2, 2, 1),
-                  crossAxisSpacing: 20,
-                  mainAxisSpacing: 20,
-                  buildItem: (BuildContext context, int index) {
-                    return _buildBody(
-                      screen,
-                      chartData: <CartesianSeries<dynamic, dynamic>>[
-                        ColumnSeries<ShopVisitorChartData, String>(
-                          dataSource: controller.data,
-                          xValueMapper: (ShopVisitorChartData data, _) =>
-                              data.x,
-                          yValueMapper: (ShopVisitorChartData data, _) =>
-                              data.y,
-                          name: 'Visitors',
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(15)),
-                          isTrackVisible: true,
-                          trackBorderWidth: 0,
-                          color: Theme.of(screen.context).primaryColor,
-                        )
-                      ],
-                    )[index];
-                  },
-                  listType: FlutterDashboardListType.Grid,
-                ),
-              ),
+            StatCardData(
+              count: c.inActiveUserCount.value,
+              title: 'Inactive Customers',
+              color: AppSemanticColors.neutral,
+              backgroundColor: AppSemanticColors.neutralBg,
+              icon: Icons.person_off_outlined,
             ),
           ],
-        ));
-  }
-
-  List<Widget> _buildTiles() {
-    return [
-      CommonCard(
-        height: 120,
-        // gradient: AppColors.gradient1,
-        color: const Color(0xffD5E8CF),
-        child: Center(
-          child: !controller.isloading.value
-              ? _buildTileItem(
-                  totalCount: controller.activeUserCount.value,
-                  title: 'Active Users',
-                  color: const Color(0xff006E1B),
-                  icon: Material(
-                    color: AppColors.white,
-                    shape: const CircleBorder(),
-                    child: Image.asset(
-                      'assets/active_user.png',
-                      scale: 1,
-                    ),
-                  ),
-                )
-              : const CircularProgressIndicator(),
-        ),
-      ),
-      CommonCard(
-        height: 120,
-        // gradient: AppColors.gradient1,
-        color: const Color(0xffE5F6FF),
-        child: Center(
-          child: !controller.isloading.value
-              ? _buildTileItem(
-                  totalCount: controller.inActiveUserCount.value,
-                  title: 'Inactive Users',
-                  color: const Color(0xff2C71FF),
-                  icon: Material(
-                    color: AppColors.white,
-                    shape: const CircleBorder(),
-                    child: Image.asset(
-                      'assets/pending_user.png',
-                      scale: 1,
-                    ),
-                  ),
-                )
-              : const CircularProgressIndicator(),
-        ),
-      ),
-      CommonCard(
-        height: 120,
-        // gradient: AppColors.gradient1,
-        color: const Color(0xffF6F3FF),
-        child: Center(
-          child: !controller.isloading.value
-              ? _buildTileItem(
-                  totalCount: controller.requestedUser.value,
-                  title: 'Requested Users',
-                  color: const Color(0xff6955BF),
-                  icon: Material(
-                    color: AppColors.white,
-                    shape: const CircleBorder(),
-                    child: Image.asset(
-                      'assets/all_user.png',
-                      scale: 1,
-                    ),
-                  ),
-                )
-              : const CircularProgressIndicator(),
-        ),
-      ),
-    ];
-  }
-
-  _buildTileItem({
-    required int totalCount,
-    required String title,
-    required Widget icon,
-    required Color color,
-  }) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(
-        vertical: 15,
-        horizontal: 20,
-      ),
-      dense: true,
-      title: Text(
-        "$totalCount".replaceAllMapped(numberFormatterRegex, formatNumberCount),
-        textScaleFactor: Get.textScaleFactor,
-        style: Theme.of(screen.context).textTheme.bodyLarge?.copyWith(
-              // color: AppColors.white,
-              color: color,
-              fontSize: 32,
+          showAlertsPanel: false,
+        );
+      case UserType.MERCHANT:
+        return _RoleDashboardConfig(
+          statCards: (HomeController c) => [
+            StatCardData(
+              count: c.activeUserCount.value,
+              title: 'Active Users',
+              color: AppSemanticColors.success,
+              backgroundColor: AppSemanticColors.successBg,
+              icon: Icons.person_outline,
             ),
-      ),
-      subtitle: Text(
-        title,
-        textScaleFactor: Get.textScaleFactor,
-        style: Theme.of(screen.context).textTheme.bodyLarge?.copyWith(
-              // color: AppColors.white,
-              color: color,
-              fontSize: 14,
+            StatCardData(
+              count: c.inActiveUserCount.value,
+              title: 'Inactive Users',
+              color: AppSemanticColors.info,
+              backgroundColor: AppSemanticColors.infoBg,
+              icon: Icons.person_off_outlined,
             ),
-      ),
-      trailing: icon,
-    );
-  }
-}
-
-class _ShopAdminView extends GetResponsiveView<HomeController> {
-  _ShopAdminView({Key? key}) : super(key: key);
-  @override
-  Widget build(BuildContext context) {
-    screen.context = context;
-    return Obx(() => FlutterDashboardListView(
-          slivers: [
-            SliverVisibility(
-              visible: deletionStatusController.isVisible.value,
-              sliver: SliverToBoxAdapter(
-                child: DeletionStatusView(),
-              ),
-            ),
-            SliverVisibility(
-              visible: !deletionStatusController.isVisible.value,
-              sliver: PaddingWrapper(
-                isSliverItem: true,
-                horizontalPadding: 20,
-                topPadding: 20,
-                child: FlutterDashboardListView.grid(
-                  isSliverItem: true,
-                  childCount: 3,
-                  gridDelegate: screen.isPhone
-                      ? null
-                      : !screen.isDesktop
-                          ? FlutterDashboardGridDelegates.columns_1(
-                              width: screen.width,
-                              length: 3,
-                            )
-                          : FlutterDashboardGridDelegates.fit(3, 3, 1),
-                  crossAxisSpacing: screen.isDesktop ? 20 : 0,
-                  mainAxisSpacing: screen.isDesktop ? 15 : 15,
-                  buildItem: (BuildContext context, int index) {
-                    return Obx(() => _buildTiles()[index]);
-                  },
-                  listType: FlutterDashboardListType.Grid,
-                ),
-              ),
-            ),
-            SliverVisibility(
-              visible: !deletionStatusController.isVisible.value,
-              sliver: PaddingWrapper(
-                isSliverItem: true,
-                horizontalPadding: 35,
-                topPadding: 50,
-                child: FlutterDashboardListView.grid(
-                  isSliverItem: true,
-                  childCount: 2,
-                  gridDelegate: screen.isPhone
-                      ? null
-                      : !screen.isDesktop
-                          ? FlutterDashboardGridDelegates.columns_1(
-                              width: screen.width,
-                              length: 2,
-                            )
-                          : FlutterDashboardGridDelegates.fit(2, 2, 1),
-                  crossAxisSpacing: 20,
-                  mainAxisSpacing: 20,
-                  buildItem: (BuildContext context, int index) {
-                    return _buildBody(
-                      screen,
-                      chartData: <CartesianSeries<dynamic, dynamic>>[
-                        ColumnSeries<ShopVisitorChartData, String>(
-                          dataSource: controller.data,
-                          xValueMapper: (ShopVisitorChartData data, _) =>
-                              data.x,
-                          yValueMapper: (ShopVisitorChartData data, _) =>
-                              data.y,
-                          name: 'Orders',
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(15)),
-                          isTrackVisible: true,
-                          trackBorderWidth: 0,
-                          color: Theme.of(screen.context).primaryColor,
-                        )
-                      ],
-                    )[index];
-                  },
-                  listType: FlutterDashboardListType.Grid,
-                ),
-              ),
-            ),
-            SliverVisibility(
-              visible: !deletionStatusController.isVisible.value,
-              sliver: const SliverToBoxAdapter(
-                child: DashboardAlertsPanel(),
-              ),
+            StatCardData(
+              count: c.requestedUser.value,
+              title: 'Requested Users',
+              color: AppSemanticColors.neutral,
+              backgroundColor: AppSemanticColors.neutralBg,
+              icon: Icons.person_add_alt_outlined,
             ),
           ],
-        ));
-  }
-
-  List<Widget> _buildTiles() {
-    return [
-      CommonCard(
-        height: 120,
-        // gradient: AppColors.gradient1,
-        color: const Color(0xffD5E8CF),
-        child: Center(
-          child: !controller.isloading.value
-              ? _buildTileItem(
-                  totalCount: controller.activeUserCount.value,
-                  title: 'Active Users',
-                  color: const Color(0xff006E1B),
-                  icon: Material(
-                    color: AppColors.white,
-                    shape: const CircleBorder(),
-                    child: Image.asset(
-                      'assets/active_user.png',
-                      scale: 1,
-                    ),
-                  ),
-                )
-              : const CircularProgressIndicator(),
-        ),
-      ),
-      CommonCard(
-        height: 120,
-        // gradient: AppColors.gradient1,
-        color: const Color(0xffE5F6FF),
-        child: Center(
-          child: !controller.isloading.value
-              ? _buildTileItem(
-                  totalCount: controller.inActiveUserCount.value,
-                  title: 'Inactive Users',
-                  color: const Color(0xff2C71FF),
-                  icon: Material(
-                    color: AppColors.white,
-                    shape: const CircleBorder(),
-                    child: Image.asset(
-                      'assets/pending_user.png',
-                      scale: 1,
-                    ),
-                  ),
-                )
-              : const CircularProgressIndicator(),
-        ),
-      ),
-      CommonCard(
-        height: 120,
-        // gradient: AppColors.gradient1,
-        color: const Color(0xffF6F3FF),
-        child: Center(
-          child: !controller.isloading.value
-              ? _buildTileItem(
-                  totalCount: controller.requestedUser.value,
-                  title: 'Requested Users',
-                  color: const Color(0xff6955BF),
-                  icon: Material(
-                    color: AppColors.white,
-                    shape: const CircleBorder(),
-                    child: Image.asset(
-                      'assets/all_user.png',
-                      scale: 1,
-                    ),
-                  ),
-                )
-              : const CircularProgressIndicator(),
-        ),
-      ),
-    ];
-  }
-
-  _buildTileItem({
-    required int totalCount,
-    required String title,
-    required Widget icon,
-    required Color color,
-  }) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(
-        vertical: 15,
-        horizontal: 20,
-      ),
-      dense: true,
-      title: Text(
-        "$totalCount".replaceAllMapped(numberFormatterRegex, formatNumberCount),
-        textScaleFactor: Get.textScaleFactor,
-        style: Theme.of(screen.context).textTheme.bodyLarge?.copyWith(
-              // color: AppColors.white,
-              color: color,
-              fontSize: 32,
+          showAlertsPanel: false,
+        );
+      case UserType.SHOP_ADMIN:
+        return _RoleDashboardConfig(
+          statCards: (HomeController c) => [
+            StatCardData(
+              count: c.activeUserCount.value,
+              title: 'Active Users',
+              color: AppSemanticColors.success,
+              backgroundColor: AppSemanticColors.successBg,
+              icon: Icons.person_outline,
             ),
-      ),
-      subtitle: Text(
-        title,
-        textScaleFactor: Get.textScaleFactor,
-        style: Theme.of(screen.context).textTheme.bodyLarge?.copyWith(
-              // color: AppColors.white,
-              color: color,
-              fontSize: 14,
+            StatCardData(
+              count: c.inActiveUserCount.value,
+              title: 'Inactive Users',
+              color: AppSemanticColors.info,
+              backgroundColor: AppSemanticColors.infoBg,
+              icon: Icons.person_off_outlined,
             ),
-      ),
-      trailing: icon,
-    );
+            StatCardData(
+              count: c.requestedUser.value,
+              title: 'Requested Users',
+              color: AppSemanticColors.neutral,
+              backgroundColor: AppSemanticColors.neutralBg,
+              icon: Icons.person_add_alt_outlined,
+            ),
+          ],
+          showAlertsPanel: true,
+        );
+      case UserType.CUSTOMER:
+      case UserType.RIDER:
+        return null;
+    }
   }
 }
 
-List<Widget> _buildBody(ResponsiveScreen screen, {required dynamic chartData}) {
-  return [
-    Center(
-      child: SizedBox(
-        width: 800,
-        height: 500,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Performance',
-                  textScaleFactor: Get.textScaleFactor,
-                  style: DefaultTextStyle.of(screen.context).style.copyWith(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 20,
-                        letterSpacing: 0.4,
-                      ),
-                ),
-                DropdownButtonHideUnderline(
-                  child: DropdownButton2(
-                    // dropdownWidth: 120,
-                    customButton: DecoratedBox(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8.0),
-                        border: Border.all(
-                          color: Theme.of(screen.context).disabledColor,
-                        ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 10,
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              IconlyLight.calendar,
-                              size: 14,
-                              color: Theme.of(screen.context).disabledColor,
-                            ),
-                            const SizedBox(
-                              width: 10,
-                            ),
-                            Text(
-                              'Today',
-                              textScaleFactor: Get.textScaleFactor,
-                              style: DefaultTextStyle.of(screen.context)
-                                  .style
-                                  .copyWith(
-                                    color:
-                                        Theme.of(screen.context).disabledColor,
-                                    fontSize: 14,
-                                  ),
-                            ),
-                            const SizedBox(
-                              width: 10,
-                            ),
-                            Icon(
-                              IconlyLight.arrow_down_2,
-                              size: 14,
-                              color: Theme.of(screen.context).disabledColor,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    items: <String>[
-                      '01/12/2020',
-                      '01/12/2021',
-                      '01/12/2022',
-                      '01/12/2023'
-                    ].map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
+/// What differs between roles on this one dashboard — the stat cards shown
+/// and whether the shop-scoped alerts panel (new orders / low stock /
+/// expiring soon) applies. Everything else (greeting, chart, layout) is
+/// shared. This replaces 5 near-identical ~200-line view classes
+/// (_RootAdminHome, _AffiliatesAdminView, _CountryAdminView,
+/// _MerchantAdminView, _ShopAdminView) that differed only in this data.
+class _RoleDashboardConfig {
+  final List<StatCardData> Function(HomeController) statCards;
+  final bool showAlertsPanel;
+
+  const _RoleDashboardConfig({required this.statCards, required this.showAlertsPanel});
+}
+
+class _RoleDashboard extends StatelessWidget {
+  final HomeController controller;
+  final _RoleDashboardConfig config;
+  final ResponsiveScreen screen;
+
+  const _RoleDashboard({
+    required this.controller,
+    required this.config,
+    required this.screen,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(
+      () => FlutterDashboardListView(
+        slivers: [
+          SliverVisibility(
+            visible: deletionStatusController.isVisible.value,
+            sliver: SliverToBoxAdapter(child: DeletionStatusView()),
+          ),
+          SliverVisibility(
+            visible: !deletionStatusController.isVisible.value,
+            sliver: PaddingWrapper(
+              isSliverItem: true,
+              horizontalPadding: AppSpacing.xl,
+              topPadding: AppSpacing.xl,
+              bottomPadding: 0,
+              child: SliverToBoxAdapter(child: _GreetingHeader(controller: controller)),
+            ),
+          ),
+          SliverVisibility(
+            visible: !deletionStatusController.isVisible.value,
+            sliver: PaddingWrapper(
+              isSliverItem: true,
+              horizontalPadding: AppSpacing.xl,
+              topPadding: AppSpacing.lg,
+              child: FlutterDashboardListView.grid(
+                isSliverItem: true,
+                childCount: 3,
+                gridDelegate: screen.isPhone
+                    ? null
+                    : !screen.isDesktop
+                        ? FlutterDashboardGridDelegates.columns_1(width: screen.width, length: 3)
+                        : FlutterDashboardGridDelegates.fit(3, 3, 1),
+                crossAxisSpacing: screen.isDesktop ? AppSpacing.lg : 0,
+                mainAxisSpacing: AppSpacing.lg,
+                buildItem: (BuildContext context, int index) {
+                  return Obx(() {
+                    final cards = config.statCards(controller);
+                    if (controller.isloading.value && index != 0) {
+                      return const CommonCard(
+                        height: 120,
+                        child: Center(child: CircularProgressIndicator()),
                       );
-                    }).toList(),
-                    onChanged: (String? value) {
-                      print(value);
-                    },
-                  ),
-                ),
-              ],
-            ),
-            const Divider(
-              color: Colors.transparent,
-              height: 50,
-            ),
-            SizedBox(
-              width: double.maxFinite,
-              height: 400,
-              child: SfCartesianChart(
-                plotAreaBorderWidth: 0,
-                plotAreaBorderColor: Colors.transparent,
-                primaryXAxis: CategoryAxis(
-                  isVisible: true,
-                  axisLine: AxisLine(
-                    width: 1,
-                    color: Theme.of(screen.context).disabledColor,
-                  ),
-                  majorGridLines: const MajorGridLines(width: 0),
-                ),
-                primaryYAxis: NumericAxis(
-                  minimum: 0,
-                  interval: 100,
-                  axisLine: AxisLine(
-                    width: 1,
-                    color: Theme.of(screen.context).disabledColor,
-                  ),
-                  majorGridLines: const MajorGridLines(width: 0),
-                ),
-                tooltipBehavior: TooltipBehavior(enable: true),
-                series: chartData,
+                    }
+                    return StatCard(data: cards[index]);
+                  });
+                },
+                listType: FlutterDashboardListType.Grid,
               ),
             ),
-          ],
-        ),
+          ),
+          SliverVisibility(
+            visible: !deletionStatusController.isVisible.value,
+            sliver: PaddingWrapper(
+              isSliverItem: true,
+              horizontalPadding: AppSpacing.xl,
+              topPadding: AppSpacing.xxl,
+              child: SliverToBoxAdapter(
+                child: Obx(
+                  () => PerformanceChartCard(
+                    data: controller.data,
+                    isLoading: controller.isLoadingChart.value,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          if (config.showAlertsPanel)
+            SliverVisibility(
+              visible: !deletionStatusController.isVisible.value,
+              sliver: PaddingWrapper(
+                isSliverItem: true,
+                topPadding: AppSpacing.xxl,
+                child: const SliverToBoxAdapter(child: DashboardAlertsPanel()),
+              ),
+            ),
+          const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxl)),
+        ],
       ),
-    ),
-    Center(
-      child: SizedBox(
-        height: 350,
-        width: 350,
-        child: SfDateRangePicker(
-          minDate: startDate,
-          maxDate: endDate,
-          showActionButtons: false,
-          showTodayButton: false,
-          enablePastDates: true,
-          view: DateRangePickerView.month,
-          viewSpacing: 5,
-          showNavigationArrow: true,
-          todayHighlightColor: Theme.of(screen.context).primaryColor,
-          selectionColor: Theme.of(screen.context).primaryColor,
-          // backgroundColor: DarkChatTheme().backgroundColor,
-          onSelectionChanged: (DateRangePickerSelectionChangedArgs args) {
-            print(args.value);
-          },
+    );
+  }
+}
+
+class _GreetingHeader extends StatelessWidget {
+  final HomeController controller;
+  const _GreetingHeader({required this.controller});
+
+  String _greeting() {
+    final int hour = DateTime.now().hour;
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final String firstName = (controller.user?.fullname ?? '').split(' ').first;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          firstName.isEmpty ? '${_greeting()} 👋' : '${_greeting()}, $firstName 👋',
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
         ),
-      ),
-    ),
-  ];
+        const SizedBox(height: 4),
+        Text(
+          "Here's what's happening with your store today.",
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.grey),
+        ),
+      ],
+    );
+  }
 }

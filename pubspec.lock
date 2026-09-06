@@ -1049,7 +1049,7 @@ packages:
     source: hosted
     version: "3.0.2"
   reactive_forms:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: reactive_forms
       sha256: "74f221052d43ba2f0661e7fda4177ed219fc3aa1fc613c9d981690e51156b418"
