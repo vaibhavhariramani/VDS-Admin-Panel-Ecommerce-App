@@ -35,7 +35,6 @@ class AuthService extends GetxService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore Collection = FirebaseFirestore.instance;
   final FacebookAuth _facebookAuth = FacebookAuth.instance;
-  Rx<Users?> appUser = Rx<Users?>(null);
 
   String? authToken;
 
@@ -350,47 +349,60 @@ class AuthService extends GetxService {
     }
   }
 
+  /// Google/Facebook/phone sign-in. Used to call [_checkUser], which always
+  /// returned `true` unconditionally (never actually checked Firestore) -
+  /// meaning *any* successful Firebase Auth sign-in was treated as a
+  /// logged-in user, but with only a bare `Users(fullname: ...)` object
+  /// ([refreshUserDetails]) carrying no role/permissions at all. That
+  /// produced a session that looked "logged in" but had zero nav routes
+  /// (fail-closed) rather than a real login or a clear rejection.
+  ///
+  /// Now mirrors what [login] (the email/password path) already did
+  /// correctly: after Firebase Auth succeeds, look the uid up in
+  /// `Users/{uid}` via [fetchUserDetails] and only treat it as a real login
+  /// if that doc actually exists with a role. An OAuth identity with no
+  /// matching Firestore doc is a real person who was never invited as a
+  /// team member - not something to silently fabricate an account for
+  /// (that would let anyone with a Google account sign in as staff), so
+  /// they're signed back out and shown an accurate reason instead of a
+  /// broken half-logged-in state.
   Future<bool> globalLogin({
     required String loginby,
     Map<String, dynamic>? credential,
   }) async {
-    _errorText = 'User not found'.tr;
+    _errorText = 'Sign-in failed. Please try again.'.tr;
     return await getUserCredentials(
       loginby,
       credential,
     ).then(
       (_userCreds) async {
-        print(_userCreds.toString());
-        Get.log(_userCreds.toString());
-        if (_userCreds != null) {
-          firebaseUser(_userCreds.user!);
-          print("User added to User profile in app");
-          return await _checkUser(
-            loginProvider: loginby,
-            email: firebaseUser.value?.providerData[0].email ??
-                "${firebaseUser.value!.phoneNumber}@gmail.com",
-          ).then((userExists) async {
-            if (userExists) {
-              BotToast.showText(
-                text: 'Login Success'.tr,
-                duration: 2.seconds,
-              );
-              refreshUserDetails(user: firebaseUser.value);
-              return userExists;
-            } else {
-              return await createUserInDatabase(
-                loginProvider: loginby,
-                credentials: credential,
-              );
-            }
-          });
-        } else {
+        if (_userCreds?.user == null) {
           BotToast.showText(
             text: _errorText,
-            duration: 2.seconds,
+            duration: 3.seconds,
           );
           return false;
         }
+        firebaseUser(_userCreds!.user!);
+        final Users details = await fetchUserDetails(firebaseUser.value?.uid);
+        if (details.user_type == null) {
+          await _auth.signOut();
+          firebaseUser(null);
+          BotToast.showText(
+            text: "This account isn't registered as a team member. Ask an admin to invite you."
+                .tr,
+            duration: 4.seconds,
+          );
+          return false;
+        }
+        user(details);
+        _storage.write('token', details.id);
+        BotToast.showText(
+          text: 'Login Success'.tr,
+          duration: 2.seconds,
+        );
+        DataService.to.CreateLogs(action: "User Logged in");
+        return true;
       },
     );
   }
@@ -460,8 +472,17 @@ class AuthService extends GetxService {
             userCredential = await _auth.signInWithPopup(authProvider);
 
             user = userCredential.user;
+          } on FirebaseAuthException catch (e) {
+            // This used to just print(e) and fall through, leaving
+            // globalLogin()'s hardcoded default ("User not found") as the
+            // only message shown - completely unrelated to what actually
+            // went wrong (most commonly a popup/COOP failure, not a missing
+            // account). Surfacing the real reason here instead.
+            _errorText = '${e.code.replaceAll('-', ' ').capitalize}: ${e.message ?? ''}';
+            print('Google sign-in (web) failed: ${e.code} ${e.message}');
           } catch (e) {
-            print(e);
+            _errorText = 'Google sign-in failed: $e';
+            print('Google sign-in (web) failed: $e');
           }
         } else {
           final GoogleSignIn googleSignIn = GoogleSignIn();
@@ -531,45 +552,6 @@ class AuthService extends GetxService {
       _errorText = e.toString();
       print(_errorText);
     }
-  }
-
-  Future<bool> createUserInDatabase({
-    required String loginProvider,
-    Map<String, dynamic>? credentials,
-  }) async {
-    print("creating account with: $loginProvider");
-    print("with credentials : $credentials");
-    Get.log("saving user");
-    return await _saveUser(
-      payload: Users(
-        fullname: credentials?["name"] ??
-            firebaseUser.value?.providerData[0].displayName,
-        email: firebaseUser.value?.providerData[0].email,
-        phn_number: credentials?['phone'] ??
-            firebaseUser.value?.providerData[0].phoneNumber,
-      ),
-      // mutationDocument: _mutationDoc,
-    );
-  }
-
-  Future<Users?> refreshUserDetails({required User? user}) async {
-    if (token != null) {
-      appUser = Users(fullname: user?.displayName).obs;
-    }
-    return appUser.value;
-  }
-
-  Future<bool> _checkUser({
-    required String loginProvider,
-    required String email,
-  }) async {
-    return true;
-  }
-
-  Future<bool> _saveUser({
-    required Users payload,
-  }) async {
-    return false;
   }
 
   Future<Users> fetchUserDetails(String? uid) async {
