@@ -1,8 +1,41 @@
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
+const { onDocumentUpdated } = require("firebase-functions/v2/firestore");
 const { defineSecret } = require("firebase-functions/params");
 const admin = require("firebase-admin");
 
 admin.initializeApp();
+
+const EARTH_RADIUS_KM = 6371;
+const DEFAULT_DELIVERY_RADIUS_KM = 50;
+
+function toRadians(deg) {
+  return (deg * Math.PI) / 180;
+}
+
+// Firestore security rules can't do trigonometry (no sin/cos/atan2), which
+// is why the 50km delivery-radius rule is enforced here rather than in
+// firestore.rules - see docs/architecture/DELIVERY_RADIUS.md in the master
+// repo for the full reasoning.
+function haversineKm(lat1, lon1, lat2, lon2) {
+  const dLat = toRadians(lat2 - lat1);
+  const dLon = toRadians(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRadians(lat1)) *
+      Math.cos(toRadians(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return EARTH_RADIUS_KM * c;
+}
+
+// Platform-wide default; PlatformConfig/delivery.radiusKm can override it
+// without a redeploy. Not yet per-shop configurable - see the doc above.
+async function getDeliveryRadiusKm(db) {
+  const snap = await db.collection("PlatformConfig").doc("delivery").get();
+  const radius = snap.exists ? snap.data().radiusKm : null;
+  return typeof radius === "number" && radius > 0 ? radius : DEFAULT_DELIVERY_RADIUS_KM;
+}
 
 // Set these once per environment with:
 //   firebase functions:secrets:set INVITE_WEBHOOK_TOKEN
@@ -403,3 +436,159 @@ exports.backfillDefaultStorefronts = onCall(async (request) => {
 
   return { dryRun, ...summary };
 });
+
+/**
+ * The only path by which a delivery gets assigned to a rider who assigned
+ * themself (staff can still assign directly from the admin panel's order
+ * detail screen, which uses the Admin SDK-equivalent trust of `isStaff()`
+ * in firestore.rules). Runs entirely server-side so a modified client can't
+ * claim a delivery outside the configured radius or race another rider for
+ * the same order - see docs/architecture/DELIVERY_RADIUS.md.
+ *
+ * firestore.rules deliberately does NOT allow a rider to set their own
+ * `riderId` on an OnlineOrders doc (only status/pickup/delivery timestamp
+ * fields, once already assigned) - this function is what performs that
+ * assignment, using the Admin SDK to bypass rules after checking eligibility
+ * itself.
+ */
+exports.acceptDelivery = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "Sign in required.");
+  }
+  const riderId = request.auth.uid;
+  const orderId = request.data && request.data.orderId;
+  if (typeof orderId !== "string" || orderId.length === 0) {
+    throw new HttpsError("invalid-argument", "orderId is required.");
+  }
+
+  const db = admin.firestore();
+
+  const riderUserSnap = await db.collection("Users").doc(riderId).get();
+  if (!riderUserSnap.exists || riderUserSnap.data().userType !== "RIDER") {
+    throw new HttpsError("permission-denied", "Only rider accounts can accept deliveries.");
+  }
+
+  const riderOpsSnap = await db.collection("Riders").doc(riderId).get();
+  const riderLocation = riderOpsSnap.exists ? riderOpsSnap.data().location : null;
+  if (
+    !riderLocation ||
+    typeof riderLocation.latitude !== "number" ||
+    typeof riderLocation.longitude !== "number"
+  ) {
+    throw new HttpsError(
+      "failed-precondition",
+      "Turn on location sharing before accepting a delivery."
+    );
+  }
+
+  const orderRef = db.collection("OnlineOrders").doc(orderId);
+  const orderSnap = await orderRef.get();
+  if (!orderSnap.exists) {
+    throw new HttpsError("not-found", "Order not found.");
+  }
+  const order = orderSnap.data();
+  if (order.riderId) {
+    throw new HttpsError("failed-precondition", "This order has already been claimed by another rider.");
+  }
+  if (order.status !== "ready_for_pickup") {
+    throw new HttpsError("failed-precondition", "This order is not ready for pickup yet.");
+  }
+
+  const shopSnap = await db.collection("Shops").doc(order.shopId).get();
+  if (!shopSnap.exists) {
+    throw new HttpsError("failed-precondition", "This order's shop could not be found.");
+  }
+  const shop = shopSnap.data();
+  const shopLat = parseFloat(shop.latitude);
+  const shopLon = parseFloat(shop.longitude);
+  if (Number.isNaN(shopLat) || Number.isNaN(shopLon)) {
+    throw new HttpsError("failed-precondition", "This shop has no location on file.");
+  }
+
+  const radiusKm = await getDeliveryRadiusKm(db);
+  const distanceKm = haversineKm(riderLocation.latitude, riderLocation.longitude, shopLat, shopLon);
+  if (distanceKm > radiusKm) {
+    throw new HttpsError(
+      "failed-precondition",
+      `This delivery is ${distanceKm.toFixed(1)} km away, outside your ${radiusKm} km delivery radius.`
+    );
+  }
+
+  const riderData = riderUserSnap.data();
+  const riderName = riderData.fullname || riderData.name || "";
+  const riderPhone = riderData.phone || "";
+
+  // Re-checks riderId is still null at write time - closes the race window
+  // between the read above and this write, so two riders tapping "Accept"
+  // within milliseconds of each other can't both win.
+  await db.runTransaction(async (tx) => {
+    const freshSnap = await tx.get(orderRef);
+    if (freshSnap.data().riderId) {
+      throw new HttpsError("failed-precondition", "This order has already been claimed by another rider.");
+    }
+    tx.update(orderRef, {
+      riderId,
+      riderName,
+      riderPhone,
+      status: "rider_assigned",
+      riderAssignedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+  });
+
+  return { ok: true, distanceKm };
+});
+
+/**
+ * Real push delivery for "new order nearby" - the original Delivery app
+ * shipped `firebase_messaging` as a dependency and a README claiming FCM
+ * alerts worked, but no code anywhere ever sent one. This is what actually
+ * sends it: triggers when an order's status changes to `ready_for_pickup`,
+ * and notifies every online rider within the delivery radius who has a
+ * saved FCM token.
+ */
+exports.notifyNearbyRidersOnReadyForPickup = onDocumentUpdated(
+  "OnlineOrders/{orderId}",
+  async (event) => {
+    const before = event.data.before.data();
+    const after = event.data.after.data();
+    if (before.status === after.status || after.status !== "ready_for_pickup") {
+      return;
+    }
+
+    const db = admin.firestore();
+    const shopSnap = await db.collection("Shops").doc(after.shopId).get();
+    if (!shopSnap.exists) return;
+    const shop = shopSnap.data();
+    const shopLat = parseFloat(shop.latitude);
+    const shopLon = parseFloat(shop.longitude);
+    if (Number.isNaN(shopLat) || Number.isNaN(shopLon)) return;
+
+    const radiusKm = await getDeliveryRadiusKm(db);
+
+    // Capped at 200 online riders per notification burst - fine at current
+    // scale; a geohash-scoped query is the eventual replacement if the
+    // online-rider pool grows large enough for this to matter.
+    const ridersSnap = await db.collection("Riders").where("isOnline", "==", true).limit(200).get();
+    const tokens = [];
+    ridersSnap.forEach((doc) => {
+      const rider = doc.data();
+      const loc = rider.location;
+      if (!loc || typeof loc.latitude !== "number" || typeof loc.longitude !== "number") return;
+      const distanceKm = haversineKm(loc.latitude, loc.longitude, shopLat, shopLon);
+      if (distanceKm <= radiusKm && typeof rider.fcmToken === "string" && rider.fcmToken.length > 0) {
+        tokens.push(rider.fcmToken);
+      }
+    });
+
+    if (tokens.length === 0) return;
+
+    await admin.messaging().sendEachForMulticast({
+      tokens,
+      notification: {
+        title: "New delivery nearby",
+        body: `A new order from ${shop.name || "a nearby shop"} is ready for pickup.`,
+      },
+      data: { orderId: event.params.orderId, type: "new_delivery" },
+    });
+  }
+);
