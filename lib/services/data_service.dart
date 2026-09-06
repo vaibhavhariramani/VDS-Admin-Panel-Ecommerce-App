@@ -123,29 +123,6 @@ class DataService extends GetxService {
     return null;
   }
 
-  //Fetching Shop Id from User Id
-  Future<String?> fetchShopId() async {
-    print("runni fetch");
-    String? userId = AuthService.to.user.value?.id;
-    print("user id: $userId uuuuuuuuuusssssssss");
-    print("Fetching Id for Shop from User Id: \n");
-    try {
-      CollectionReference ShopsDB = Collection.collection('Shops');
-      QuerySnapshot<Object?> querySnapshot =
-          await ShopsDB.where("shopAdmin", isEqualTo: userId).get();
-      if (querySnapshot.docs.isEmpty) {
-        print("No shop found for the user.");
-        return null;
-      }
-      String shopId = querySnapshot.docs.first.id;
-      print("Fetched ShopId: $shopId");
-      return shopId;
-    } catch (e) {
-      print('Error fetching shopId: $e');
-      return null;
-    }
-  }
-
   Future<String> uploadImageNamed(String imagename) => uploadImage(imagename);
 
   Future<List<Product>> fetchAllProducts() async {
