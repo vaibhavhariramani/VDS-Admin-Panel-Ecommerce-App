@@ -579,21 +579,98 @@ class DataService extends GetxService {
           .where('userType', isEqualTo: userType.name)
           .get();
       for (var doc in querySnapshot.docs) {
-        final data = doc.data() as Map<String, dynamic>;
-        users.add(Users(
-          id: data['id']?.toString() ?? doc.id,
-          fullname: data['fullname']?.toString(),
-          img_token: data['imgToken']?.toString(),
-          phn_number: data['phone']?.toString(),
-          email: data['email']?.toString(),
-          user_type: getUserTypeFromString(data['userType']?.toString() ?? ''),
-          country: data['Country']?.toString(),
-        ));
+        users.add(_userFromDoc(doc.id, doc.data() as Map<String, dynamic>));
       }
     } catch (e) {
       print('Error fetching all users: $e');
     }
     return users;
+  }
+
+  /// Every account with a staff role (i.e. not a customer or rider) — the
+  /// "Team" screen's member list. `Country`-only scoping isn't applied
+  /// here; that's a coarser cut than any existing screen needed before, so
+  /// it's deliberately platform-wide rather than guessed at.
+  Future<List<Users>> fetchStaffUsers() async {
+    List<Users> users = [];
+    if (!AuthService.to.isAuthenticated) return users;
+    const List<String> staffRoles = ['ADMIN', 'COUNTRY_HEAD', 'MERCHANT', 'SHOP_ADMIN', 'AFFILIATES'];
+    try {
+      QuerySnapshot<Object?> querySnapshot =
+          await Collection.collection('Users').where('userType', whereIn: staffRoles).get();
+      for (var doc in querySnapshot.docs) {
+        users.add(_userFromDoc(doc.id, doc.data() as Map<String, dynamic>));
+      }
+    } catch (e) {
+      print('Error fetching staff users: $e');
+    }
+    return users;
+  }
+
+  Users _userFromDoc(String docId, Map<String, dynamic> data) {
+    final dynamic rawPermissions = data['permissions'];
+    return Users(
+      id: data['id']?.toString() ?? docId,
+      fullname: data['fullname']?.toString(),
+      img_token: data['imgToken']?.toString(),
+      phn_number: data['phone']?.toString(),
+      email: data['email']?.toString(),
+      user_type: getUserTypeFromString(data['userType']?.toString() ?? ''),
+      country: data['Country']?.toString(),
+      permissions: rawPermissions is List ? rawPermissions.map((e) => e.toString()).toSet() : null,
+    );
+  }
+
+  /// Sets or clears a user's explicit permission override. `null`/empty
+  /// removes the field entirely so [Users.effectivePermissions] falls back
+  /// to the role default again, rather than storing an explicit empty set
+  /// (which would mean "no permissions at all", not "use the default").
+  Future<bool> updateUserPermissions(String uid, Set<String>? permissions) async {
+    try {
+      final DocumentReference<Object?> ref = Collection.collection('Users').doc(uid);
+      if (permissions == null || permissions.isEmpty) {
+        await ref.update({'permissions': FieldValue.delete()});
+      } else {
+        await ref.update({'permissions': permissions.toList()});
+      }
+      await CreateLogs(action: 'Updated permissions for $uid');
+      return true;
+    } catch (e) {
+      print('Error updating permissions for $uid: $e');
+      return false;
+    }
+  }
+
+  /// All pending invites platform-wide, for the Team screen. Deliberately
+  /// not scoped by inviter (unlike [FetchInvitedUserData], which is scoped
+  /// to "invites I sent" for the Merchants/Shop Listing screens) — a Team
+  /// overview should show every outstanding invite, not just the current
+  /// admin's own.
+  Future<List<InvitedUser>> fetchAllPendingInvites() async {
+    List<InvitedUser> invites = [];
+    try {
+      QuerySnapshot<Object?> querySnapshot = await Collection
+          .collection('InvitedUsers')
+          .where('status', isEqualTo: InvitedUserStatus.PENDING.name)
+          .get();
+      for (var doc in querySnapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        invites.add(InvitedUser(
+          id: doc.id,
+          email: data['email'],
+          fullname: data['fullname'],
+          user_type: getUserTypeFromString(data['userType'] ?? ''),
+          usersID: data['usersID'] ?? '',
+          status: InvitedUserStatus.values.firstWhere(
+            (e) => e.name == data['status'],
+            orElse: () => InvitedUserStatus.PENDING,
+          ),
+        ));
+      }
+    } catch (e) {
+      print('Error fetching pending invites: $e');
+    }
+    return invites;
   }
 
   Future<void> CreateinvitedUser(

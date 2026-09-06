@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dashboard/flutter_dashboard.dart';
 
@@ -70,9 +69,7 @@ class OrdersView extends GetResponsiveView<OrdersController> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // _typeofdealsRow(context),
               OnlineOrderstableView(),
-              // OnlineOrders(),
             ],
           ),
         ),
@@ -171,12 +168,14 @@ class OrdersView extends GetResponsiveView<OrdersController> {
     return [
       _buildCard(
         text: 'Online Orders',
+        icon: IconlyLight.bag,
         onPressed: () {
           controller.showOnlineOrdersTable(true);
         },
       ),
       _buildCard(
         text: 'Offline Orders',
+        icon: Icons.point_of_sale_outlined,
         onPressed: () {
           controller.showOfflineOrdersTable(true);
           controller.refreshOfflineOrders();
@@ -185,7 +184,7 @@ class OrdersView extends GetResponsiveView<OrdersController> {
     ];
   }
 
-  Widget _buildCard({required String text, required VoidCallback onPressed}) {
+  Widget _buildCard({required String text, required IconData icon, required VoidCallback onPressed}) {
     return CommonCard(
       onTap: onPressed,
       height: 300,
@@ -194,8 +193,8 @@ class OrdersView extends GetResponsiveView<OrdersController> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Icon(
-            IconlyLight.plus,
-            color: DefaultTextStyle.of(screen.context).style.color,
+            icon,
+            color: Theme.of(screen.context).primaryColor,
             size: 50,
           ),
           const Divider(

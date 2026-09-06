@@ -3,16 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dashboard/flutter_dashboard.dart';
 import 'package:iconly/iconly.dart';
 
+import '../../../../../constants/order_status.dart';
 import '../../../../../models/Orders.dart';
+import '../../../../../themes/app_theme.dart';
 import '../../controllers/orders_controller.dart';
 import '../order_details.dart';
-// import '../../controllers/Orders_controller.dart';
 
 class DataSourceOrders extends DataTableSource {
-  DataSourceOrders(this.context, this.rows); //snapshot.data
+  DataSourceOrders(this.context, this.rows);
   OrdersController controller = Get.put(OrdersController());
   final BuildContext context;
-  RxList<Orders?> rows;
+  final List<Orders?> rows;
   final int _selectedCount = 0;
 
   @override
@@ -29,7 +30,7 @@ class DataSourceOrders extends DataTableSource {
     }
     // Safe conversion
     DateTime dateOfOrder;
-    final dateValue = row?.dateOfOrder;
+    final dateValue = row.dateOfOrder;
     if (dateValue is Timestamp) {
       dateOfOrder = dateValue.toDate();
     } else if (dateValue is DateTime) {
@@ -38,11 +39,13 @@ class DataSourceOrders extends DataTableSource {
       dateOfOrder = DateTime.now();
     }
 
+    final String status = row.status?.toString() ?? '';
+    final String riderName = row.deliveryPersonName?.toString() ?? '';
+
     return DataRow.byIndex(
       selected: false,
       index: index,
       onSelectChanged: (value) {
-        // Map<String, dynamic> mp = row as Map<String, dynamic>;
         Navigator.push(
             context,
             MaterialPageRoute(
@@ -56,14 +59,11 @@ class DataSourceOrders extends DataTableSource {
             mainAxisSize: MainAxisSize.min,
             children: [
               RichText(
-                textScaleFactor: Get.textScaleFactor,
                 maxLines: 2,
                 text: TextSpan(
                   children: [
                     TextSpan(
-                      text: row?.customerName.toString() == 'null'
-                          ? ''
-                          : row?.customerName.toString(),
+                      text: row.customerName.toString() == 'null' ? '' : row.customerName.toString(),
                       style: DefaultTextStyle.of(context).style.copyWith(
                             fontSize: 14,
                           ),
@@ -72,9 +72,7 @@ class DataSourceOrders extends DataTableSource {
                       text: '\n',
                     ),
                     TextSpan(
-                      text: row?.Address.toString() == 'null'
-                          ? ''
-                          : row?.Address.toString(),
+                      text: row.Address.toString() == 'null' ? '' : row.Address.toString(),
                       style: DefaultTextStyle.of(context).style.copyWith(
                             fontSize: 12,
                           ),
@@ -86,133 +84,112 @@ class DataSourceOrders extends DataTableSource {
           ),
         ),
         DataCell(Text(dateOfOrder.toString())),
-        DataCell(Text(row?.customerNumber.toString() == 'null'
-            ? ''
-            : row!.customerNumber!)),
+        DataCell(Text(row.customerNumber.toString() == 'null' ? '' : row.customerNumber!)),
         DataCell(
-          Text(
-            row!.status.toString() == 'null' ? '' : row.status!,
-            // style: TextStyle(
-            //     color: row.status == 'Active'
-            //         ? Colors.green
-            //         : row.status == 'Pending'
-            //             ? const Color(0xFFFF9F43)
-            //             : const Color(0xFF82868B),
-            //     fontWeight: FontWeight.bold),
-          ),
+          status.isEmpty
+              ? const Text('')
+              : Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: OrderStatus.color(status).withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
+                  ),
+                  child: Text(
+                    OrderStatus.label(status),
+                    style: TextStyle(color: OrderStatus.color(status), fontWeight: FontWeight.w700, fontSize: 12),
+                  ),
+                ),
         ),
         DataCell(
-          CircleAvatar(
-            radius: 20,
-            backgroundImage: Image.network(
-              row!.deliveryPersonPhoto.toString() == 'null'
-                  ? 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50?s=200'
-                  : row.deliveryPersonPhoto.toString(),
-              fit: BoxFit.cover,
-            ).image,
-          ),
+          riderName.isEmpty
+              ? Text('—', style: TextStyle(color: Theme.of(context).disabledColor))
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const CircleAvatar(radius: 14, child: Icon(Icons.person, size: 16)),
+                    const SizedBox(width: 6),
+                    Text(riderName, overflow: TextOverflow.ellipsis),
+                  ],
+                ),
         ),
         DataCell(Row(
           children: [
             IconButton(
-                onPressed: () {
-                  Get.dialog(AlertDialog(
-                    content: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Center(
-                            child: Card(
-                                child: SizedBox.square(
-                              dimension: 80,
-                              child: Image.network(
-                                row.deliveryPersonPhoto.toString() == 'null'
-                                    ? 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50?s=200'
-                                    : row.deliveryPersonPhoto.toString(),
-                                fit: BoxFit.cover,
-                              ),
-                            )),
-                          ),
-                          Center(
-                            child: Text(
-                              row.customerName.toString() == 'null'
-                                  ? ''
-                                  : row.customerName.toString(),
-                              style: DefaultTextStyle.of(context)
-                                  .style
-                                  .copyWith(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          Text(
-                            "Details",
-                            style: DefaultTextStyle.of(context).style.copyWith(
-                                  fontSize: 14,
-                                ),
-                          ),
-                          const Divider(),
-                          Text(
-                            "Email: ${row.Address.toString() == 'null' ? '' : row.Address.toString()}",
-                            style: DefaultTextStyle.of(context).style.copyWith(
-                                  fontSize: 14,
-                                ),
-                          ),
-                          const SizedBox(
-                            height: 8,
-                          ),
-                          Row(
-                            children: [
-                              Text(
-                                "Status: ",
-                                style:
-                                    DefaultTextStyle.of(context).style.copyWith(
-                                          fontSize: 14,
-                                        ),
-                              ),
-                              Container(
-                                  padding: const EdgeInsets.all(4),
-                                  child: Text(
-                                    row.status!.toString() == 'null'
-                                        ? ''
-                                        : row.status!,
-                                    // style: TextStyle(
-                                    //   color: row.status == 'Active'
-                                    //       ? Colors.green
-                                    //       : row.status == 'Pending'
-                                    //           ? const Color(0xFFFF9F43)
-                                    //           : const Color(0xFF82868B),
-                                    // ),
-                                  )),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 8,
-                          ),
-                          Text(
-                            "Contact: ${row.customerNumber.toString() == 'null' ? '' : row.customerNumber.toString()}",
-                            style: DefaultTextStyle.of(context).style.copyWith(
-                                  fontSize: 14,
-                                ),
-                          ),
-                          const SizedBox(
-                            height: 8,
-                          ),
-                          Text(
-                            "Country: ${row.Address.toString() == 'null' ? '' : row.Address.toString()}",
-                            style: DefaultTextStyle.of(context).style.copyWith(
-                                  fontSize: 14,
-                                ),
-                          ),
-                        ]),
-                  ));
-                },
+                onPressed: () => _showQuickView(context, row, status),
                 icon: const Icon(IconlyLight.show)),
-            IconButton(onPressed: () {}, icon: const Icon(Icons.delete))
+            IconButton(
+              onPressed: () => _confirmDelete(context, row),
+              icon: Icon(Icons.delete_outline, color: AppSemanticColors.danger),
+            ),
           ],
         )),
       ],
     );
+  }
+
+  void _showQuickView(BuildContext context, Orders row, String status) {
+    Get.dialog(AlertDialog(
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Center(
+            child: Text(
+              row.customerName.toString() == 'null' ? '' : row.customerName.toString(),
+              style: DefaultTextStyle.of(context).style.copyWith(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
+          const Divider(),
+          Text(
+            "Address: ${row.Address.toString() == 'null' ? 'Not provided' : row.Address.toString()}",
+            style: DefaultTextStyle.of(context).style.copyWith(fontSize: 14),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Text("Status: ", style: DefaultTextStyle.of(context).style.copyWith(fontSize: 14)),
+              if (status.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: OrderStatus.color(status).withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
+                  ),
+                  child: Text(
+                    OrderStatus.label(status),
+                    style: TextStyle(color: OrderStatus.color(status), fontWeight: FontWeight.w700),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            "Contact: ${row.customerNumber.toString() == 'null' ? 'Not provided' : row.customerNumber.toString()}",
+            style: DefaultTextStyle.of(context).style.copyWith(fontSize: 14),
+          ),
+        ],
+      ),
+    ));
+  }
+
+  void _confirmDelete(BuildContext context, Orders row) {
+    Get.dialog(AlertDialog(
+      title: const Text('Delete order?'),
+      content: Text(
+        'This permanently removes the order from ${row.customerName ?? 'this customer'}. This cannot be undone.',
+      ),
+      actions: [
+        TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+        TextButton(
+          onPressed: () {
+            Get.back();
+            controller.deleteOrder(row.orderId);
+            notifyListeners();
+          },
+          child: Text('Delete', style: TextStyle(color: AppSemanticColors.danger)),
+        ),
+      ],
+    ));
   }
 
   @override

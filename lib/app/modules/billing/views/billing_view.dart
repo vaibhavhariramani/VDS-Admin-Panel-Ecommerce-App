@@ -1,16 +1,8 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_barcode_listener/flutter_barcode_listener.dart';
-import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter_dashboard/flutter_dashboard.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:iconly/iconly.dart';
-import 'package:visibility_detector/visibility_detector.dart';
 import 'package:get/get.dart';
 
-import '../../../../constants/constants.dart';
 import '../../../../models/Permission.dart';
 import '../../../../services/auth_service.dart';
 import '../../../../themes/app_theme.dart';
@@ -18,6 +10,7 @@ import '../../../widgets/components/common_card.dart';
 import '../../../widgets/utils/padding_wrapper.dart';
 import '../../deletion_status/views/deletion_status_view.dart';
 import '../../home/views/home_view.dart';
+import '../../home/views/widgets/stat_card.dart';
 import '../controllers/billing_controller.dart';
 import 'create_bill_view.dart';
 import 'users_table_dialog.dart';
@@ -57,7 +50,15 @@ class BillingView extends GetResponsiveView<BillingController> {
                 crossAxisSpacing: screen.isDesktop ? 20 : 0,
                 mainAxisSpacing: screen.isDesktop ? 15 : 15,
                 buildItem: (BuildContext context, int index) {
-                  return Obx(() => _buildTiles()[index]);
+                  return Obx(() {
+                    if (controller.isloading.value) {
+                      return const CommonCard(
+                        height: 120,
+                        child: Center(child: CircularProgressIndicator()),
+                      );
+                    }
+                    return _buildTiles()[index];
+                  });
                 },
                 listType: FlutterDashboardListType.Grid,
               ),
@@ -99,13 +100,26 @@ class BillingView extends GetResponsiveView<BillingController> {
                 },
                 listType: FlutterDashboardListType.Grid,
               )
-            : const Padding(
-                padding: EdgeInsets.symmetric(vertical: 40),
+            : Padding(
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
                 child: Center(
-                  child: Text(
-                    "Your account doesn't have POS access. Ask your admin to grant it.",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.lock_outline, size: 40, color: AppColors.grey),
+                      const SizedBox(height: AppSpacing.md),
+                      Text(
+                        "Your account doesn't have POS access.",
+                        textAlign: TextAlign.center,
+                        style: Theme.of(screen.context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        'Ask your admin to grant it.',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(screen.context).textTheme.bodyMedium?.copyWith(color: AppColors.grey),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -160,110 +174,40 @@ class BillingView extends GetResponsiveView<BillingController> {
 
   List<Widget> _buildTiles() {
     return [
-      CommonCard(
-        height: 120,
-        // gradient: AppColors.gradient1,
-        color: const Color(0xffD5E8CF),
-        onTap: () {
-          controller.loadAllUsers();
-          Get.dialog(const UsersTableDialog());
-        },
-        child: Center(
-          child: !controller.isloading.value
-              ? _buildTileItem(
-                  totalCount: controller.totalUserCount.value,
-                  title: 'Total Users',
-                  color: const Color(0xff006E1B),
-                  icon: Material(
-                    color: AppColors.white,
-                    shape: const CircleBorder(),
-                    child: Image.asset(
-                      'assets/all_user.png',
-                      scale: 1,
-                    ),
-                  ),
-                )
-              : const CircularProgressIndicator(),
+      StatCard(
+        data: StatCardData(
+          count: controller.totalUserCount.value,
+          title: 'Total Users',
+          color: AppSemanticColors.success,
+          backgroundColor: AppSemanticColors.successBg,
+          icon: Icons.groups_outlined,
+        ),
+      ).withTap(() {
+        controller.loadAllUsers();
+        Get.dialog(const UsersTableDialog());
+      }),
+      StatCard(
+        data: StatCardData(
+          count: controller.activeUserCount.value,
+          title: 'Active Users',
+          color: AppSemanticColors.info,
+          backgroundColor: AppSemanticColors.infoBg,
+          icon: Icons.person_outline,
         ),
       ),
-      CommonCard(
-        height: 120,
-        // gradient: AppColors.gradient1,
-        color: const Color(0xffE5F6FF),
-        child: Center(
-          child: !controller.isloading.value
-              ? _buildTileItem(
-                  totalCount: controller.activeUserCount.value,
-                  title: 'Active Users',
-                  color: const Color(0xff2C71FF),
-                  icon: Material(
-                    color: AppColors.white,
-                    shape: const CircleBorder(),
-                    child: Image.asset(
-                      'assets/active_user.png',
-                      scale: 1,
-                    ),
-                  ),
-                )
-              : const CircularProgressIndicator(),
+      StatCard(
+        data: StatCardData(
+          count: controller.inActiveUserCount.value,
+          title: 'Inactive Users',
+          color: AppSemanticColors.neutral,
+          backgroundColor: AppSemanticColors.neutralBg,
+          icon: Icons.person_off_outlined,
         ),
       ),
-      CommonCard(
-        height: 120,
-        // gradient: AppColors.gradient1,
-        color: const Color(0xffF6F3FF),
-        child: Center(
-          child: !controller.isloading.value
-              ? _buildTileItem(
-                  totalCount: controller.inActiveUserCount.value,
-                  title: 'Inactive Users',
-                  color: const Color(0xff6955BF),
-                  icon: Material(
-                    color: AppColors.white,
-                    shape: const CircleBorder(),
-                    child: Image.asset(
-                      'assets/pending_user.png',
-                      scale: 1,
-                    ),
-                  ),
-                )
-              : const CircularProgressIndicator(),
-        ),
-      )
     ];
   }
+}
 
-  _buildTileItem({
-    required int totalCount,
-    required String title,
-    required Widget icon,
-    required Color color,
-  }) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(
-        vertical: 15,
-        horizontal: 20,
-      ),
-      dense: true,
-      title: Text(
-        "$totalCount".replaceAllMapped(numberFormatterRegex, formatNumberCount),
-        textScaleFactor: Get.textScaleFactor,
-        style: Theme.of(screen.context).textTheme.bodyLarge?.copyWith(
-              // color: AppColors.white,
-              color: color,
-              fontSize: 32,
-            ),
-      ),
-      subtitle: Text(
-        title,
-        textScaleFactor: Get.textScaleFactor,
-        style: Theme.of(screen.context).textTheme.bodyLarge?.copyWith(
-              // color: AppColors.white,
-              color: color,
-              fontSize: 14,
-            ),
-      ),
-      trailing: icon,
-    );
-  }
+extension _Tappable on Widget {
+  Widget withTap(VoidCallback onTap) => GestureDetector(onTap: onTap, child: this);
 }
