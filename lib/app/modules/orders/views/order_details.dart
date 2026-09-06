@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../constants/order_status.dart';
 import '../../../../models/Orders.dart';
 import '../../../../services/fetch_data.dart';
 import 'items_details.dart';
@@ -21,24 +22,17 @@ class _OrderDetailsState extends State<OrderDetails> {
   DateFormat time = DateFormat.jm();
   String? delivery;
 
-  static const List<String> _knownStatuses = [
-    'Order Placed',
-    'Order Accepted',
-    'Order PickedUp',
-    'Order Completed',
-  ];
-
   /// DropdownButton requires `value` to exactly match one of `items`, or it
-  /// throws. Orders placed from the client app can carry a status string
-  /// that isn't one of the 4 the admin panel recognizes (e.g. whatever the
-  /// client app's own wording is) — folding the order's actual status into
-  /// the list when it's unrecognized keeps the dropdown from crashing and
-  /// still lets the admin move it to a known status.
+  /// throws. An order can carry a status string that predates this
+  /// canonical list (e.g. from before the status vocabulary was unified
+  /// across apps) — folding the order's actual status into the list when
+  /// it's unrecognized keeps the dropdown from crashing and still lets the
+  /// admin move it to a known status.
   List<String> get _statusOptions {
-    if (status != null && !_knownStatuses.contains(status)) {
-      return [status!, ..._knownStatuses];
+    if (status != null && !OrderStatus.all.contains(status)) {
+      return [status!, ...OrderStatus.all];
     }
-    return _knownStatuses;
+    return OrderStatus.all;
   }
 
   // Safe numeric getters
@@ -82,9 +76,12 @@ class _OrderDetailsState extends State<OrderDetails> {
 
   @override
   void initState() {
-    // TODO: implement initState
     status = widget.mp?.status;
-    delivery = '${widget.mp?.deliveryPersonPhoto}';
+    // Pre-selects the currently-assigned rider's radio button below —
+    // this used to read deliveryPersonPhoto (an image URL), which never
+    // matched an Employee doc id, so the picker never showed a selection
+    // even when a rider was already assigned.
+    delivery = widget.mp?.riderId;
     super.initState();
   }
 
@@ -127,7 +124,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                 items: _statusOptions.map((value) {
                   return DropdownMenuItem(
                     value: value,
-                    child: Text(value),
+                    child: Text(OrderStatus.label(value)),
                   );
                 }).toList(),
                 onChanged: _update,
@@ -338,7 +335,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                                     items: _statusOptions.map((value) {
                                       return DropdownMenuItem(
                                         value: value,
-                                        child: Text(value),
+                                        child: Text(OrderStatus.label(value)),
                                       );
                                     }).toList(),
                                     onChanged: _update,
@@ -492,10 +489,14 @@ class _OrderDetailsState extends State<OrderDetails> {
   }
 
   void _update(String? value) async {
+    // Real customer orders live in OnlineOrders (see fetch_data.dart) —
+    // this used to write to the unrelated legacy `Orders` collection, so
+    // status changes made here never reached the order the customer or
+    // the delivery app actually reads.
     CollectionReference referencer =
-        FirebaseFirestore.instance.collection('Orders');
+        FirebaseFirestore.instance.collection('OnlineOrders');
     try {
-      referencer.doc(widget.mp?.orderId).update({
+      await referencer.doc(widget.mp?.orderId).update({
         'status': value,
       });
       setState(() {
@@ -506,17 +507,20 @@ class _OrderDetailsState extends State<OrderDetails> {
 
   Future _deliveryBoy(DocumentSnapshot snapshot) async {
     CollectionReference referencer =
-        FirebaseFirestore.instance.collection('Orders');
+        FirebaseFirestore.instance.collection('OnlineOrders');
     try {
-      referencer.doc(widget.mp?.orderId).update({
-        'deliveryBoy': snapshot.id,
-        'boyName': snapshot['name'],
-        'boyPhone': snapshot['phone'],
-        'status': 'Order PickedUp'
+      // Assigning a rider moves the order to "rider_assigned", not
+      // straight to "picked_up" — pickup is a separate action the rider
+      // confirms from the Delivery app once they're actually at the shop.
+      await referencer.doc(widget.mp?.orderId).update({
+        'riderId': snapshot.id,
+        'riderName': snapshot['name'],
+        'riderPhone': snapshot['phone'],
+        'status': OrderStatus.riderAssigned,
       });
       setState(() {
         delivery = snapshot.id;
-        status = 'Order PickedUp';
+        status = OrderStatus.riderAssigned;
       });
     } catch (e) {}
   }

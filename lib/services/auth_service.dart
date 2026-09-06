@@ -138,8 +138,10 @@ class AuthService extends GetxService {
         ]);
         break;
       case UserType.CUSTOMER:
+      case UserType.RIDER:
       case null:
-        // No admin-panel routes for a customer account or an
+        // No admin-panel routes for a customer or rider account (riders
+        // use the separate Delivery app, not this panel) or an
         // unrecognized/missing profile — fail closed, not open.
         break;
     }
@@ -686,6 +688,8 @@ UserType? getUserTypeFromString(String userTypeString) {
       return UserType.COUNTRY_HEAD;
     case 'SHOP_ADMIN':
       return UserType.SHOP_ADMIN;
+    case 'RIDER':
+      return UserType.RIDER;
     default:
       return null;
   }

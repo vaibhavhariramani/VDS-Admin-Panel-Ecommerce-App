@@ -41,6 +41,14 @@ class Permission {
   // Referral partner (UserType.AFFILIATES)
   static const String referralsRead = 'referrals.read';
 
+  // Rider (UserType.RIDER) — a rider doesn't use the admin panel at all,
+  // but shares the same Users/permissions model so the Delivery app's
+  // Firestore access can be gated by the same rule helpers as everyone
+  // else, rather than inventing a parallel authorization scheme.
+  static const String deliveriesRead = 'deliveries.read';
+  static const String deliveriesWrite = 'deliveries.write';
+  static const String earningsRead = 'earnings.read';
+
   // Super Admin — a wildcard rather than every key above, since Super
   // Admin is defined as "complete platform-level control" rather than an
   // enumerable set that has to be kept in sync by hand.
@@ -83,6 +91,11 @@ final Map<UserType, Set<String>> kDefaultPermissionsByRole =
   },
   UserType.AFFILIATES: <String>{
     Permission.referralsRead,
+  },
+  UserType.RIDER: <String>{
+    Permission.deliveriesRead,
+    Permission.deliveriesWrite,
+    Permission.earningsRead,
   },
   UserType.CUSTOMER: <String>{},
 };

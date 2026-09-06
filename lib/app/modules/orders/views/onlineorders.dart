@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../constants/order_status.dart';
 import '../../../../models/Orders.dart';
 import '../../../../services/fetch_data.dart';
 import 'order_details.dart';
@@ -18,6 +19,26 @@ class OnlineOrders extends StatefulWidget {
 class _OnlineOrdersState extends State<OnlineOrders> {
   dynamic pincode;
   String? search;
+
+  Color _statusColor(String status) {
+    switch (status) {
+      case OrderStatus.placed:
+      case OrderStatus.confirmed:
+        return Colors.blue;
+      case OrderStatus.preparing:
+      case OrderStatus.readyForPickup:
+      case OrderStatus.riderAssigned:
+      case OrderStatus.pickedUp:
+      case OrderStatus.outForDelivery:
+        return Colors.amber.shade800;
+      case OrderStatus.cancelled:
+        return Colors.red;
+      case OrderStatus.delivered:
+        return Color(0xff32CC34);
+      default:
+        return Color(0xff32CC34);
+    }
+  }
   late String url;
   DateFormat format = DateFormat.yMMMMd('en_US');
   DateFormat time = DateFormat.jm();
@@ -251,51 +272,33 @@ class _OnlineOrdersState extends State<OnlineOrders> {
                                                         const EdgeInsets.only(
                                                       left: 4,
                                                     ),
-                                                    child: Container(
-                                                        decoration:
-                                                            BoxDecoration(
-                                                                color: docs[index]
-                                                                            [
-                                                                            'status'] ==
-                                                                        'Order Placed'
-                                                                    ? Colors
-                                                                        .blue
-                                                                        .withOpacity(
-                                                                            0.1)
-                                                                    : docs[index]['status'] ==
-                                                                            'Order Progress'
-                                                                        ? Colors
-                                                                            .amber
-                                                                            .withOpacity(
-                                                                                0.1)
-                                                                        : Color(0xff32CC34).withOpacity(
-                                                                            0.1),
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            8)),
+                                                    child: Builder(builder: (context) {
+                                                      final String orderStatus =
+                                                          '${docs[index]['status']}';
+                                                      final Color statusColor =
+                                                          _statusColor(orderStatus);
+                                                      return Container(
+                                                        decoration: BoxDecoration(
+                                                            color: statusColor
+                                                                .withOpacity(0.1),
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(8)),
                                                         padding: EdgeInsets.all(4),
                                                         child: Text(
-                                                          '${docs[index]['status']}',
+                                                          OrderStatus.label(
+                                                              orderStatus),
                                                           style: GoogleFonts
                                                               .poppins(
                                                                   fontSize: 14,
-                                                                  color: docs[index]
-                                                                              [
-                                                                              'status'] ==
-                                                                          'Order Placed'
-                                                                      ? Colors
-                                                                          .blue
-                                                                      : docs[index]['status'] ==
-                                                                              'Order Progress'
-                                                                          ? Colors
-                                                                              .amber
-                                                                          : Color(
-                                                                              0xff32CC34),
+                                                                  color:
+                                                                      statusColor,
                                                                   fontWeight:
                                                                       FontWeight
                                                                           .bold),
-                                                        )),
+                                                        ),
+                                                      );
+                                                    }),
                                                   ),
                                                 ],
                                               ),

@@ -38,6 +38,16 @@ service cloud.firestore {
         get(/databases/$(database)/documents/Users/$(request.auth.uid)).data.get('userType', '') == 'ADMIN';
     }
 
+    // A delivery rider (UserType.RIDER in the admin panel's own role
+    // model) — deliberately NOT included in staffRoles() above, since a
+    // rider should never get the broad "internal to the admin panel"
+    // access the final catch-all rule grants staff.
+    function isRider() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/Users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/Users/$(request.auth.uid)).data.get('userType', '') == 'RIDER';
+    }
+
     // Storefront Configuration Manager: a shop's own admin (or a platform
     // admin) edits `draft`; `published` is what the separate Client App's
     // per-shop storefront page reads, so it stays publicly readable like
@@ -78,6 +88,16 @@ service cloud.firestore {
       allow read, write: if isOwner(userId) || isStaff();
     }
 
+    // A rider's operational data - online/offline, last known location,
+    // vehicle info, running earnings summary. Deliberately separate from
+    // Users/{uid} (the identity/role profile above): this changes far
+    // more often (every location ping) and staff oversight access here
+    // is about delivery operations, not account management.
+    match /Riders/{riderId} {
+      allow read: if isOwner(riderId) || isStaff();
+      allow write: if isOwner(riderId) && isRider();
+    }
+
     // Per-customer saved shops, written by the client app's Favorites
     // feature (Users/{uid}/Favorites/{shopId}). Doesn't inherit from the
     // Users/{userId} match above - Firestore rules don't cascade to
@@ -110,8 +130,20 @@ service cloud.firestore {
       allow create: if isSignedIn() &&
         request.resource.data.get('customerUid', '') == request.auth.uid;
       allow read: if isSignedIn() &&
-        (resource.data.get('customerUid', '') == request.auth.uid || isStaff());
-      allow update, delete: if isStaff();
+        (resource.data.get('customerUid', '') == request.auth.uid ||
+          resource.data.get('riderId', '') == request.auth.uid ||
+          isStaff());
+      // A rider may only touch an order already assigned to them
+      // (riderId set by staff via the assignment flow - see
+      // order_details.dart), and only to advance its status/pickup/
+      // delivery timestamps - never the amount, address, or who it
+      // belongs to.
+      allow update: if isStaff() ||
+        (isRider() &&
+          resource.data.get('riderId', '') == request.auth.uid &&
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['status', 'pickedUpAt', 'deliveredAt', 'DateOfDelivery']));
+      allow delete: if isStaff();
     }
 
     // Line items for an OnlineOrders doc. A customer may only add/read
