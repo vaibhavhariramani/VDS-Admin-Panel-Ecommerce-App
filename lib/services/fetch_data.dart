@@ -51,22 +51,27 @@ class FetchService extends GetxService {
 
   //Fetching Shop Id from User Id
   Future<String?> fetchShopId() async {
-    print("runni fetch");
     String? userId = AuthService.to.user.value?.id;
-    print("Fetching Id for Shop from User Id: \n");
-    print("user id: $userId ");
+    if (userId == null) return null;
 
     try {
       CollectionReference ShopsDB = Collection.collection('Shops');
+      // Primary owner first (the common case, one query) - only falls back
+      // to the additionalAdmins array (see firestore.rules' isShopOwner())
+      // if that finds nothing, since most shops only ever have one admin
+      // and don't need the second read.
       QuerySnapshot<Object?> querySnapshot =
-          await ShopsDB.where("shopAdmin", isEqualTo: userId).get();
-      if (querySnapshot.docs.isEmpty) {
-        print("No shop found for the user.");
-        return null;
+          await ShopsDB.where("shopAdmin", isEqualTo: userId).limit(1).get();
+      if (querySnapshot.docs.isNotEmpty) {
+        return querySnapshot.docs.first.id;
       }
-      String shopId = querySnapshot.docs.first.id;
-      print("Fetched ShopId: $shopId");
-      return shopId;
+      querySnapshot =
+          await ShopsDB.where("additionalAdmins", arrayContains: userId).limit(1).get();
+      if (querySnapshot.docs.isNotEmpty) {
+        return querySnapshot.docs.first.id;
+      }
+      print("No shop found for the user.");
+      return null;
     } catch (e) {
       print('Error fetching shopId: $e');
       return null;

@@ -26,10 +26,21 @@ service cloud.firestore {
 
     // Re-derives storefront ownership from the Shops doc itself server-side
     // - never trusts a shopId path segment the client supplied on its own.
+    //
+    // `shopAdmin` stays a single uid (changing it to an array would be a
+    // platform-wide migration touching every shop's data, just to support
+    // one shop having two admins) - `additionalAdmins` is an optional,
+    // additive array for the (currently rare) case of more than one owner.
+    // Missing on every shop that predates this, which is why both
+    // `.get('shopAdmin', '')` and `.get('additionalAdmins', [])` default to
+    // "nobody" rather than erroring on shops that don't have the field.
     function isShopOwner(shopId) {
       return isStaff() &&
         exists(/databases/$(database)/documents/Shops/$(shopId)) &&
-        get(/databases/$(database)/documents/Shops/$(shopId)).data.get('shopAdmin', '') == request.auth.uid;
+        (
+          get(/databases/$(database)/documents/Shops/$(shopId)).data.get('shopAdmin', '') == request.auth.uid ||
+          request.auth.uid in get(/databases/$(database)/documents/Shops/$(shopId)).data.get('additionalAdmins', [])
+        );
     }
 
     function isPlatformAdmin() {
