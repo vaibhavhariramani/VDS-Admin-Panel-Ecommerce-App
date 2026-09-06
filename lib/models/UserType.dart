@@ -5,6 +5,7 @@ enum UserType {
   AFFILIATES,
   COUNTRY_HEAD,
   SHOP_ADMIN,
+  RIDER,
 }
 
 /// Display labels for each role. `MERCHANT` is labeled "Region Admin" —
@@ -26,6 +27,8 @@ extension UserTypeLabel on UserType {
         return 'Referral Partner';
       case UserType.CUSTOMER:
         return 'Customer';
+      case UserType.RIDER:
+        return 'Delivery Rider';
     }
   }
 }

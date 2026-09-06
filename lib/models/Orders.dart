@@ -16,9 +16,9 @@ class Orders {
   String? _deliveryDate;
   String? _deliveryTime;
   String? _deliveryCharges;
+  String? _riderId;
   String? _deliveryPersonName;
   String? _deliveryPersonPhone;
-  String? _deliveryPersonPhoto;
   String? _deliveryPersonVehicle;
   String? _deliveryPersonVehicleNumber;
   DateTime? _dateOfOrder;
@@ -40,9 +40,9 @@ class Orders {
     String? deliveryDate,
     String? deliveryTime,
     String? deliveryCharges,
+    String? riderId,
     String? deliveryPersonName,
     String? deliveryPersonPhone,
-    String? deliveryPersonPhoto,
     String? deliveryPersonVehicle,
     String? deliveryPersonVehicleNumber,
     DateTime? dateOfOrder,
@@ -61,9 +61,9 @@ class Orders {
     _deliveryDate = deliveryDate;
     _deliveryTime = deliveryTime;
     _deliveryCharges = deliveryCharges;
+    _riderId = riderId;
     _deliveryPersonName = deliveryPersonName;
     _deliveryPersonPhone = deliveryPersonPhone;
-    _deliveryPersonPhoto = deliveryPersonPhoto;
     _deliveryPersonVehicle = deliveryPersonVehicle;
     _deliveryPersonVehicleNumber = deliveryPersonVehicleNumber;
     _dateOfOrder = dateOfOrder;
@@ -91,8 +91,23 @@ class Orders {
     return _customerName;
   }
 
+  get riderId {
+    return _riderId;
+  }
+
+  get deliveryPersonName {
+    return _deliveryPersonName;
+  }
+
+  get deliveryPersonPhone {
+    return _deliveryPersonPhone;
+  }
+
+  /// Not yet populated — assigning a rider (see order_details.dart)
+  /// currently denormalizes id/name/phone onto the order but not a photo.
+  /// Callers already fall back to a placeholder avatar when this is null.
   get deliveryPersonPhoto {
-    return _deliveryPersonPhoto;
+    return null;
   }
 
   get deliveryDate {
@@ -145,9 +160,9 @@ class Orders {
     tempOrder._deliveryDate = data['DateOfDelivery'].toString();
     tempOrder._deliveryTime = data['DateOfDelivery'].toString();
     tempOrder._deliveryCharges = data['deliveryCharges'];
-    tempOrder._deliveryPersonName = data['DeliveryBoy']['name'];
-    tempOrder._deliveryPersonPhone = data['DeliveryBoy']['Dcontact'];
-    tempOrder._deliveryPersonPhoto = data['DeliveryBoy']['Dimage'];
+    tempOrder._riderId = data['riderId'];
+    tempOrder._deliveryPersonName = data['riderName'];
+    tempOrder._deliveryPersonPhone = data['riderPhone'];
     tempOrder._deliveryPersonVehicle = 'deliveryPersonVehicle';
     tempOrder._deliveryPersonVehicleNumber = 'deliveryPersonVehicleNumber';
     tempOrder._dateOfOrder = (data['dateOfOrder']as Timestamp?)?.toDate();
@@ -173,9 +188,9 @@ Orders emptyOrder() {
     deliveryDate: '',
     deliveryTime: '',
     deliveryCharges: '',
+    riderId: '',
     deliveryPersonName: '',
     deliveryPersonPhone: '',
-    deliveryPersonPhoto: '',
     deliveryPersonVehicle: '',
     deliveryPersonVehicleNumber: '',
     dateOfOrder: null,
