@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dashboard/flutter_dashboard.dart';
 
+import '../../../routes/app_pages.dart';
 import '../controllers/settings_controller.dart';
 
 class SettingsView extends GetView<SettingsController> {
@@ -50,6 +51,30 @@ class SettingsView extends GetView<SettingsController> {
                     value: controller.isDarkMode.value,
                     onChanged: controller.toggleDarkMode,
                   ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Team',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Invite staff and manage what each person can access.',
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(color: Theme.of(context).disabledColor),
+              ),
+              const SizedBox(height: 12),
+              Card(
+                elevation: 2,
+                child: ListTile(
+                  leading: const Icon(Icons.people_outline),
+                  title: const Text('Team & Permissions'),
+                  subtitle: const Text('View team members, invite new staff, edit permissions'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Get.toNamed(Routes.TEAM),
                 ),
               ),
             ],

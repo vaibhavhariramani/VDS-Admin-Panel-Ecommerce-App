@@ -4,6 +4,7 @@ import 'package:flutter_dashboard/flutter_dashboard.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../constants/constants.dart';
+import '../../../../themes/app_theme.dart';
 import '../../../widgets/components/common_card.dart';
 import '../../../widgets/utils/padding_wrapper.dart';
 import '../controllers/storefront_controller.dart';
@@ -37,19 +38,18 @@ class StorefrontOverviewView extends GetView<StorefrontController> {
         return SingleChildScrollView(
           child: PaddingWrapper(
             isSliverItem: false,
-            horizontalPadding: 24,
-            topPadding: 20,
-            bottomPadding: 40,
+            horizontalPadding: AppSpacing.xl,
+            topPadding: AppSpacing.lg,
+            bottomPadding: AppSpacing.xxl,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _statusRow(context),
-                const SizedBox(height: 20),
+                const SizedBox(height: AppSpacing.lg),
                 _storeUrlCard(context),
-                const SizedBox(height: 24),
-                const Text('Appearance',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.xl),
+                Text('Appearance', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
+                const SizedBox(height: AppSpacing.md),
                 _summaryCard(
                   context,
                   title: 'Branding & Theme',
@@ -59,10 +59,9 @@ class StorefrontOverviewView extends GetView<StorefrontController> {
                   onTap: () => Navigator.push(context,
                       MaterialPageRoute(builder: (_) => const StorefrontAppearanceView())),
                 ),
-                const SizedBox(height: 24),
-                const Text('Homepage',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.xl),
+                Text('Homepage', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
+                const SizedBox(height: AppSpacing.md),
                 _summaryCard(
                   context,
                   title: 'Homepage Sections',
@@ -72,7 +71,7 @@ class StorefrontOverviewView extends GetView<StorefrontController> {
                   onTap: () => Navigator.push(context,
                       MaterialPageRoute(builder: (_) => const StorefrontHomepageView())),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.sm),
                 _summaryCard(
                   context,
                   title: 'Manage Banners',
@@ -81,7 +80,7 @@ class StorefrontOverviewView extends GetView<StorefrontController> {
                   onTap: () => Navigator.push(context,
                       MaterialPageRoute(builder: (_) => const StorefrontBannersView())),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.sm),
                 _summaryCard(
                   context,
                   title: 'Store Details',
@@ -90,7 +89,7 @@ class StorefrontOverviewView extends GetView<StorefrontController> {
                   onTap: () => Navigator.push(context,
                       MaterialPageRoute(builder: (_) => const StoreDetailsView())),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.sm),
                 _summaryCard(
                   context,
                   title: 'Navigation',
@@ -99,7 +98,7 @@ class StorefrontOverviewView extends GetView<StorefrontController> {
                   onTap: () => Navigator.push(context,
                       MaterialPageRoute(builder: (_) => const StorefrontNavigationView())),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.sm),
                 _summaryCard(
                   context,
                   title: 'Pages',
@@ -108,7 +107,7 @@ class StorefrontOverviewView extends GetView<StorefrontController> {
                   onTap: () => Navigator.push(context,
                       MaterialPageRoute(builder: (_) => const StorefrontPagesView())),
                 ),
-                const SizedBox(height: 28),
+                const SizedBox(height: AppSpacing.xxl),
                 _publishingBar(context),
               ],
             ),
@@ -121,13 +120,14 @@ class StorefrontOverviewView extends GetView<StorefrontController> {
   Widget _statusRow(BuildContext context) {
     final bool isLive = controller.published.value != null &&
         controller.published.value!.homepage.isNotEmpty;
+    final Color color = isLive ? AppSemanticColors.success : AppColors.grey;
     return Row(
       children: [
-        Icon(Icons.circle, size: 12, color: isLive ? Colors.green : Colors.grey),
-        const SizedBox(width: 8),
+        Icon(Icons.circle, size: 12, color: color),
+        const SizedBox(width: AppSpacing.sm),
         Text(
           isLive ? 'Live' : 'Not published yet',
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: color),
         ),
       ],
     );
@@ -138,23 +138,21 @@ class StorefrontOverviewView extends GetView<StorefrontController> {
     // working link the moment it exists, nothing to "set up" first.
     final String? shopId = controller.shopId;
     final String url = shopId != null ? '$storefrontBaseUrl/$shopId' : '';
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Your Store URL',
-                style: TextStyle(fontSize: 14, color: Colors.grey)),
-            const SizedBox(height: 6),
-            Text(
-              url,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 10,
+    return CommonCard(
+      elevation: 0,
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Your Store URL', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.grey)),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            url,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Wrap(
+            spacing: AppSpacing.sm,
               children: [
                 OutlinedButton.icon(
                   onPressed: () async {
@@ -177,7 +175,6 @@ class StorefrontOverviewView extends GetView<StorefrontController> {
             ),
           ],
         ),
-      ),
     );
   }
 
@@ -192,20 +189,19 @@ class StorefrontOverviewView extends GetView<StorefrontController> {
       onTap: onTap,
       height: 90,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
         child: Row(
           children: [
-            Icon(icon, size: 28),
-            const SizedBox(width: 16),
+            Icon(icon, size: 28, color: Theme.of(context).primaryColor),
+            const SizedBox(width: AppSpacing.lg),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(title,
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 4),
-                  Text(subtitle, style: const TextStyle(color: Colors.grey)),
+                  Text(title, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(subtitle, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.grey)),
                 ],
               ),
             ),
@@ -219,25 +215,25 @@ class StorefrontOverviewView extends GetView<StorefrontController> {
   Widget _publishingBar(BuildContext context) {
     final DateTime? publishedAt = controller.published.value?.updatedAt;
     return Card(
-      elevation: 2,
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Publishing',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-            const SizedBox(height: 6),
+            Text('Publishing', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
+            const SizedBox(height: AppSpacing.xs),
             Text(
               publishedAt != null
                   ? 'Last published: ${publishedAt.toString().substring(0, 16)}'
                   : 'Never published',
-              style: const TextStyle(color: Colors.grey),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.grey),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
             Wrap(
-              spacing: 12,
-              runSpacing: 12,
+              spacing: AppSpacing.md,
+              runSpacing: AppSpacing.md,
               children: [
                 OutlinedButton(
                   onPressed: controller.isSaving.value ? null : controller.saveDraft,

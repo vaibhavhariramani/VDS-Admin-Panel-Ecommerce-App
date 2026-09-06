@@ -34,6 +34,8 @@ import '../utilities/help/bindings/help_binding.dart';
 import '../utilities/help/views/help_view.dart';
 import '../utilities/settings/bindings/settings_binding.dart';
 import '../utilities/settings/views/settings_view.dart';
+import '../utilities/team/team_binding.dart';
+import '../utilities/team/team_view.dart';
 
 part 'app_routes.dart';
 
@@ -84,6 +86,12 @@ class AppPages {
       name: _Paths.BILLING,
       page: () => BillingView(),
       binding: BillingBinding(),
+    ),
+    GetPage(
+      name: _Paths.TEAM,
+      page: () => const TeamView(),
+      binding: TeamBinding(),
+      middlewares: [EnsureAuthenticated()],
     ),
   ];
 

@@ -1,3 +1,7 @@
+import 'package:flutter/material.dart';
+
+import '../themes/app_theme.dart';
+
 /// Canonical `OnlineOrders.status` values, shared conceptually across all
 /// three Local Bazaar apps (Admin, Client, Delivery) — see
 /// docs/architecture/ORDER_LIFECYCLE.md in the master repo for the full
@@ -34,5 +38,28 @@ class OrderStatus {
         .split('_')
         .map((w) => w.isEmpty ? w : '${w[0].toUpperCase()}${w.substring(1)}')
         .join(' ');
+  }
+
+  /// Status pill color — one definition shared by every order list/detail
+  /// screen, instead of each screen inventing (or forgetting to implement)
+  /// its own color coding for the same status value.
+  static Color color(String status) {
+    switch (status) {
+      case placed:
+      case confirmed:
+        return AppSemanticColors.info;
+      case preparing:
+      case readyForPickup:
+      case riderAssigned:
+      case pickedUp:
+      case outForDelivery:
+        return AppSemanticColors.warning;
+      case delivered:
+        return AppSemanticColors.success;
+      case cancelled:
+        return AppSemanticColors.danger;
+      default:
+        return AppSemanticColors.neutral;
+    }
   }
 }

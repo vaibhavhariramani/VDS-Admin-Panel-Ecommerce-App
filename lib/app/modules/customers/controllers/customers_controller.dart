@@ -6,6 +6,18 @@ import 'package:flutter_dashboard/flutter_dashboard.dart';
 class CustomersController extends GetxController {
   final RxBool isLoading = true.obs;
   final RxList<Map<String, dynamic>> customers = <Map<String, dynamic>>[].obs;
+  final RxString searchQuery = ''.obs;
+
+  List<Map<String, dynamic>> get visibleCustomers {
+    final String query = searchQuery.value.trim().toLowerCase();
+    if (query.isEmpty) return customers;
+    return customers.where((c) {
+      final String name = (c['fullname'] ?? c['name'] ?? '').toString().toLowerCase();
+      final String email = (c['email'] ?? '').toString().toLowerCase();
+      final String phone = (c['phone'] ?? c['phone_number'] ?? '').toString().toLowerCase();
+      return name.contains(query) || email.contains(query) || phone.contains(query);
+    }).toList();
+  }
 
   @override
   void onInit() {
