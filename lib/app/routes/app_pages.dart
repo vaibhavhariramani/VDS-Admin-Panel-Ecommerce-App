@@ -18,8 +18,8 @@ import '../modules/merchants/bindings/merchants_binding.dart';
 import '../modules/merchants/views/merchants_view.dart';
 import '../modules/orders/bindings/orders_binding.dart';
 import '../modules/orders/views/orders_view.dart';
-import '../modules/products/master_list/bindings/master_list_binding.dart';
-import '../modules/products/master_list/views/master_list_view.dart';
+import '../modules/products/product_management/bindings/product_management_binding.dart';
+import '../modules/products/product_management/views/product_management_view.dart';
 import '../modules/products/products_listing/bindings/products_listing_binding.dart';
 import '../modules/products/products_listing/views/products_listing_view.dart';
 import '../modules/shop_listing/bindings/shop_listing_binding.dart';
@@ -64,9 +64,9 @@ class AppPages {
       binding: ProductsListingBinding(),
     ),
     GetPage(
-      name: _Paths.MATSER_LIST,
-      page: () => MasterListView(),
-      binding: MasterListBinding(),
+      name: _Paths.PRODUCTS,
+      page: () => const ProductManagementView(),
+      binding: ProductManagementBinding(),
     ),
     GetPage(
       name: _Paths.ORDERS,
@@ -372,7 +372,7 @@ class AppPages {
       FlutterDashboardItem(
         title: 'Billing',
         page: GetPage(
-          name: _Paths.HOT_DEALS,
+          name: _Paths.BILLING,
           page: () => BillingView(),
           binding: BillingBinding(),
           middlewares: [
@@ -399,20 +399,20 @@ class AppPages {
         selectedIcon: Icon(Icons.people, color: Theme.of(context).scaffoldBackgroundColor),
       ),
       FlutterDashboardItem(
-        title: 'Master List',
+        title: 'Products',
         page: GetPage(
-          name: _Paths.MATSER_LIST,
-          page: () => MasterListView(),
-          binding: MasterListBinding(),
+          name: _Paths.PRODUCTS,
+          page: () => const ProductManagementView(),
+          binding: ProductManagementBinding(),
           middlewares: [
             EnsureAuthenticated(),
           ],
         ),
         icon: const Icon(
-          IconlyLight.chart,
+          IconlyLight.bag_2,
         ),
         selectedIcon: Icon(
-          IconlyBold.chart,
+          IconlyBold.bag_2,
           color: Theme.of(context).scaffoldBackgroundColor,
         ),
       ),
@@ -433,31 +433,6 @@ class AppPages {
           IconlyBold.bag,
           color: Theme.of(context).scaffoldBackgroundColor,
         ),
-      ),
-      FlutterDashboardItem(
-        title: 'Product Listing',
-        page: GetPage(
-          name: _Paths.PRODUCTS_LISTING,
-          page: () => ProductsListingView(),
-          binding: ProductsListingBinding(),
-          middlewares: [
-            EnsureAuthenticated(),
-          ],
-        ),
-        icon: const Icon(
-          Icons.flag_outlined,
-        ),
-        selectedIcon: Icon(
-          Icons.flag,
-          color: Theme.of(context).scaffoldBackgroundColor,
-        ),
-      ),
-      FlutterDashboardItem.items(
-        title: 'Products',
-        icon: const Icon(
-          IconlyLight.folder,
-        ),
-        subItems: [],
       ),
       FlutterDashboardItem(
         title: 'Storefront',

@@ -40,6 +40,12 @@ class HomeController extends GetxController {
   RxInt activeUserCount = 0.obs;
   RxInt inActiveUserCount = 0.obs;
   RxInt requestedUser = 0.obs;
+
+  /// Active + inactive customers — there's no single "all users" query in
+  /// this app (staff accounts aren't counted here), so this is scoped to
+  /// what it actually measures: customers. Replaces a previous dashboard
+  /// card that showed a hardcoded 21,459 regardless of any real data.
+  int get totalCustomerCount => activeUserCount.value + inActiveUserCount.value;
   final RxBool isloading = false.obs;
   Users? get user => _authService.user.value;
   final AuthService userService = AuthService.to;

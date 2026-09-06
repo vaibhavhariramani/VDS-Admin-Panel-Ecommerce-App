@@ -8,11 +8,8 @@ abstract class Routes {
   static String LOGIN_THEN(String afterSuccessfulLogin) =>
       '$LOGIN?then=${Uri.encodeQueryComponent(afterSuccessfulLogin)}';
   static const DELETION_STATUS = _Paths.DELETION_STATUS;
+  static const PRODUCTS = _Paths.PRODUCTS;
   static const PRODUCTS_LISTING = _Paths.PRODUCTS_LISTING;
-  static const MATSER_LIST = _Paths.MATSER_LIST;
-  static const SCHEDULED_PRODUCTS = _Paths.SCHEDULED_PRODUCTS;
-  static const HOT_DEALS = _Paths.HOT_DEALS;
-  static const PUBLISHED_PRODUCTS = _Paths.PUBLISHED_PRODUCTS;
   static const MERCHANTS = _Paths.MERCHANTS;
   static const SHOP_LISTING = _Paths.SHOP_LISTING;
   static const ORDERS = _Paths.ORDERS;
@@ -29,11 +26,8 @@ abstract class _Paths {
   static const HOME = '/home';
   static const LOGIN = '/login';
   static const DELETION_STATUS = '/deletion-status';
+  static const PRODUCTS = '/products';
   static const PRODUCTS_LISTING = '/products-listing';
-  static const MATSER_LIST = '/matser-list';
-  static const SCHEDULED_PRODUCTS = '/scheduled-products';
-  static const HOT_DEALS = '/hot-deals';
-  static const PUBLISHED_PRODUCTS = '/published-products';
   static const MERCHANTS = '/merchants';
   static const SHOP_LISTING = '/shop-listing';
   static const ORDERS = '/orders';

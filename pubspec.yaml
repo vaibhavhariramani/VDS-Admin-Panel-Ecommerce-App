@@ -71,6 +71,10 @@ dependencies:
   visibility_detector: ^0.4.0+2
   pdf: ^3.11.3
   printing: ^5.14.2
+  # Was only ever a transitive dependency despite being imported directly
+  # throughout lib/ (ReactiveFormBuilder/FormGroup) - declaring it directly
+  # so a future dependency bump elsewhere can't silently drop it.
+  reactive_forms: ^16.1.0
 
 dev_dependencies:
   flutter_test:
