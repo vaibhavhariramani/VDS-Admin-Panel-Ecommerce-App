@@ -10,6 +10,7 @@ import 'app/utilities/settings/controllers/settings_controller.dart';
 import 'app/widgets/appbar_actions/go_to_live_store_button.dart';
 import 'app/widgets/appbar_actions/notification_button.dart';
 import 'app/widgets/appbar_actions/user_button.dart';
+import 'app/widgets/components/brand_mark.dart';
 import 'app/widgets/drawer_header.dart';
 import 'firebase_options.dart';
 import 'middlewares/auth_middleware.dart';
@@ -45,7 +46,7 @@ class RootApp extends AppConfig {
     // );
 
     return FlutterDashboardMaterialApp(
-      title: "Emart Admin",
+      title: "Local Bazaar Admin",
       dashboardItems: AppPages.allPages(context),
       // This was commented out, so FlutterDashboardMaterialApp fell back to
       // DashboardConfig's own bare defaults (theme/darkTheme both null,

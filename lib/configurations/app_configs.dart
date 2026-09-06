@@ -22,10 +22,7 @@ abstract class AppConfig extends StatelessWidget {
         enableBodySpacing: true,
         debugShowCheckedModeBanner: false,
         hasScrollingBody: false,
-        brandLogo: Image.asset(
-          "assets/drawer_logo.png",
-          scale: 1,
-        ),
+        brandLogo: const BrandMark(),
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
         // Settings > Dark mode switches this live via Get.changeThemeMode()
