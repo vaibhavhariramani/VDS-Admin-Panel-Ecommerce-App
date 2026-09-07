@@ -3,6 +3,7 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 
 import '../../../../../themes/app_theme.dart';
 import '../../../../widgets/components/common_card.dart';
+import '../../../../widgets/utils/shimmer_helper.dart';
 import '../../controllers/home_controller.dart';
 
 /// The dashboard's order-volume chart. Used to sit next to a date-range
@@ -37,7 +38,7 @@ class PerformanceChartCard extends StatelessWidget {
           SizedBox(
             height: 280,
             child: isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? ShimmerHelper.buildBasicShimmer(height: 280)
                 : SfCartesianChart(
                     plotAreaBorderWidth: 0,
                     plotAreaBorderColor: Colors.transparent,

@@ -5,6 +5,7 @@ import '../../../../models/Shop.dart';
 import '../../../../models/storefront/section_config.dart';
 import '../../../../models/storefront/storefront_config.dart';
 import '../../../../models/storefront/storefront_section.dart';
+import '../../../../services/auth_service.dart';
 import '../../../../services/fetch_data.dart';
 import '../../../../services/storefront_service.dart';
 
@@ -33,17 +34,35 @@ class StorefrontController extends GetxController {
 
   Future<void> _load() async {
     isLoading(true);
+    // fetchShopId() reads AuthService.to.user.value?.id - on a fresh page
+    // load (a direct/bookmarked link, or a browser refresh) this
+    // controller's onInit can fire before the post-login Firestore user
+    // profile fetch resolves, seeing a still-null user and returning null
+    // with no retry. That read as "no shop found for your account" for
+    // every shop admin who didn't reach Storefront by clicking through
+    // from an already-loaded dashboard first. Same fix as HomeController.
+    if (AuthService.to.user.value == null) {
+      await AuthService.to.user.stream.firstWhere((u) => u != null);
+    }
     shopId = await FetchService.to.fetchShopId();
     if (shopId != null) {
-      // Shop must be loaded first: a first-time draft is seeded from the
-      // shop's own name/logo/brand color/products, so there's a real
-      // starting storefront (not a blank page) the moment a merchant opens
-      // this section — see [_loadDraft].
-      await _loadShop();
-      await Future.wait([
-        _loadDraft(),
-        _loadPublished(),
-      ]);
+      try {
+        // Shop must be loaded first: a first-time draft is seeded from the
+        // shop's own name/logo/brand color/products, so there's a real
+        // starting storefront (not a blank page) the moment a merchant
+        // opens this section — see [_loadDraft]. Wrapped: an uncaught
+        // exception anywhere in this chain used to leave isLoading stuck
+        // at true forever - a spinner with nothing behind it that no
+        // retry could recover from, indistinguishable from the page
+        // simply "not working".
+        await _loadShop();
+        await Future.wait([
+          _loadDraft(),
+          _loadPublished(),
+        ]);
+      } catch (e) {
+        print('Error loading storefront for shop $shopId: $e');
+      }
     }
     isLoading(false);
   }

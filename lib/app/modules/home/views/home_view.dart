@@ -4,8 +4,8 @@ import 'package:get/get.dart';
 
 import '../../../../models/UserType.dart';
 import '../../../../themes/app_theme.dart';
-import '../../../widgets/components/common_card.dart';
 import '../../../widgets/utils/padding_wrapper.dart';
+import '../../../widgets/utils/shimmer_helper.dart';
 import '../../deletion_status/controllers/deletion_status_controller.dart';
 import '../../deletion_status/views/deletion_status_view.dart';
 import '../controllers/home_controller.dart';
@@ -205,10 +205,7 @@ class _RoleDashboard extends StatelessWidget {
                   return Obx(() {
                     final cards = config.statCards(controller);
                     if (controller.isloading.value && index != 0) {
-                      return const CommonCard(
-                        height: 120,
-                        child: Center(child: CircularProgressIndicator()),
-                      );
+                      return ShimmerHelper.buildBasicShimmer(height: 120);
                     }
                     return StatCard(data: cards[index]);
                   });
