@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../constants/order_status.dart';
@@ -8,15 +9,23 @@ import '../../../../services/fetch_data.dart';
 import 'items_details.dart';
 
 class OrderDetails extends StatefulWidget {
-  // final DocumentSnapshot snapshot;
+  // Optional fast-path: the Orders table already has this object in memory
+  // and passes it as the route's `arguments`, so opening details from the
+  // table doesn't need an extra Firestore round trip. A direct deep link
+  // or a page refresh won't have arguments though - see _loadOrder below,
+  // which falls back to fetching by the :orderId route parameter.
   final Orders? mp;
-  const OrderDetails({Key? key, required this.mp}) : super(key: key);
+  const OrderDetails({Key? key, this.mp}) : super(key: key);
 
   @override
   _OrderDetailsState createState() => _OrderDetailsState();
 }
 
 class _OrderDetailsState extends State<OrderDetails> {
+  Orders? _order;
+  bool _loading = true;
+  String? _loadError;
+  late final Stream<QuerySnapshot> _itemsStream;
   String? status;
   DateFormat format = DateFormat.yMMMMd('en_US');
   DateFormat time = DateFormat.jm();
@@ -37,7 +46,7 @@ class _OrderDetailsState extends State<OrderDetails> {
 
   // Safe numeric getters
   double get totalAmount {
-    final v = widget.mp?.totalAmount;
+    final v = _order?.totalAmount;
     if (v is double) return v;
     if (v is int) return v.toDouble();
     if (v is String) return double.tryParse(v) ?? 0.0;
@@ -45,7 +54,7 @@ class _OrderDetailsState extends State<OrderDetails> {
   }
 
   double get deliveryCharges {
-    final v = widget.mp?.deliveryCharges;
+    final v = _order?.deliveryCharges;
     if (v is double) return v;
     if (v is int) return v.toDouble();
     if (v is String) return double.tryParse(v) ?? 0.0;
@@ -53,7 +62,7 @@ class _OrderDetailsState extends State<OrderDetails> {
   }
 
   double get discount {
-    final v = widget.mp?.discount;
+    final v = _order?.discount;
     if (v is double) return v;
     if (v is int) return v.toDouble();
     if (v is String) return double.tryParse(v) ?? 0.0;
@@ -76,20 +85,78 @@ class _OrderDetailsState extends State<OrderDetails> {
 
   @override
   void initState() {
-    status = widget.mp?.status;
+    super.initState();
+    final dynamic args = Get.rootDelegate.arguments();
+    final Orders? preloaded = args is Orders ? args : widget.mp;
+    if (preloaded != null) {
+      _applyOrder(preloaded);
+      _loading = false;
+    } else {
+      _loadOrder();
+    }
+  }
+
+  /// Sets every piece of state derived from the resolved order in one
+  /// place, so the fast (arguments) path and the fetch-by-id fallback
+  /// path can't drift from each other.
+  void _applyOrder(Orders order) {
+    _order = order;
     // Pre-selects the currently-assigned rider's radio button below —
     // this used to read deliveryPersonPhoto (an image URL), which never
     // matched an Employee doc id, so the picker never showed a selection
     // even when a rider was already assigned.
-    delivery = widget.mp?.riderId;
-    super.initState();
+    status = order.status;
+    delivery = order.riderId;
+    // Items are always written with `orderID` set to the order's own
+    // document id (see the client app's checkout code) - querying by that
+    // directly instead of the redundant `cartId`/`CartItemsId` field is
+    // both simpler and doesn't depend on a legacy/optional field staying
+    // in sync.
+    final String orderId = order.orderId;
+    _itemsStream = orderId.isEmpty
+        ? const Stream<QuerySnapshot>.empty()
+        : FetchService.to.orderItems(orderId);
   }
 
+  /// Deep-link / page-refresh fallback: resolves the order from the
+  /// `:orderId` route parameter when it wasn't handed over via arguments.
+  Future<void> _loadOrder() async {
+    final String? orderId = Get.rootDelegate.parameters['orderId'];
+    if (orderId == null || orderId.isEmpty) {
+      setState(() {
+        _loading = false;
+        _loadError = 'No order id in the URL.';
+      });
+      return;
+    }
+    final Orders? fetched = await FetchService.to.fetchOrderById(orderId);
+    if (!mounted) return;
+    setState(() {
+      if (fetched != null) {
+        _applyOrder(fetched);
+      } else {
+        _loadError = 'Order not found.';
+      }
+      _loading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final deliveryDate = parseDate(widget.mp?.deliveryDate);
-    final deliveryTime = parseDate(widget.mp?.deliveryTime);
+    if (_loading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+    if (_order == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Order Details')),
+        body: Center(child: Text(_loadError ?? 'Order not found.')),
+      );
+    }
+    final Orders order = _order!;
+    final deliveryDate = parseDate(order.deliveryDate);
+    final deliveryTime = parseDate(order.deliveryTime);
     return Scaffold(
         backgroundColor: Color(0xffebebeb),
         appBar: AppBar(
@@ -103,7 +170,7 @@ class _OrderDetailsState extends State<OrderDetails> {
           title: Row(
             children: [
               Text(
-                widget.mp?.customerNumber,
+                order.customerNumber?.toString() ?? '',
                 style: TextStyle(fontSize: 16),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -157,11 +224,11 @@ class _OrderDetailsState extends State<OrderDetails> {
                             ListTile(
                               leading: CircleAvatar(
                                   child: Icon(Icons.person_outline)),
-                              title: Text('${widget.mp?.customerName}',
+                              title: Text('${order.customerName}',
                                   style:
                                       TextStyle(fontWeight: FontWeight.w500)),
                               subtitle: Text(
-                                '${widget.mp?.customerNumber}',
+                                '${order.customerNumber}',
                               ),
                             ),
                             ListTile(
@@ -170,7 +237,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                                   style:
                                       TextStyle(fontWeight: FontWeight.w500)),
                               subtitle: Text(
-                                '${widget.mp?.Address}',
+                                '${order.Address}',
                               ),
                             ),
                             SizedBox(height: 10)
@@ -306,7 +373,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                                 ),
                               ),
                               ListTile(
-                                title: Text('${widget.mp?.orderId}',
+                                title: Text('${order.orderId}',
                                     style:
                                         TextStyle(fontWeight: FontWeight.w500)),
                                 subtitle: Text.rich(TextSpan(
@@ -323,23 +390,36 @@ class _OrderDetailsState extends State<OrderDetails> {
                                           BorderRadius.all(Radius.circular(8)),
                                       border:
                                           Border.all(color: Colors.black26)),
-                                  child: DropdownButton(
-                                    value: status,
-                                    icon: Icon(Icons.keyboard_arrow_down),
-                                    iconSize: 24,
-                                    elevation: 16,
-                                    isExpanded: true,
-                                    underline: Container(),
-                                    hint: Text('Status'),
-                                    style: TextStyle(color: Colors.black),
-                                    items: _statusOptions.map((value) {
-                                      return DropdownMenuItem(
-                                        value: value,
-                                        child: Text(OrderStatus.label(value)),
-                                      );
-                                    }).toList(),
-                                    onChanged: _update,
-                                  ),
+                                  child: Builder(builder: (context) {
+                                    // Hardcoded black text/icon used to go
+                                    // invisible against this Card's dark-mode
+                                    // background (the Card follows the theme;
+                                    // this text didn't) - follow the theme's
+                                    // brightness instead.
+                                    final bool isDark =
+                                        Theme.of(context).brightness ==
+                                            Brightness.dark;
+                                    final Color textColor =
+                                        isDark ? Colors.white : Colors.black;
+                                    return DropdownButton(
+                                      value: status,
+                                      icon: Icon(Icons.keyboard_arrow_down,
+                                          color: textColor),
+                                      iconSize: 24,
+                                      elevation: 16,
+                                      isExpanded: true,
+                                      underline: Container(),
+                                      hint: Text('Status'),
+                                      style: TextStyle(color: textColor),
+                                      items: _statusOptions.map((value) {
+                                        return DropdownMenuItem(
+                                          value: value,
+                                          child: Text(OrderStatus.label(value)),
+                                        );
+                                      }).toList(),
+                                      onChanged: _update,
+                                    );
+                                  }),
                                 ),
                               ),
                               SizedBox(height: 10)
@@ -363,9 +443,8 @@ class _OrderDetailsState extends State<OrderDetails> {
                           TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                   ),
-                  //dataProvider.orderItems(widget.mp['id']),
                   StreamBuilder<QuerySnapshot>(
-                    stream: FetchService.to.orderItems(widget.mp?.CartItemsId),
+                    stream: _itemsStream,
                     builder: (context, snapshot) {
                       if (snapshot.hasError) {
                         return Padding(
@@ -496,7 +575,7 @@ class _OrderDetailsState extends State<OrderDetails> {
     CollectionReference referencer =
         FirebaseFirestore.instance.collection('OnlineOrders');
     try {
-      await referencer.doc(widget.mp?.orderId).update({
+      await referencer.doc(_order?.orderId).update({
         'status': value,
       });
       setState(() {
@@ -512,7 +591,7 @@ class _OrderDetailsState extends State<OrderDetails> {
       // Assigning a rider moves the order to "rider_assigned", not
       // straight to "picked_up" — pickup is a separate action the rider
       // confirms from the Delivery app once they're actually at the shop.
-      await referencer.doc(widget.mp?.orderId).update({
+      await referencer.doc(_order?.orderId).update({
         'riderId': snapshot.id,
         'riderName': snapshot['name'],
         'riderPhone': snapshot['phone'],

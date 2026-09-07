@@ -254,6 +254,22 @@ class FetchService extends GetxService {
     return Collection.collection('Employee').snapshots();
   }
 
+  /// A single order by its own document id - used by the Order Details
+  /// route (`/dashboard/orders/online/order-details/:orderId`) to resolve
+  /// the order directly from the URL, so a deep link or a page refresh
+  /// works even without the in-memory list the Orders table builds.
+  Future<Orders?> fetchOrderById(String orderId) async {
+    try {
+      final DocumentSnapshot<Object?> doc =
+          await Collection.collection('OnlineOrders').doc(orderId).get();
+      if (!doc.exists) return null;
+      return Orders.fromJson(doc.data() as Map<String, dynamic>);
+    } catch (e) {
+      print('Error fetching order $orderId: $e');
+      return null;
+    }
+  }
+
   Future<RxList<Orders?>> fetchOnlineOrdersUsingShopId() async {
     RxList<Orders?> _onlineOrders = RxList<Orders?>();
     if (AuthService.to.isAuthenticated) {
