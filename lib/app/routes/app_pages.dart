@@ -18,7 +18,6 @@ import '../modules/merchants/bindings/merchants_binding.dart';
 import '../modules/merchants/views/merchants_view.dart';
 import '../modules/orders/bindings/orders_binding.dart';
 import '../modules/orders/views/orders_view.dart';
-import '../modules/orders/views/order_details.dart';
 import '../modules/products/product_management/bindings/product_management_binding.dart';
 import '../modules/products/product_management/views/product_management_view.dart';
 import '../modules/products/products_listing/bindings/products_listing_binding.dart';
@@ -433,22 +432,6 @@ class AppPages {
           binding: OrdersBinding(),
           middlewares: [
             EnsureAuthenticated(),
-          ],
-          children: [
-            // Gives an opened order a real, shareable/refreshable URL
-            // (/dashboard/orders/online/order-details/<id>) instead of the
-            // previous plain Navigator.push, which never touched the URL
-            // at all. OrderDetails resolves the order itself - from route
-            // arguments when navigated here from the table (no extra
-            // fetch), or by fetching :orderId directly on a deep link/
-            // refresh.
-            GetPage(
-              name: '/online/order-details/:orderId',
-              page: () => const OrderDetails(),
-              middlewares: [
-                EnsureAuthenticated(),
-              ],
-            ),
           ],
         ),
         icon: const Icon(

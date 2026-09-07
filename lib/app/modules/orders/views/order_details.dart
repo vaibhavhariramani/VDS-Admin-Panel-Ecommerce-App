@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dashboard/flutter_dashboard.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../constants/order_status.dart';
@@ -9,11 +8,6 @@ import '../../../../services/fetch_data.dart';
 import 'items_details.dart';
 
 class OrderDetails extends StatefulWidget {
-  // Optional fast-path: the Orders table already has this object in memory
-  // and passes it as the route's `arguments`, so opening details from the
-  // table doesn't need an extra Firestore round trip. A direct deep link
-  // or a page refresh won't have arguments though - see _loadOrder below,
-  // which falls back to fetching by the :orderId route parameter.
   final Orders? mp;
   const OrderDetails({Key? key, this.mp}) : super(key: key);
 
@@ -86,19 +80,12 @@ class _OrderDetailsState extends State<OrderDetails> {
   @override
   void initState() {
     super.initState();
-    // This page lives under /dashboard, which is resolved by the
-    // dashboard shell's own nested GetRouterOutlet/delegate, not by
-    // Get.rootDelegate - see the matching comment in
-    // table_datasrc_orders.dart where the route is pushed.
-    final GetDelegate? delegate = FlutterDashboardController.to.delegate;
-    final dynamic args = delegate?.arguments();
-    final Orders? preloaded = args is Orders ? args : widget.mp;
-    if (preloaded != null) {
-      _applyOrder(preloaded);
-      _loading = false;
+    if (widget.mp != null) {
+      _applyOrder(widget.mp!);
     } else {
-      _loadOrder();
+      _loadError = 'No order given.';
     }
+    _loading = false;
   }
 
   /// Sets every piece of state derived from the resolved order in one
@@ -121,30 +108,6 @@ class _OrderDetailsState extends State<OrderDetails> {
     _itemsStream = orderId.isEmpty
         ? const Stream<QuerySnapshot>.empty()
         : FetchService.to.orderItems(orderId);
-  }
-
-  /// Deep-link / page-refresh fallback: resolves the order from the
-  /// `:orderId` route parameter when it wasn't handed over via arguments.
-  Future<void> _loadOrder() async {
-    final String? orderId =
-        FlutterDashboardController.to.delegate?.parameters['orderId'];
-    if (orderId == null || orderId.isEmpty) {
-      setState(() {
-        _loading = false;
-        _loadError = 'No order id in the URL.';
-      });
-      return;
-    }
-    final Orders? fetched = await FetchService.to.fetchOrderById(orderId);
-    if (!mounted) return;
-    setState(() {
-      if (fetched != null) {
-        _applyOrder(fetched);
-      } else {
-        _loadError = 'Order not found.';
-      }
-      _loading = false;
-    });
   }
 
   @override
