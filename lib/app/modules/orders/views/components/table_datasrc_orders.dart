@@ -52,7 +52,15 @@ class DataSourceOrders extends DataTableSource {
         // arguments so OrderDetails can render immediately without an
         // extra Firestore fetch; it still knows how to resolve the order
         // from the URL alone if arguments aren't present.
-        Get.rootDelegate.toNamed(
+        //
+        // Everything nested under /dashboard is resolved by the dashboard
+        // shell's OWN nested GetRouterOutlet/GetDelegate
+        // (FlutterDashboardController.to.delegate - see how the sidebar
+        // nav itself navigates in flutter_dashboard's drawer.dart), not
+        // by Get.rootDelegate (which only owns '/' and '/dashboard' as a
+        // whole page). Using Get.rootDelegate here matched nothing in the
+        // inner outlet's route tree and fell through to its 404 page.
+        FlutterDashboardController.to.delegate?.toNamed(
           '/dashboard/orders/online/order-details/${row.orderId}',
           arguments: row,
         );

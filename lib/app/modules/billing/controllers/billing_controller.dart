@@ -165,9 +165,16 @@ class BillingController extends GetxController {
   }
 
   void addProduct(Product product, {int quantity = 1}) {
+    // product.id is actually backed by the product's barcode (see
+    // Product.fromJson) - never the real Firestore doc id - so it's empty
+    // whenever barcode is. `?? product.name` didn't defend against that:
+    // '' is not null, so an empty string passed straight through as the
+    // key. That empty string later reached
+    // FirebaseFirestore.doc(''), which throws synchronously - the actual
+    // cause of "Error creating bill" for any product with no barcode.
     final String key = (product.barcode?.isNotEmpty ?? false)
         ? product.barcode!
-        : (product.id ?? product.name);
+        : ((product.id?.isNotEmpty ?? false) ? product.id! : product.name);
     BillLineItem? existing;
     for (final BillLineItem item in billItems) {
       if (item.productId == key) {
@@ -234,6 +241,9 @@ class BillingController extends GetxController {
   /// `DataService._productDocRef`. Custom items that don't resolve are
   /// simply not stock-checked.
   Future<DocumentReference<Object?>?> _resolveProductRef(String productId) async {
+    // FirebaseFirestore.doc('') throws synchronously rather than just
+    // finding nothing - never let an empty id reach it.
+    if (productId.isEmpty) return null;
     final DocumentReference<Object?> byId =
         _firestore.collection('Products').doc(productId);
     final DocumentSnapshot<Object?> byIdSnap = await byId.get();
@@ -329,7 +339,10 @@ class BillingController extends GetxController {
       final List<MapEntry<BillLineItem, DocumentReference<Object?>>?> resolved =
           await Future.wait(lineItems.map((BillLineItem item) async {
         final String? productId = item.productId;
-        if (productId == null) return null;
+        // An empty productId (see addProduct's comment) reaching
+        // Products.doc('') throws synchronously - guard against it here
+        // too, in case a line item was ever built with one some other way.
+        if (productId == null || productId.isEmpty) return null;
         final DocumentReference<Object?>? ref = await _resolveProductRef(productId);
         return ref == null ? null : MapEntry(item, ref);
       }));
@@ -431,7 +444,16 @@ class BillingController extends GetxController {
       return false;
     } catch (e) {
       print('Error creating bill: $e');
-      Fluttertoast.showToast(msg: 'Error creating bill');
+      // Surface the real cause instead of a bare "Error creating bill" -
+      // this exact opaque message was the reported bug (turned out to be
+      // FirebaseFirestore.doc('') throwing for a product with no
+      // barcode - now guarded above), and it was invisible without
+      // reading device logs. Keep the specific-exception messages above
+      // for the cases that already have a good one.
+      Fluttertoast.showToast(
+        msg: 'Error creating bill: $e',
+        toastLength: Toast.LENGTH_LONG,
+      );
       return false;
     } finally {
       isCreatingBill(false);

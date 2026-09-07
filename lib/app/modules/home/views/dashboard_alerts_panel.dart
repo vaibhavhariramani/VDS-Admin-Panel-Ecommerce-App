@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../models/Product.dart';
+import '../../../widgets/utils/shimmer_helper.dart';
 import '../controllers/home_controller.dart';
 
 /// Sits below the dashboard's order-trend chart: new orders still awaiting
@@ -15,9 +16,19 @@ class DashboardAlertsPanel extends StatelessWidget {
     final HomeController controller = Get.find<HomeController>();
     return Obx(() {
       if (controller.isLoadingAlerts.value) {
-        return const Padding(
-          padding: EdgeInsets.symmetric(vertical: 30),
-          child: Center(child: CircularProgressIndicator()),
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Wrap(
+            spacing: 20,
+            runSpacing: 20,
+            children: List.generate(
+              3,
+              (_) => SizedBox(
+                width: 340,
+                child: ShimmerHelper.buildBasicShimmer(height: 160),
+              ),
+            ),
+          ),
         );
       }
       return Padding(

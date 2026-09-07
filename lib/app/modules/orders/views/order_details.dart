@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_dashboard/flutter_dashboard.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../constants/order_status.dart';
@@ -86,7 +86,12 @@ class _OrderDetailsState extends State<OrderDetails> {
   @override
   void initState() {
     super.initState();
-    final dynamic args = Get.rootDelegate.arguments();
+    // This page lives under /dashboard, which is resolved by the
+    // dashboard shell's own nested GetRouterOutlet/delegate, not by
+    // Get.rootDelegate - see the matching comment in
+    // table_datasrc_orders.dart where the route is pushed.
+    final GetDelegate? delegate = FlutterDashboardController.to.delegate;
+    final dynamic args = delegate?.arguments();
     final Orders? preloaded = args is Orders ? args : widget.mp;
     if (preloaded != null) {
       _applyOrder(preloaded);
@@ -121,7 +126,8 @@ class _OrderDetailsState extends State<OrderDetails> {
   /// Deep-link / page-refresh fallback: resolves the order from the
   /// `:orderId` route parameter when it wasn't handed over via arguments.
   Future<void> _loadOrder() async {
-    final String? orderId = Get.rootDelegate.parameters['orderId'];
+    final String? orderId =
+        FlutterDashboardController.to.delegate?.parameters['orderId'];
     if (orderId == null || orderId.isEmpty) {
       setState(() {
         _loading = false;

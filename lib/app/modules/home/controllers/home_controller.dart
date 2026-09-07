@@ -1,5 +1,5 @@
+import 'package:bot_toast/bot_toast.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_dashboard/flutter_dashboard.dart';
 
 import '../../../../models/Product.dart';
@@ -160,32 +160,17 @@ class HomeController extends GetxController {
 
     if (newlyPlacedOrders.isNotEmpty && !_hasShownNewOrderPopup) {
       _hasShownNewOrderPopup = true;
-      Get.dialog(
-        // Builder gives the OK button the dialog route's own BuildContext,
-        // so it can pop that exact route via Navigator.of(dialogContext)
-        // instead of going through GetX's back-stack resolution at all.
-        // Get.back(closeOverlays: true) still didn't close this reliably -
-        // flutter_dashboard's nested Navigator leaves more than one
-        // Navigator in the ancestor chain, and which one GetX's global
-        // "back" targets isn't guaranteed to be the one that actually owns
-        // this dialog route. Popping the dialog's own context sidesteps
-        // that ambiguity entirely.
-        Builder(
-          builder: (BuildContext dialogContext) => AlertDialog(
-            title: const Text('New Orders'),
-            content: Text(
-              '${newlyPlacedOrders.length} order${newlyPlacedOrders.length == 1 ? '' : 's'} '
-              'placed and awaiting action.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(dialogContext).pop(),
-                child: const Text('OK'),
-              ),
-            ],
-          ),
-        ),
-        barrierDismissible: true,
+      // Was a Get.dialog AlertDialog - under flutter_dashboard's nested
+      // Navigator, nothing could reliably close it (neither
+      // Get.back(closeOverlays: true) nor popping the dialog's own
+      // BuildContext), leaving a full-screen modal barrier stuck up
+      // forever - which is what made the dashboard look "blank and grey"
+      // after this ran. A toast needs no Navigator/dialog-closing
+      // machinery at all: it draws no barrier and dismisses itself.
+      BotToast.showText(
+        text: '${newlyPlacedOrders.length} new order${newlyPlacedOrders.length == 1 ? '' : 's'} '
+            'placed and awaiting action.',
+        duration: 5.seconds,
       );
     }
   }
