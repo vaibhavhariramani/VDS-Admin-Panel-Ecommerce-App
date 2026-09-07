@@ -7,6 +7,7 @@ import '../../../../constants/constants.dart';
 import '../../../../themes/app_theme.dart';
 import '../../../widgets/components/common_card.dart';
 import '../../../widgets/utils/padding_wrapper.dart';
+import '../../../widgets/utils/shimmer_helper.dart';
 import '../controllers/storefront_controller.dart';
 import 'storefront_appearance_view.dart';
 import 'store_details_view.dart';
@@ -25,7 +26,34 @@ class StorefrontOverviewView extends GetView<StorefrontController> {
       appBar: AppBar(title: const Text('Storefront'), elevation: 0),
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
+          return SingleChildScrollView(
+            child: PaddingWrapper(
+              isSliverItem: false,
+              horizontalPadding: AppSpacing.xl,
+              topPadding: AppSpacing.lg,
+              bottomPadding: AppSpacing.xxl,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ShimmerHelper.buildBasicShimmer(height: 24, width: 160),
+                  const SizedBox(height: AppSpacing.lg),
+                  ShimmerHelper.buildBasicShimmer(height: 100),
+                  const SizedBox(height: AppSpacing.xl),
+                  ShimmerHelper.buildBasicShimmer(height: 24, width: 160),
+                  const SizedBox(height: AppSpacing.md),
+                  ShimmerHelper.buildBasicShimmer(height: 90),
+                  const SizedBox(height: AppSpacing.xl),
+                  ShimmerHelper.buildBasicShimmer(height: 24, width: 160),
+                  const SizedBox(height: AppSpacing.md),
+                  ShimmerHelper.buildBasicShimmer(height: 90),
+                  const SizedBox(height: AppSpacing.sm),
+                  ShimmerHelper.buildBasicShimmer(height: 90),
+                  const SizedBox(height: AppSpacing.sm),
+                  ShimmerHelper.buildBasicShimmer(height: 90),
+                ],
+              ),
+            ),
+          );
         }
         if (controller.shopId == null) {
           return const Center(

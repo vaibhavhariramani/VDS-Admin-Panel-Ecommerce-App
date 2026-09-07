@@ -20,23 +20,22 @@ import '../../../../services/auth_service.dart';
 import '../../../../services/data_service.dart';
 import '../../../../services/fetch_data.dart';
 
-/// Thrown inside the checkout transaction when a line item's requested
-/// quantity exceeds the freshly-read stock on hand, so it can be caught
-/// separately from generic write failures and reported per-item.
-class _InsufficientStockException implements Exception {
-  final String itemName;
-  _InsufficientStockException(this.itemName);
-}
+/// What the checkout transaction actually decided, returned as data rather
+/// than thrown. Firestore's web transaction implementation round-trips the
+/// transaction closure's result through a JS promise - an exception thrown
+/// from inside it comes back on the other side wrapped in a generic
+/// "Dart exception thrown from converted Future" error, not as the
+/// original type, so `on _InsufficientStockException catch` etc. never
+/// actually matched on web (confirmed live: a real insufficient-stock
+/// rejection was showing as that opaque wrapper text, not the friendly
+/// "Not enough stock for X" message). Returning the outcome as a plain
+/// value survives that boundary intact.
+enum _BillOutcome { created, alreadyCompleted, insufficientStock, invalidStockQuantity }
 
-/// Thrown when a product's `quantity` field isn't a plain stock-count
-/// number at all (e.g. a pack-size string like `"50 ml"` typed into the
-/// wrong field when the product was created) - int.tryParse would silently
-/// read that as "0 in stock" and this would otherwise surface as a
-/// confusing generic "Error creating bill" with no indication of what's
-/// actually wrong or which product to go fix.
-class _InvalidStockQuantityException implements Exception {
-  final String itemName;
-  _InvalidStockQuantityException(this.itemName);
+class _BillTransactionResult {
+  final _BillOutcome outcome;
+  final String? itemName;
+  const _BillTransactionResult(this.outcome, [this.itemName]);
 }
 
 class BillingController extends GetxController {
@@ -360,14 +359,14 @@ class BillingController extends GetxController {
       // product's quantity *inside* the transaction (rather than trusting
       // the cart's stale view) is what makes two concurrent sales of the
       // last unit resolve safely instead of overselling.
-      final bool alreadyCompleted =
-          await _firestore.runTransaction<bool>((Transaction tx) async {
+      final _BillTransactionResult result =
+          await _firestore.runTransaction<_BillTransactionResult>((Transaction tx) async {
         final DocumentSnapshot<Object?> existingBill = await tx.get(billRef);
         if (existingBill.exists) {
           // Same idempotency key already completed this exact bill (a
           // double tap of "Pay", or a retried request) — don't touch
           // stock or write a second invoice.
-          return true;
+          return const _BillTransactionResult(_BillOutcome.alreadyCompleted);
         }
 
         final Map<BillLineItem, DocumentSnapshot<Object?>> productSnaps = {};
@@ -382,10 +381,10 @@ class BillingController extends GetxController {
           final String? rawQuantity = data?['quantity']?.toString();
           final int? available = rawQuantity == null ? 0 : int.tryParse(rawQuantity);
           if (available == null) {
-            throw _InvalidStockQuantityException(entry.key.name);
+            return _BillTransactionResult(_BillOutcome.invalidStockQuantity, entry.key.name);
           }
           if (available < entry.key.quantity.value) {
-            throw _InsufficientStockException(entry.key.name);
+            return _BillTransactionResult(_BillOutcome.insufficientStock, entry.key.name);
           }
         }
 
@@ -417,10 +416,23 @@ class BillingController extends GetxController {
           'createdAt': FieldValue.serverTimestamp(),
         });
 
-        return false;
+        return const _BillTransactionResult(_BillOutcome.created);
       });
 
-      if (!alreadyCompleted) {
+      if (result.outcome == _BillOutcome.insufficientStock) {
+        Fluttertoast.showToast(msg: 'Not enough stock for ${result.itemName}');
+        return false;
+      }
+      if (result.outcome == _BillOutcome.invalidStockQuantity) {
+        Fluttertoast.showToast(
+          msg:
+              "${result.itemName}'s stock quantity isn't a number - fix it from Product Listing before billing it",
+          toastLength: Toast.LENGTH_LONG,
+        );
+        return false;
+      }
+
+      if (result.outcome == _BillOutcome.created) {
         // Fire-and-forget: neither the activity log nor the PDF upload
         // needs to hold up handing control back to the cashier.
         DataService.to.CreateLogs(action: 'Created bill $invoiceNumber');
@@ -432,16 +444,6 @@ class BillingController extends GetxController {
       lastPdfBytes = pdfBytes;
       billCreated(true);
       return true;
-    } on _InsufficientStockException catch (e) {
-      Fluttertoast.showToast(msg: 'Not enough stock for ${e.itemName}');
-      return false;
-    } on _InvalidStockQuantityException catch (e) {
-      Fluttertoast.showToast(
-        msg:
-            "${e.itemName}'s stock quantity isn't a number - fix it from Product Listing before billing it",
-        toastLength: Toast.LENGTH_LONG,
-      );
-      return false;
     } catch (e) {
       print('Error creating bill: $e');
       // Surface the real cause instead of a bare "Error creating bill" -

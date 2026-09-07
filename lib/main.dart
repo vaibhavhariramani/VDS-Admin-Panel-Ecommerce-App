@@ -79,6 +79,12 @@ class RootApp extends AppConfig {
       ],
       overrideRootPage: (BuildContext context, GetDelegate delegate,
           GetNavConfig? currentRoute) {
+        // Reverted - respecting the deep-linked path here (instead of
+        // always hardcoding /dashboard or /login) caused a runaway
+        // re-render loop that threw continuously and left the whole app
+        // blank, confirmed live. Needs a different fix that doesn't touch
+        // this root-level callback; reverted to the original behavior
+        // rather than ship a broken app.
         String _initialRoute = '/';
 
         if (AuthService.to.isAuthenticated) {

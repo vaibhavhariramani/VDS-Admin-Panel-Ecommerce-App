@@ -46,10 +46,16 @@ class NotFoundPage extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               ElevatedButton.icon(
+                // Get.rootDelegate rather than
+                // FlutterDashboardController.to.delegate (the dashboard
+                // shell's own nested outlet) - navigation through that
+                // inner delegate doesn't reliably land from this specific
+                // broken/404 state in this app's flutter_dashboard
+                // version, confirmed live. Get.rootDelegate is the same
+                // top-level delegate that already reliably lands on
+                // /dashboard right after login.
                 onPressed: () =>
-                    FlutterDashboardController.to.delegate?.toNamed(
-                  DashboardRoutes.DASHBOARD,
-                ),
+                    Get.rootDelegate.toNamed(DashboardRoutes.DASHBOARD),
                 icon: const Icon(Icons.home_outlined),
                 label: const Text('Back to Dashboard'),
               ),

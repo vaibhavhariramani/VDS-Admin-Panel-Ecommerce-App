@@ -7,6 +7,7 @@ import '../../../../../constants/order_status.dart';
 import '../../../../../models/Orders.dart';
 import '../../../../../themes/app_theme.dart';
 import '../../controllers/orders_controller.dart';
+import '../order_details.dart';
 
 class DataSourceOrders extends DataTableSource {
   DataSourceOrders(this.context, this.rows);
@@ -45,25 +46,21 @@ class DataSourceOrders extends DataTableSource {
       selected: false,
       index: index,
       onSelectChanged: (value) {
-        // Named route (rather than a plain Navigator.push) so opening an
-        // order actually changes the URL to
-        // /dashboard/orders/online/order-details/<id> - shareable and
-        // refreshable, not just an in-app overlay. `row` is passed as
-        // arguments so OrderDetails can render immediately without an
-        // extra Firestore fetch; it still knows how to resolve the order
-        // from the URL alone if arguments aren't present.
-        //
-        // Everything nested under /dashboard is resolved by the dashboard
-        // shell's OWN nested GetRouterOutlet/GetDelegate
-        // (FlutterDashboardController.to.delegate - see how the sidebar
-        // nav itself navigates in flutter_dashboard's drawer.dart), not
-        // by Get.rootDelegate (which only owns '/' and '/dashboard' as a
-        // whole page). Using Get.rootDelegate here matched nothing in the
-        // inner outlet's route tree and fell through to its 404 page.
-        FlutterDashboardController.to.delegate?.toNamed(
-          '/dashboard/orders/online/order-details/${row.orderId}',
-          arguments: row,
-        );
+        // Plain Navigator.push, not a named route: two different named-
+        // route approaches (nested under /dashboard/orders, then a
+        // root-level page) both broke live - the second one sent every
+        // click into a continuous exception loop dead-ending at
+        // /error404. This app's flutter_dashboard version's routing is
+        // too fragile to risk again for what's a "nice to have" (a
+        // shareable URL) rather than a functional requirement. This is
+        // back to the original, proven-stable approach; it just doesn't
+        // update the browser URL.
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (BuildContext context) => OrderDetails(
+                      mp: row,
+                    )));
       },
       cells: [
         DataCell(
