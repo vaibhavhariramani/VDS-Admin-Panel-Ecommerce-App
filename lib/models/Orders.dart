@@ -145,28 +145,45 @@ class Orders {
 
   static Orders fromJson(Map<String, dynamic> data) {
     Orders tempOrder = emptyOrder();
-    print("Converted snapshot data into Map");
-    print(data);
-    tempOrder.orderId = data['id'];
+    // Firestore's integerValue deserializes to a Dart `int`, not `double` -
+    // every real order in this collection stores `total` as an integer, so
+    // a direct `_totalAmount = data['total']` assignment (a `double?`
+    // field) threw a runtime TypeError on every single document. Since
+    // that throw happened inside the caller's for-loop
+    // (fetchOnlineOrdersUsingShopId), it silently emptied the *entire*
+    // order list after the first document, not just that one order - the
+    // Online Orders table was blank for every order, not just malformed
+    // ones. `(x as num?)?.toDouble()` accepts either int or double.
+    tempOrder.orderId = (data['id'] as String?) ?? '';
     tempOrder._customerName = data['name'];
     tempOrder._customerNumber = data['phone'];
-    tempOrder._totalAmount = data['total'];
+    tempOrder._totalAmount = (data['total'] as num?)?.toDouble();
     tempOrder._CartItemsId = data['cartId'];
     tempOrder._status = data['status'];
     tempOrder._paymentMethod = data['paymentMethod'];
     tempOrder._paymentStatus = data['paymentStatus'];
     tempOrder._deliveryMethod = data['deliveryMethod'];
     tempOrder._Address = data['address'];
-    tempOrder._deliveryDate = data['DateOfDelivery'].toString();
-    tempOrder._deliveryTime = data['DateOfDelivery'].toString();
-    tempOrder._deliveryCharges = data['deliveryCharges'];
+    tempOrder._deliveryDate = data['DateOfDelivery']?.toString();
+    tempOrder._deliveryTime = data['DateOfDelivery']?.toString();
+    // Also stored as a string on every real order ("0"), but be defensive
+    // for the same reason as `total` above in case a future write ever
+    // sends a number instead.
+    tempOrder._deliveryCharges = data['deliveryCharges']?.toString();
     tempOrder._riderId = data['riderId'];
     tempOrder._deliveryPersonName = data['riderName'];
     tempOrder._deliveryPersonPhone = data['riderPhone'];
     tempOrder._deliveryPersonVehicle = 'deliveryPersonVehicle';
     tempOrder._deliveryPersonVehicleNumber = 'deliveryPersonVehicleNumber';
-    tempOrder._dateOfOrder = (data['dateOfOrder']as Timestamp?)?.toDate();
-    tempOrder._timeOfOrder = data['dateOfOrder'].toString();
+    // Legacy orders (pre-dating this platform's Firebase consolidation)
+    // stored a `booking` field as a raw microseconds string instead of a
+    // Firestore Timestamp; `dateOfOrder` itself has been a real Timestamp
+    // on every order seen so far, but a bad cast here has the same
+    // whole-list-empties-out blast radius as the `total` bug above, so
+    // this is deliberately tolerant rather than assuming the type holds.
+    final dynamic rawDate = data['dateOfOrder'];
+    tempOrder._dateOfOrder = rawDate is Timestamp ? rawDate.toDate() : null;
+    tempOrder._timeOfOrder = rawDate?.toString();
     tempOrder._pincode = data['pincode'];
     return tempOrder;
   }

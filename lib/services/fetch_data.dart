@@ -265,16 +265,15 @@ class FetchService extends GetxService {
             await OnlineOrderDB.where("shopId", isEqualTo: shopId).get();
         for (var document in querySnapshot.docs) {
           var OrderData = document.data() as Map<String, dynamic>;
-
-          var OrderUserID = OrderData['RegionOrderUserID'];
-          var shopsUnderOrder = OrderData['ShopsUnderOrder'];
-
-          print('OrderUserID: $OrderUserID');
-          print('ShopsUnderOrder: $shopsUnderOrder');
-          print(OrderData);
-          print("*****************************");
-          Orders temp = Orders.fromJson(OrderData);
-          _onlineOrders.add(temp);
+          // One malformed/legacy order used to take down the *entire*
+          // list - a single bad document threw inside this loop with no
+          // per-document try/catch, so every other (perfectly fine) order
+          // silently vanished from the table too, not just the bad one.
+          try {
+            _onlineOrders.add(Orders.fromJson(OrderData));
+          } catch (e) {
+            print('Skipping order ${document.id}, failed to parse: $e');
+          }
         }
       } on Exception catch (e) {
         print('Query failed: $e');
@@ -282,8 +281,6 @@ class FetchService extends GetxService {
         print(e);
       }
     }
-    print("Length of list fetched from google firebase for _onlineOrders");
-    print(_onlineOrders.length);
     return _onlineOrders;
   }
 

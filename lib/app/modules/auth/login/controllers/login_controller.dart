@@ -6,7 +6,6 @@ import '../../../../../services/auth_service.dart';
 
 class LoginController extends GetxController {
   final AuthService _authService = AuthService.to;
-  RxBool mobileloginbool = false.obs;
   final RxBool isLoginPassVisible = true.obs,
       isRegisterPassVisible = false.obs,
       isRegisterConfirmPassVisible = false.obs,
