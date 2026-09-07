@@ -7,7 +7,6 @@ import '../../../../../constants/order_status.dart';
 import '../../../../../models/Orders.dart';
 import '../../../../../themes/app_theme.dart';
 import '../../controllers/orders_controller.dart';
-import '../order_details.dart';
 
 class DataSourceOrders extends DataTableSource {
   DataSourceOrders(this.context, this.rows);
@@ -46,12 +45,17 @@ class DataSourceOrders extends DataTableSource {
       selected: false,
       index: index,
       onSelectChanged: (value) {
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (BuildContext context) => OrderDetails(
-                      mp: row,
-                    )));
+        // Named route (rather than a plain Navigator.push) so opening an
+        // order actually changes the URL to
+        // /dashboard/orders/online/order-details/<id> - shareable and
+        // refreshable, not just an in-app overlay. `row` is passed as
+        // arguments so OrderDetails can render immediately without an
+        // extra Firestore fetch; it still knows how to resolve the order
+        // from the URL alone if arguments aren't present.
+        Get.rootDelegate.toNamed(
+          '/dashboard/orders/online/order-details/${row.orderId}',
+          arguments: row,
+        );
       },
       cells: [
         DataCell(

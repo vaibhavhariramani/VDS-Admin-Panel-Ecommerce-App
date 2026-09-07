@@ -161,25 +161,29 @@ class HomeController extends GetxController {
     if (newlyPlacedOrders.isNotEmpty && !_hasShownNewOrderPopup) {
       _hasShownNewOrderPopup = true;
       Get.dialog(
-        AlertDialog(
-          title: const Text('New Orders'),
-          content: Text(
-            '${newlyPlacedOrders.length} order${newlyPlacedOrders.length == 1 ? '' : 's'} '
-            'placed and awaiting action.',
-          ),
-          actions: [
-            TextButton(
-              // A plain Get.back() didn't close this - flutter_dashboard's
-              // own nested Navigator makes GetX's default back-stack
-              // resolution ambiguous (which Navigator does "back" mean?),
-              // so the dialog stayed on screen with nothing visibly
-              // happening on tap. closeOverlays explicitly removes every
-              // open overlay (dialogs/snackbars/bottom sheets) instead of
-              // trying to pop one route relative to an ambiguous stack.
-              onPressed: () => Get.back(closeOverlays: true),
-              child: const Text('OK'),
+        // Builder gives the OK button the dialog route's own BuildContext,
+        // so it can pop that exact route via Navigator.of(dialogContext)
+        // instead of going through GetX's back-stack resolution at all.
+        // Get.back(closeOverlays: true) still didn't close this reliably -
+        // flutter_dashboard's nested Navigator leaves more than one
+        // Navigator in the ancestor chain, and which one GetX's global
+        // "back" targets isn't guaranteed to be the one that actually owns
+        // this dialog route. Popping the dialog's own context sidesteps
+        // that ambiguity entirely.
+        Builder(
+          builder: (BuildContext dialogContext) => AlertDialog(
+            title: const Text('New Orders'),
+            content: Text(
+              '${newlyPlacedOrders.length} order${newlyPlacedOrders.length == 1 ? '' : 's'} '
+              'placed and awaiting action.',
             ),
-          ],
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
         ),
         barrierDismissible: true,
       );

@@ -31,7 +31,12 @@ class HomeView extends GetResponsiveView<HomeController> {
   @override
   Widget build(BuildContext context) {
     screen.context = context;
-    controller.onInit();
+    // GetX already calls onInit() exactly once when the (lazyPut) controller
+    // is first resolved - calling it again here ran it on *every* rebuild of
+    // this view (any Obx anywhere in the tree firing, window resize, etc.),
+    // which re-queried Firestore for user counts/invites on each rebuild.
+    // That's what made the dashboard feel like it "takes lots of time to
+    // populate": it wasn't one slow load, it was being repeatedly restarted.
     return Obx(() {
       final _RoleDashboardConfig? config = _configFor(controller.userType);
       if (config == null) {
