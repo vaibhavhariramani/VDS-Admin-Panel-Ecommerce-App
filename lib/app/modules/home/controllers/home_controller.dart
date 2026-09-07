@@ -169,11 +169,19 @@ class HomeController extends GetxController {
           ),
           actions: [
             TextButton(
-              onPressed: () => Get.back(),
+              // A plain Get.back() didn't close this - flutter_dashboard's
+              // own nested Navigator makes GetX's default back-stack
+              // resolution ambiguous (which Navigator does "back" mean?),
+              // so the dialog stayed on screen with nothing visibly
+              // happening on tap. closeOverlays explicitly removes every
+              // open overlay (dialogs/snackbars/bottom sheets) instead of
+              // trying to pop one route relative to an ambiguous stack.
+              onPressed: () => Get.back(closeOverlays: true),
               child: const Text('OK'),
             ),
           ],
         ),
+        barrierDismissible: true,
       );
     }
   }

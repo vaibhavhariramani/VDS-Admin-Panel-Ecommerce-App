@@ -102,32 +102,6 @@ class AuthSocialMediaButtons extends GetWidget<AuthService> {
             icon: 'assets/icons/google.png',
           ),
         ),
-        Visibility(
-          visible: true,
-          child: _buildButton(
-            context,
-            icon: !authController.mobileloginbool.value
-                ? 'assets/icons/ic_call.png'
-                : 'assets/icons/ic_email.png',
-            onPressed: () async {
-              print("mobile login button is pressed");
-              // isProcessing(true);
-              // await controller.globalLogin(loginby: "facebook").then(
-              //   (_response) {
-              //     isProcessing(_response);
-              //     if (_response) {
-              //       _navigateScreen();
-              //     }
-              //   },
-              // );
-
-              // Toggle the mobileloginbool variable
-              authController.mobileloginbool.toggle().obs;
-              print(
-                  "authController.mobileloginbool value now is ${authController.mobileloginbool.value}");
-            },
-          ),
-        ),
       ],
     );
   }
