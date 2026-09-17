@@ -90,13 +90,10 @@ class ShimmerHelper {
               borderRadius: BorderRadius.circular(15.0),
             ),
             child: Center(
-              child: Image.asset(
-                'assets/logo.png',
+              child: Icon(
+                Icons.storefront_rounded,
                 color: Theme.of(Get.context!).disabledColor,
-                scale: 1,
-                fit: BoxFit.scaleDown,
-                height: 60,
-                width: logoWidth ?? 60,
+                size: logoWidth ?? 60,
               ),
             ),
           ),
