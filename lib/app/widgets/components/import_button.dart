@@ -1,9 +1,17 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_dashboard/flutter_dashboard.dart';
 import 'package:iconly/iconly.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../modules/products/products_listing/controllers/products_listing_controller.dart';
+
+const _sampleProductsCsv = 'img_token,sku,name,price,discount,'
+    'available_from,expires_on
+'
+    ',,Sample Product,100,10,2024-01-01,2024-12-31
+';
 
 class ImportButton extends GetResponsiveView {
   // Future<void> ontap;
@@ -45,8 +53,11 @@ class ImportButton extends GetResponsiveView {
                         width: Get.width * 0.10,
                         child: LoadingButton(
                           onPressed: () async {
-                            const url =
-                                "https://firebasestorage.googleapis.com/v0/b/cucumia-369c1.appspot.com/o/csv%2Fsample.csv?alt=media&token=abb6cd47-65fd-4731-b62c-dbdbb310d50d";
+                            final url = Uri.dataFromString(
+                              _sampleProductsCsv,
+                              mimeType: 'text/csv',
+                              encoding: utf8,
+                            ).toString();
 
                             if (await canLaunch(url)) {
                               await launch(url);

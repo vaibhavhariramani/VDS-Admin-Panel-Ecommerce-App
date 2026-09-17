@@ -3,7 +3,6 @@ import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:path/path.dart' as path;
 
 import 'package:flutter_dashboard/flutter_dashboard.dart';
 
@@ -141,26 +140,6 @@ class DataService extends GetxService {
       return url;
     } else {
       return "";
-    }
-  }
-
-  static String getFileNameFromURL(String url) {
-    String fileName = url.replaceAll(
-        RegExp(
-            r'https://firebasestorage.googleapis.com/v0/b/cucumia-369c1.appspot.com/o/'),
-        '');
-
-    if (fileName.contains("Profile_Images")) {
-      return path.basename("/" +
-          fileName.split('?').first.split("3A%20").last.replaceAll('%', ' '));
-    } else {
-      return path
-          .basename("/" + fileName.split('?').first)
-          .replaceAll('Banners%2F', '')
-          .replaceAll('%20', ' ')
-          .split('2F')
-          .last
-          .toUpperCase();
     }
   }
 

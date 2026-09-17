@@ -87,24 +87,5 @@ abstract class AppConfig extends StatelessWidget {
       );
 
   static FlutterDashboarAuthConfig get authConfiguration =>
-      const FlutterDashboarAuthConfig(
-          // overrideLoginFunction: (Map<String, dynamic> _credential) async {
-          //   print(_credential);
-          //   return true;
-          // },
-          // overrideRegisterFunction:
-          //     (Map<String, dynamic> _registrationPayload) async {
-          //   return false;
-          // },
-          // overrideLogoutFunction: () async {
-          //   return false;
-          // },
-          // overrideLoginView: CustomLoginView(),
-          // rootUser: const FlutterDashboardUser(
-          //   username: 'Cucumia Admin',
-          //   email: 'admin@cucumia.com',
-          //   password: '#Notroot1',
-          //   role: 'Admin',
-          // ),
-          );
+      const FlutterDashboarAuthConfig();
 }
