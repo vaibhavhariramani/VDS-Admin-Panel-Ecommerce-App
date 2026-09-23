@@ -23,7 +23,13 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  await GoogleSignIn.instance.initialize();
+  try {
+    await GoogleSignIn.instance.initialize();
+  } catch (e) {
+    // Don't let a Google Sign-In init hiccup (missing web client ID,
+    // GIS script blocked, etc.) blank the entire app on startup.
+    debugPrint('GoogleSignIn.initialize failed: $e');
+  }
   runApp(const MyApp());
 }
 
